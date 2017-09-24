@@ -1,2 +1,3 @@
-# janson299r
-299r with Prof. Lucas Janson, Fall 2017
+Pkg.add("IJulia")
+using IJuliao
+julia> notebook(dir=".");
