@@ -1,12 +1,13 @@
 print("Hello World! ☺ ♫ ☕ \n\n")
 
-using PyCall
-using PyPlot
+using Plots
 
 clf()
 
 #x = linspace(0,2*pi,1000); y = sin.(3*x + 4*cos.(2*x));
 #plot(x, y, color="red", linewidth=2.0, linestyle="--")
+
+
 
 function test()
 	#figure;
@@ -17,7 +18,7 @@ function test()
     roomx = [0,0,dim,dim];
     roomy = [0,dim,dim,0];
 
-    plot(roomx, roomy, "k", linewidth=5);
+    plot(roomx, roomy, color=:black, linewidth=5);
 
     axis("equal");
     fig = gcf();
@@ -28,7 +29,6 @@ function test()
     #yticks(a)
     #ax = fig.gca()
     #ax.set_aspect("equal")
-    grid()
 
     # two obstacles
     obs1 = Obstacle((1,0),(2,1))
@@ -40,8 +40,8 @@ function test()
     goalx, goaly = (4,5)
     bigcircle = 0.3
 
-	circle(startx, starty,0.5,"r")
-	circle(goalx, goaly,0.5,"g")
+	circle(startx, starty,0.5, :red)
+	circle(goalx, goaly,0.5, :green)
 
 	robotRad = 0.5
     rob = Node(0,0,(startx, starty)) #!
@@ -69,31 +69,18 @@ function test()
 #
 
 #        addNode(rrt, 
-
-
     #end
-#
-
 ##
     push!(rrt.nodeslist,rob)
     push!(rrt.nodeslist,rob)
-
     testgoal = Node(1,0,(goalx, goaly))
-
     push!(rrt.nodeslist,testgoal)
-
-
 
     line((1,1),(2,2), "red")
 
 ##
 
 end
-
-
-
-
-
 
 
 function main()
@@ -140,7 +127,7 @@ function circleObs(obstacle)
     x1, y1 = obstacle.SW
     x2,y2 = obstacle.NE
     r = 0.2
-    obsColor = "k"
+    obsColor =  :black
 
     circle(x1,y1,r,obsColor)
     circle(x1,y2,r,obsColor)
@@ -160,21 +147,28 @@ function goalline(startpt, finishpt)
     plot([x1, x2], [y1,y2], color="g", linewidth=2)
 end
 
+
+module rrtTypes
+    export Node, Edge
+
+    struct Node
+        id::Int
+        iPrev::Int #parent
+        state::Tuple{Int,Int}
+        id2::Int
+    end
+
+    struct Edge
+        startnode::Int
+        endnode::Int
+    end
+end
+
+
+
 type Obstacle
     SW
     NE
-end
-
-
-struct Node
-   id::Int
-   iPrev::Int #parent
-   state::Tuple{Int,Int}
-end
-
-struct Edge
-    startnode::Int
-    endnode::Int
 end
 
 
@@ -184,8 +178,6 @@ struct rrtPath
     #nodeslist::Array{Node}
     #edgeslist::Array{Edge}
 end
-
-test()
 
 
 
@@ -249,3 +241,5 @@ function nn() #nearest neighbors
 end
 
 print("\n\nend of function. \n")
+
+test()

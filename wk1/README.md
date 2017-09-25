@@ -389,3 +389,6 @@ http://localhost:8888/notebooks/RoboticsJuliaCon2017.jl/notebook/Easy%203D%20Vis
 
 Slider robot? :'(
 http://localhost:8888/notebooks/AgileRoboticsTutorial.jl/notebooks/3.%20RigidBodyDynamics.ipynb
+
+# Pseudocode
+
