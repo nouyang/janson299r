@@ -43,15 +43,18 @@ module rrt
             
 end
 
-function isCollidingNode(r, nn, obs)
-    rx,ry = r.x, r.y
+function isCollidingNode(pt,obs)
+    # this does not work.
+    px,py = pt.x, pt.y
     x1,y1 = obs.SW.x, obs.SW.y
     x2,y2 = obs.NE.x, obs.NE.y 
 
-    if (rx > x1 && rx < x2 && ry > y1 && ry < y2)
+    if (px > x1 && px < x2 && py > y1 && py < y2)
+        print("Node in obstacle, discarded.")
         return true
+    else
+        return false
     end
-    return false
 end
 
 function isCollidingEdge(r, nn, obs)
@@ -84,8 +87,11 @@ function isCollidingEdge(r, nn, obs)
 
     if (!coll1 && !coll2 && !coll3 && !coll4)
         return false
+    else
+        #print("you're colliding!\n")
+        #@show nn
+        return true
     end
-    return true
 end
 
 function inGoalRegion(node, goal)
@@ -136,18 +142,19 @@ end
 
 
 
-function rrtPathPlanner()
-    nIter = 100
+function rrtPathPlanner(niterations)
+    nIter = niterations 
     maxDist = 3
     #room = Room(0,0,21,21);
 
-    obs1 = rrt.Obstacle(rrt.Point(3,4),rrt.Point(5,8)) #Todo
+    obs1 = rrt.Obstacle(rrt.Point(8,3),rrt.Point(10,18)) #Todo
+    #obs2 = rrt.Obstacle(rrt.Point(10,12),rrt.Point(14,12)) #Todo
+    obs1 = rrt.Obstacle(rrt.Point(8,5),rrt.Point(10,18)) #Todo
 
     rrtstart = rrt.Point(1,0)
     goal = rrt.Point(18,18)
 
     nodeslist = Vector{rrt.Node}()
-    #nodeslist = []
 
     startNode = rrt.Node(0,0, rrtstart)
     push!(nodeslist, startNode)
@@ -157,32 +164,23 @@ function rrtPathPlanner()
     isPathFound = false
 
     for i in 1:nIter
-        #@show i
         r = rrt.Point(rand(1:20),rand(1:20)) #new point
         nn = nearestN(r, nodeslist) # parent point
-            # if !isCollidingNode(r, nn.state, obs1)#check node XY first
-                # @printf("Cancelling due to node collision %d,  %d \n", r.x, r.y)
-                # continue
-           if isCollidingEdge(r, nn.state, obs1) # check edge #rewrite so we can check multiple obstacles...
-                @printf("Cancelling due to edge collision %d\n", i)
-			    continue
-			else
-                # create new node?
-                nearestDist = distPt(r, nn.state)
-                if nearestDist > maxDist
-                    x1,y1 = nn.state.x, nn.state.y
-                    x2,y2 = r.x, r.y 
-                    tantheta = atan2((y2-y1) , (x2-x1))
-                    newX = x1 + maxDist * cos(tantheta)
-                    newY = y1 + maxDist * sin(tantheta)
-                    newPt = rrt.Point(floor(newX), floor(newY)) #Todo: maybe I shouldn't floor?
-                    node = rrt.Node(maxNodeID, nn.id, newPt) #throw out r, but try to steer toward it
-                else
-                    # nodeID, prevNodeId, (x,y)
-                    node = rrt.Node(maxNodeID, nn.id, r)
-                    #@printf("Found node: %s, %s, %s, %s \n", node.id, node.iPrev, node.state.x, node.state.y)
-                end
 
+        #if !isCollidingNode(r, obs1)#check node XY first #Tofix: this function
+        if !isCollidingNode(r, obs1) && !isCollidingEdge(r, nn.state, obs1) # check edge #rewrite so we can check multiple obstacles...
+                nearestDist = distPt(r, nn.state)
+                    if nearestDist > maxDist
+                        x1,y1 = nn.state.x, nn.state.y
+                        x2,y2 = r.x, r.y 
+                        tantheta = atan2((y2-y1) , (x2-x1))
+                        newX = x1 + maxDist * cos(tantheta)
+                        newY = y1 + maxDist * sin(tantheta)
+                        newPt = rrt.Point(floor(newX), floor(newY)) #Todo: maybe I shouldn't floor?
+                        node = rrt.Node(maxNodeID, nn.id, newPt) #throw out r, but try to steer toward it
+                    else
+                        node = rrt.Node(maxNodeID, nn.id, r)
+                    end
                 maxNodeID += 1
                 push!(nodeslist, node)
 
@@ -193,20 +191,21 @@ function rrtPathPlanner()
                     isPathFound = true
                     break
                 end
+        else
             end
-
         end
 
+    #@show nodeslist
     @printf("\nPath found? %s Length of nodeslist: %d\n", isPathFound, length(nodeslist))
-    return isPathFound, nodeslist
+    cost = costWinningPath(nodeslist)
+    return cost, isPathFound, nodeslist
 end
 
-isPathFound, nlist = rrtPathPlanner()
 
 function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFound, obs1, rrtstart, goal, room 
 
     ### <COPIED FOR NOW #Todo fix hardcoding
-    obs1 = rrt.Obstacle(rrt.Point(3,4),rrt.Point(5,8))
+    obs1 = rrt.Obstacle(rrt.Point(8,5),rrt.Point(10,18)) #Todo
 
     rrtstart = rrt.Point(1,0)
     goal = rrt.Point(18,18)
@@ -219,7 +218,7 @@ function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFo
     @printf("%s", "plotted\n")
     plot!(h, show=true, legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:lightcyan)
 
-    nIter = 20 #fix hardcoding
+    nIter = -1#fix hardcoding
     title!("RRT nIter = $(nIter), Path Found $(isPathFound)")
 
     # plot room
@@ -235,18 +234,21 @@ function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFo
     # plot obstacles
     circleObs(obs1)
 
-    # # plot all paths
-    for n in nlist
-    #@show n
-        plotEdge(n, nlist)
-    end
+    # plot all paths
 
 
     # plot winning path
     if isPathFound
-        print("try to plot winner")
-        plotWinningPath(nlist)
+        cost = plotWinningPath(nlist)
+        @printf("\n!!!! the cost of the path was %d across %d nodes  !!!! \n", cost, length(nlist))
         #nEnd = nlist[end]
+    end
+    for n in nlist
+        if n.id == 0
+            continue 
+        else
+            plotEdge(n,nlist)
+        end
     end
     # display winning path cost
 end
@@ -275,35 +277,47 @@ end
         plot!([x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], color=obsColor, linewidth=2)
     end
 
-    function plotEdges(nlist)
-        xEdges = []
-        yEdges = []
-        for n in nlist
-            if n.id == 0
-              continue 
+    function plotEdge(n, nlist)
+        pt1 = n.state
+        iPrev = n.iPrev
+        nPrev = findNode(iPrev, nlist) 
+        pt2 = nPrev.state
+        plot!( [pt1.x, pt2.x],[pt1.y, pt2.y], color=:orange, linewidth=3)
+        # Todo: rewrite this to just plot them all at once.... [x1 x2 x3] [y1 y2 y3]
+    end
+    function costWinningPath(nlist)
+        curNode = nlist[end]
+        guhPath = [ rrt.Point(curNode.state.x, curNode.state.y)]
+        while true
+            iPrev = curNode.iPrev
+            curNode = findNode(iPrev, nlist)
+            x,y = curNode.state.x, curNode.state.y
+            push!( guhPath, rrt.Point(x,y))
+            if curNode.id == 0
+                push!( guhPath, rrt.Point(x,y))
+                break
             end
-            iPrev = n.iPrev
-            nPrev = findNode(iPrev, nlist) 
-            pt2 = nPrev.state
-            #plot!( [pt1.x, pt2.x],[pt1.y, pt2.y], color=:orange, linewidth=3)
-            # Todo: rewrite this to just plot them all at once.... [x1 x2 x3] [y1 y2 y3]
-            prevNode = findNode(iPrev, nlist)
-            push!(xEdges, prevNode.state.x) 
-            push!(yEdges, prevNode.state.y) 
         end
-        plot!( xEdges, yEdges, color = :orange, linewidth=3)
+        cost = 0
+        for i in 2:length(guhPath)
+            cost += distPt(guhPath[i],guhPath[i-1])
+        end
+
+        return cost
     end
 
     function plotWinningPath(nlist)
         curNode = nlist[end]
         xPath = [curNode.state.x]
         yPath = [curNode.state.y]
+        guhPath = [ rrt.Point(curNode.state.x, curNode.state.y)]
         while true
             iPrev = curNode.iPrev
             curNode = findNode(iPrev, nlist)
             x,y = curNode.state.x, curNode.state.y
             push!(xPath, x)
             push!(yPath,y)
+            push!( guhPath, rrt.Point(x,y))
             if curNode.id == 0
                 push!(xPath, x)
                 push!(yPath,y)         
@@ -311,8 +325,14 @@ end
             end
         end
         print("plotted winning path")
+        cost = 0
+        for i in 2:length(guhPath)
+            cost += distPt(guhPath[i],guhPath[i-1])
+        end
+
         plot!( xPath, yPath, color = :orchid, linewidth=3)
-        @show nlist
+        #@show nlist
+        return cost
     end
 
     function findNode(id, nodeslist)
@@ -324,4 +344,5 @@ end
     end
 #end
 
-plotPath(isPathFound,nlist)
+#isPathFound, nlist = rrtPathPlanner()
+#plotPath(isPathFound,nlist)
