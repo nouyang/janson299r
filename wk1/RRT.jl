@@ -50,7 +50,7 @@ function isCollidingNode(pt,obs)
     x2,y2 = obs.NE.x, obs.NE.y 
 
     if (px > x1 && px < x2 && py > y1 && py < y2)
-        print("Node in obstacle, discarded.")
+        #print("Node in obstacle, discarded.")
         return true
     else
         return false
@@ -196,7 +196,7 @@ function rrtPathPlanner(niterations)
         end
 
     #@show nodeslist
-    @printf("\nPath found? %s Length of nodeslist: %d\n", isPathFound, length(nodeslist))
+    #@printf("\nPath found? %s Length of nodeslist: %d\n", isPathFound, length(nodeslist))
     cost = costWinningPath(nodeslist)
     return cost, isPathFound, nodeslist
 end
