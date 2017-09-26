@@ -43,6 +43,17 @@ module rrt
             
 end
 
+function isCollidingNode(r, nn, obs)
+    rx,ry = r.x, r.y
+    x1,y1 = obs.SW.x, obs.SW.y
+    x2,y2 = obs.NE.x, obs.NE.y 
+
+    if (rx > x1 && rx < x2 && ry > y1 && ry < y2)
+        return true
+    end
+    return false
+end
+
 function isCollidingEdge(r, nn, obs)
     # to detect collision, let's just check whether any of the four
     # lines of the rectangular obstacle intersect with our edge
@@ -77,13 +88,14 @@ function isCollidingEdge(r, nn, obs)
     return true
 end
 
-function inGoalRegion(r, goal)
+function inGoalRegion(node, goal)
     goal = rrt.Point(18,18)
-    if r == goal
+    n = node.state
+    if node == goal
         return true
     end
-    distx = abs(r.x - goal.x)
-    disty = abs(r.y - goal.y)
+    distx = abs(n.x - goal.x)
+    disty = abs(n.y - goal.y)
     if ( distx < 2 && disty < 2) #radius of goal
         return true
     end
@@ -125,7 +137,7 @@ end
 
 
 function rrtPathPlanner()
-    nIter = 20
+    nIter = 30
     maxDist = 3
     #room = Room(0,0,21,21);
 
@@ -146,28 +158,24 @@ function rrtPathPlanner()
 
     for i in 1:nIter
         #@show i
-        r = rrt.Point(rand(1:20),rand(1:20))
-
-        if r != obs1  #check node XY first
-			nn = nearestN(r, nodeslist)
-
-
-            if isCollidingEdge(r, nn.state, obs1) # check edge #rewrite so we can check multiple obstacles...
-                @printf("Cancelling due to collision %d\n", i)
+        r = rrt.Point(rand(1:20),rand(1:20)) #new point
+        nn = nearestN(r, nodeslist) # parent point
+            # if !isCollidingNode(r, nn.state, obs1)#check node XY first
+                # @printf("Cancelling due to node collision %d,  %d \n", r.x, r.y)
+                # continue
+           if isCollidingEdge(r, nn.state, obs1) # check edge #rewrite so we can check multiple obstacles...
+                @printf("Cancelling due to edge collision %d\n", i)
 			    continue
 			else
                 # create new node?
                 nearestDist = distPt(r, nn.state)
                 if nearestDist > maxDist
                     x1,y1 = nn.state.x, nn.state.y
-                    x2,y2 = r.x, r.y #ERROR: LoadError: MethodError: no method matching start(::rrt.Point) if you just use 'r' SIGH
+                    x2,y2 = r.x, r.y 
                     tantheta = atan2((y2-y1) , (x2-x1))
                     newX = x1 + maxDist * cos(tantheta)
                     newY = y1 + maxDist * sin(tantheta)
-                    @show newX
-                    @show newY
                     newPt = rrt.Point(floor(newX), floor(newY)) #Todo: maybe I shouldn't floor?
-
                     node = rrt.Node(maxNodeID, nn.id, newPt) #throw out r, but try to steer toward it
                 else
                     # nodeID, prevNodeId, (x,y)
@@ -178,8 +186,8 @@ function rrtPathPlanner()
                 maxNodeID += 1
                 push!(nodeslist, node)
 
-                if inGoalRegion(r, goal)
-                    print("Goallllll!\n") 
+                if inGoalRegion(node, goal)
+                    print("Goallllll! This is the winning node:\n") 
                     @show node  #winning node
                     @printf("Goallll! Found after %d iterations", i)
                     isPathFound = true
@@ -188,7 +196,6 @@ function rrtPathPlanner()
             end
 
         end
-    end
 
     @printf("\nPath found? %s Length of nodeslist: %d\n", isPathFound, length(nodeslist))
     return isPathFound, nodeslist
@@ -223,7 +230,7 @@ function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFo
 
     # plot start and end goals
     circle(1,0, 0.5, :red)
-    circle(18,18, 0.5, :forestgreen)
+    circle(18,18, 1.4, :forestgreen)
 
     # plot obstacles
     circleObs(obs1)
@@ -237,6 +244,10 @@ function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFo
 
 
     # plot winning path
+    nEnd = nlist[end]
+
+
+
     # display winning path cost
 end
 
@@ -273,6 +284,24 @@ end
         nPrev = findNode(iPrev, nlist) 
         pt2 = nPrev.state
         plot!( [pt1.x, pt2.x],[pt1.y, pt2.y], color=:orange, linewidth=3)
+        # Todo: rewrite this to just plot them all at once.... [x1 x2 x3] [y1 y2 y3]
+    end
+
+    function plotWinningPath(nlist)
+        curNode = nlist[end]
+        while 1
+            iPrev = curNode.iPrev
+            curNode = findNode(iPrev)
+            winpath = [winpath curNode] 
+            if curNode.id == 0
+                break
+            end
+        end
+        xPath = []
+        yPath = []
+        for n in winpath:
+            x,y = n.state.x, n.state.y
+
     end
 
     function findNode(id, nodeslist)
