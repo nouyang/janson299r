@@ -237,13 +237,11 @@ function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFo
 
     #plotEdge(nlist[5], nlist)
     # # plot all paths
-     for n in nlist
-         #@show n
-         plotEdge(n, nlist)
-      end
+    plotEdges(nlist)
 
 
     # plot winning path
+    plotWinningPath(nlist)
     nEnd = nlist[end]
 
 
@@ -275,32 +273,43 @@ end
         plot!([x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], color=obsColor, linewidth=2)
     end
 
-    function plotEdge(node, nlist)
-        if node.id == 0
-            return
+    function plotEdges(nlist)
+        xEdges = []
+        yEdges = []
+        for n in nlist
+            if n.id == 0
+              continue 
+            end
+            iPrev = n.iPrev
+            nPrev = findNode(iPrev, nlist) 
+            pt2 = nPrev.state
+            #plot!( [pt1.x, pt2.x],[pt1.y, pt2.y], color=:orange, linewidth=3)
+            # Todo: rewrite this to just plot them all at once.... [x1 x2 x3] [y1 y2 y3]
+            prevNode = findNode(iPrev, nlist)
+            push!(xEdges, prevNode.state.x) 
+            push!(yEdges, prevNode.state.y) 
         end
-        pt1 = node.state
-        iPrev = node.iPrev
-        nPrev = findNode(iPrev, nlist) 
-        pt2 = nPrev.state
-        plot!( [pt1.x, pt2.x],[pt1.y, pt2.y], color=:orange, linewidth=3)
-        # Todo: rewrite this to just plot them all at once.... [x1 x2 x3] [y1 y2 y3]
+        plot!( xEdges, yEdges, color = :orange, linewidth=3)
     end
 
     function plotWinningPath(nlist)
         curNode = nlist[end]
-        while 1
+        winpath = []
+        while true
             iPrev = curNode.iPrev
-            curNode = findNode(iPrev)
-            winpath = [winpath curNode] 
+            n = findNode(iPrev, nlist)
+            x,y = n.state.x, n.state.y
+            push!(xPath, x)
+            push!(yPath,y)
             if curNode.id == 0
                 break
             end
         end
         xPath = []
         yPath = []
-        for n in winpath:
-            x,y = n.state.x, n.state.y
+        for n in winpath
+        end
+        plot!( xPath, yPath, color = :gold, linewidth=3)
 
     end
 
