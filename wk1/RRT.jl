@@ -137,7 +137,7 @@ end
 
 
 function rrtPathPlanner()
-    nIter = 30
+    nIter = 100
     maxDist = 3
     #room = Room(0,0,21,21);
 
@@ -235,17 +235,19 @@ function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFo
     # plot obstacles
     circleObs(obs1)
 
-    #plotEdge(nlist[5], nlist)
     # # plot all paths
-    plotEdges(nlist)
+    for n in nlist
+    #@show n
+        plotEdge(n, nlist)
+    end
 
 
     # plot winning path
-    plotWinningPath(nlist)
-    nEnd = nlist[end]
-
-
-
+    if isPathFound
+        print("try to plot winner")
+        plotWinningPath(nlist)
+        #nEnd = nlist[end]
+    end
     # display winning path cost
 end
 
@@ -294,23 +296,23 @@ end
 
     function plotWinningPath(nlist)
         curNode = nlist[end]
-        winpath = []
+        xPath = [curNode.state.x]
+        yPath = [curNode.state.y]
         while true
             iPrev = curNode.iPrev
-            n = findNode(iPrev, nlist)
-            x,y = n.state.x, n.state.y
+            curNode = findNode(iPrev, nlist)
+            x,y = curNode.state.x, curNode.state.y
             push!(xPath, x)
             push!(yPath,y)
             if curNode.id == 0
+                push!(xPath, x)
+                push!(yPath,y)         
                 break
             end
         end
-        xPath = []
-        yPath = []
-        for n in winpath
-        end
-        plot!( xPath, yPath, color = :gold, linewidth=3)
-
+        print("plotted winning path")
+        plot!( xPath, yPath, color = :orchid, linewidth=3)
+        @show nlist
     end
 
     function findNode(id, nodeslist)
