@@ -22,8 +22,8 @@ module rrt
     end
 
     struct Obstacle
-        SW
-        NE
+        SW::Point
+        NE::Point
     end
 
     ### Some types?
@@ -45,6 +45,7 @@ function isCollidingEdge(r, nn, obs)
     # lines of the rectangular obstacle intersect with our edge
     # ignore collinearity for now
 
+    @show obs
     pt1 = rrt.Point(obs.SW.x, obs.SW.y)
     pt2 = rrt.Point(obs.SW.x, obs.NE.y)
     pt3 = rrt.Point(obs.NE.x, obs.NE.y)
@@ -77,18 +78,18 @@ end
 
 function nearestN(r, nodeslist)
     nearestDist = 9999;
-    nearestNode = Node;
+    nearestNode = []; #I guess we can use this to delcare an empty any type?
     for n in nodeslist
         @show n
-        x2,y2 = n.state
-        x1,y1 = r
+        x2,y2 = n.state.x, n.state.y
+        x1,y1 = r.x, r.y
         dist = sqrt( (x1-x2)^2 + (y1-y2)^2 )
         if dist < nearestDist
             nearestDist = dist
             nearestNode = n
         end
     end
-    return n
+    return nearestNode
 end
 
 
@@ -99,36 +100,40 @@ function rrtPathPlanner()
 
     #room = Room(0,0,21,21);
 
-    obs1 = (rrt.Point(1,1),rrt.Point(5,5))
+    obs1 = rrt.Obstacle(rrt.Point(1,1),rrt.Point(5,5))
 
     rrtstart = rrt.Point(1,0)
     goal = rrt.Point(18,18)
 
-    nodeslist = []
+    nodeslist = Vector{rrt.Node}()
+    #nodeslist = []
 
-    startNode = Node(0,0, rrtstart)
+    startNode = rrt.Node(0,0, rrtstart)
     push!(nodeslist, startNode)
-    @printf("string %s",nodeslist)
+    #@printf("string %s",nodeslist)
 
     maxNodeID = 0
     for i in 1:nIter
+        @show i
         r = rrt.Point(rand(1:20),rand(1:20))
 
-        @printf("A random point: %d, %d\n", r.x, r.y)
+    #    @printf("A random point: %d, %d\n", r.x, r.y)
 
         if r != obs1  #check node XY first
 			nn = nearestN(r, nodeslist)
 
-            if isCollidingEdge(r, nn.state) # check edge
+            if isCollidingEdge(r, nn.state, obs1) # check edge
 			    continue
 			else
                 # nodeID, prevNodeId, (x,y)
-                node = Node(maxID, nn.id, r)
+                node = rrt.Node(maxNodeID, nn.id, r)
                 #push!(nodeslist, node)
                 maxNodeID += 1
-                @printf("Found node: %s, %s, %s, %s \n", node.ID, node.prevID, node.state.x, node.state.y)
+                #@printf("Found node: %s, %s, %s, %s \n", node.id, node.iPrev, node.state.x, node.state.y)
 
                 if r == goal
+                    print("Goallllll!")
+                    @show nodeslist
                     break
                 end
             #    if inGoalRegion(r)
@@ -139,6 +144,8 @@ function rrtPathPlanner()
         end
     end
 
+        print("\n\nno solution found\n")
+        @show nodeslist
     return nodeslist
 end
 
