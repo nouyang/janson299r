@@ -3,6 +3,8 @@ print("Hello World! ☺ ♫ ☕ \n\n")
 using Plots
 gr()
 
+plot([1,2],[2,3])
+
 module rrt 
     export Node, Edge, Obstacle, Room, Point
 
@@ -97,10 +99,11 @@ end
 
 
 function rrtPathPlanner()
+    h = plot([1,2],[2,3])
     nIter = 10;
     #room = Room(0,0,21,21);
 
-    obs1 = rrt.Obstacle(rrt.Point(1,1),rrt.Point(5,5))
+    obs1 = rrt.Obstacle(rrt.Point(2,2),rrt.Point(5,5))
 
     rrtstart = rrt.Point(1,0)
     goal = rrt.Point(18,18)
@@ -112,7 +115,7 @@ function rrtPathPlanner()
     push!(nodeslist, startNode)
     #@printf("string %s",nodeslist)
 
-    maxNodeID = 0
+    maxNodeID = 1
     for i in 1:nIter
         #@show i
         r = rrt.Point(rand(1:20),rand(1:20))
@@ -148,12 +151,12 @@ function rrtPathPlanner()
 end
 
 
-rrtPathPlanner()
+nlist = rrtPathPlanner()
 
-function plotPath()
+function plotPath(nlist)
 
     ### <COPIED FOR NOW
-    obs1 = rrt.Obstacle(rrt.Point(1,1),rrt.Point(5,5))
+    obs1 = rrt.Obstacle(rrt.Point(2,2),rrt.Point(5,5))
 
     rrtstart = rrt.Point(1,0)
     goal = rrt.Point(18,18)
@@ -162,24 +165,32 @@ function plotPath()
 
     foo = rand(1)
     h = plot()
-    #plot!(h, legend=false, xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_axis=:red)
-    #plot!(h, legend=false, xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_axis=:red, grid=false)
+    @printf("%s", "plotted\n")
     plot!(h, legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:lightcyan)
     title!("A rrt visualization $(foo)")
 
+    # plot room
     dim = 21 
     roomx = [0,0,dim,dim];
     roomy = [0,dim,dim,0];
     plot!(roomx, roomy, color=:black, linewidth=5)
 
-    circle(0,0, 0.5, :red)
-    obs1 = rrt.Obstacle(rrt.Point(1,0), rrt.Point(2,1))
+    # plot start and end goals
+    circle(1,0, 0.5, :red)
+    circle(18,18, 0.5, :forestgreen)
+
+    # plot obstacles
+    obs1 = rrt.Obstacle(rrt.Point(1,1),rrt.Point(5,5))
     circleObs(obs1)
 
-    # plot room
-    # plot obstacles
-    # plot start and end goals
+    plotEdge(nlist[3], nlist)
     # plot all paths
+     for n in nlist
+         @show n
+        # plotEdge(n, nlist)
+     end
+
+
     # plot winning path
     # display winning path cost
 end
@@ -198,14 +209,34 @@ end
         x1,y1 = obstacle.SW.x, obstacle.SW.y
         x2,y2 = obstacle.NE.x, obstacle.NE.y
         r = 0.2
-        obsColor =  :blue
+        obsColor = :blue
 
         circle(x1,y1,r,obsColor)
         circle(x1,y2,r,obsColor)
         circle(x2,y1,r,obsColor)
         circle(x2,y2,r,obsColor)
+
+        plot!([x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], color=obsColor, linewidth=2)
     end
 
+    function plotEdge(node, nlist)
+        if node.id == 0
+            return
+        end
+        pt1 = node.state
+        iPrev = node.iPrev
+        nPrev = findNode(iPrev, nlist) 
+        pt2 = nPrev.state
+        plot!( [pt1.x, pt2.x],[pt1.y, pt2.y], color=:orange, linewidth=3)
+    end
+
+    function findNode(id, nodeslist)
+        for n in nodeslist
+            if n.id == id
+                return n
+            end
+        end
+    end
 #end
 
-plotPath()
+plotPath(nlist)
