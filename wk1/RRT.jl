@@ -1,6 +1,7 @@
 print("Hello World! ☺ ♫ ☕ \n\n")
 
 using Plots
+gr()
 
 module rrt 
     export Node, Edge, Obstacle, Room, Point
@@ -121,6 +122,7 @@ function rrtPathPlanner()
 			nn = nearestN(r, nodeslist)
 
             if isCollidingEdge(r, nn.state, obs1) # check edge
+                @printf("Cancelling due to collision %d\n", i)
 			    continue
 			else
                 # nodeID, prevNodeId, (x,y)
@@ -147,3 +149,63 @@ end
 
 
 rrtPathPlanner()
+
+function plotPath()
+
+    ### <COPIED FOR NOW
+    obs1 = rrt.Obstacle(rrt.Point(1,1),rrt.Point(5,5))
+
+    rrtstart = rrt.Point(1,0)
+    goal = rrt.Point(18,18)
+    ### / COPIED FOR NOW>
+
+
+    foo = rand(1)
+    h = plot()
+    #plot!(h, legend=false, xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_axis=:red)
+    #plot!(h, legend=false, xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_axis=:red, grid=false)
+    plot!(h, legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:lightcyan)
+    title!("A rrt visualization $(foo)")
+
+    dim = 21 
+    roomx = [0,0,dim,dim];
+    roomy = [0,dim,dim,0];
+    plot!(roomx, roomy, color=:black, linewidth=5)
+
+    circle(0,0, 0.5, :red)
+    obs1 = rrt.Obstacle(rrt.Point(1,0), rrt.Point(2,1))
+    circleObs(obs1)
+
+    # plot room
+    # plot obstacles
+    # plot start and end goals
+    # plot all paths
+    # plot winning path
+    # display winning path cost
+end
+
+#module pHelp()
+
+    ### Some helper functions
+    function circle(x,y,r,c_color)
+        th = 0:pi/50:2*pi;
+        xunit = r * cos.(th) + x;
+        yunit = r * sin.(th) + y;
+        plot!(xunit, yunit,color=c_color,linewidth=3.0);
+    end
+
+    function circleObs(obstacle)
+        x1,y1 = obstacle.SW.x, obstacle.SW.y
+        x2,y2 = obstacle.NE.x, obstacle.NE.y
+        r = 0.2
+        obsColor =  :blue
+
+        circle(x1,y1,r,obsColor)
+        circle(x1,y2,r,obsColor)
+        circle(x2,y1,r,obsColor)
+        circle(x2,y2,r,obsColor)
+    end
+
+#end
+
+plotPath()
