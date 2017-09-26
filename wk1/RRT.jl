@@ -99,8 +99,7 @@ end
 
 
 function rrtPathPlanner()
-    h = plot([1,2],[2,3])
-    nIter = 10;
+    nIter = 20;
     #room = Room(0,0,21,21);
 
     obs1 = rrt.Obstacle(rrt.Point(2,2),rrt.Point(5,5))
@@ -165,8 +164,9 @@ function plotPath(nlist)
 
     foo = rand(1)
     h = plot()
+
     @printf("%s", "plotted\n")
-    plot!(h, legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:lightcyan)
+    plot!(h, show=true, legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:lightcyan)
     title!("A rrt visualization $(foo)")
 
     # plot room
@@ -180,15 +180,14 @@ function plotPath(nlist)
     circle(18,18, 0.5, :forestgreen)
 
     # plot obstacles
-    obs1 = rrt.Obstacle(rrt.Point(1,1),rrt.Point(5,5))
     circleObs(obs1)
 
-    plotEdge(nlist[3], nlist)
-    # plot all paths
+    #plotEdge(nlist[5], nlist)
+    # # plot all paths
      for n in nlist
          @show n
-        # plotEdge(n, nlist)
-     end
+         plotEdge(n, nlist)
+      end
 
 
     # plot winning path
