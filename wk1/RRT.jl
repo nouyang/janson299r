@@ -48,10 +48,22 @@ function isCollidingEdge(r, nn, obs)
     # lines of the rectangular obstacle intersect with our edge
     # ignore collinearity for now
 
-    pt1 = rrt.Point(obs.SW.x, obs.SW.y)
-    pt2 = rrt.Point(obs.SW.x, obs.NE.y)
-    pt3 = rrt.Point(obs.NE.x, obs.NE.y)
-    pt4 = rrt.Point(obs.NE.x, obs.SW.y)
+    # Tofix: To make it look prettier in the graph, I am just going to add a 1 grid pt
+    # spacer for now, until I figure out how to check for coincidence of point
+    # in line. Or really, I should use GeometryShapes library
+
+    x1,y1 = obs.SW.x, obs.SW.y
+    x2,y2 = obs.NE.x, obs.NE.y 
+
+    x1 -= 1
+    y1 -= 1
+    x2 += 1
+    y2 += 1
+
+    pt1 = rrt.Point(x1, y1)
+    pt2 = rrt.Point(x1, y2)
+    pt3 = rrt.Point(x2, y2)
+    pt4 = rrt.Point(x2, y1)
     
     # let A, B be r, nn
     coll1 = intersectLineSeg(r, nn, pt1, pt2)
@@ -65,8 +77,18 @@ function isCollidingEdge(r, nn, obs)
     return true
 end
 
-function inGoalRegion
-
+function inGoalRegion(r, goal)
+    goal = rrt.Point(18,18)
+    if r == goal
+        return true
+    end
+    distx = abs(r.x - goal.x)
+    disty = abs(r.y - goal.y)
+    if ( distx < 2 && disty < 2) #radius of goal
+        return true
+    end
+    return false
+    
 end
 
 function ccw(A,B,C)
@@ -78,31 +100,36 @@ function intersectLineSeg(A,B,C,D) #no ":" at the end!
  	return ( (ccw(A, C, D) != ccw(B, C, D)) && ccw(A, B, C) != ccw(A, B, D))
 end
 
-function nearestN(r, nodeslist)
+function nearestN(r, nodeslist) #dear lord rewrite this so it doesn't need to pass in maxNodeId
     nearestDist = 9999;
-    nearestNode = []; #I guess we can use this to delcare an empty any type?
+
+    nearestNode = [];
     for n in nodeslist
-        x2,y2 = n.state.x, n.state.y
-        x1,y1 = r.x, r.y
-        dist = sqrt( (x1-x2)^2 + (y1-y2)^2 )
+        dist = distPt(r, n.state)
         if dist < nearestDist
             nearestDist = dist
             nearestNode = n
         end
     end
-    #@show nearestNode
-
     return nearestNode
 end
 
 
+function distPt(pt1, pt2)
+    x2,y2 = pt2.x, pt2.y
+    x1,y1 = pt1.x, pt1.y
+    dist = sqrt( (x1-x2)^2 + (y1-y2)^2 )
+    return dist
+end
+
 
 
 function rrtPathPlanner()
-    nIter = 20;
+    nIter = 20
+    maxDist = 3
     #room = Room(0,0,21,21);
 
-    obs1 = rrt.Obstacle(rrt.Point(2,2),rrt.Point(5,5))
+    obs1 = rrt.Obstacle(rrt.Point(3,4),rrt.Point(5,8)) #Todo
 
     rrtstart = rrt.Point(1,0)
     goal = rrt.Point(18,18)
@@ -115,47 +142,64 @@ function rrtPathPlanner()
     #@printf("string %s",nodeslist)
 
     maxNodeID = 1
+    isPathFound = false
+
     for i in 1:nIter
         #@show i
         r = rrt.Point(rand(1:20),rand(1:20))
 
-
         if r != obs1  #check node XY first
 			nn = nearestN(r, nodeslist)
 
-            if isCollidingEdge(r, nn.state, obs1) # check edge
+
+            if isCollidingEdge(r, nn.state, obs1) # check edge #rewrite so we can check multiple obstacles...
                 @printf("Cancelling due to collision %d\n", i)
 			    continue
 			else
-                # nodeID, prevNodeId, (x,y)
-                node = rrt.Node(maxNodeID, nn.id, r)
-                push!(nodeslist, node)
-                maxNodeID += 1
-                #@printf("Found node: %s, %s, %s, %s \n", node.id, node.iPrev, node.state.x, node.state.y)
+                # create new node?
+                nearestDist = distPt(r, nn.state)
+                if nearestDist > maxDist
+                    x1,y1 = nn.state.x, nn.state.y
+                    x2,y2 = r.x, r.y #ERROR: LoadError: MethodError: no method matching start(::rrt.Point) if you just use 'r' SIGH
+                    tantheta = atan2((y2-y1) , (x2-x1))
+                    newX = x1 + maxDist * cos(tantheta)
+                    newY = y1 + maxDist * sin(tantheta)
+                    @show newX
+                    @show newY
+                    newPt = rrt.Point(floor(newX), floor(newY)) #Todo: maybe I shouldn't floor?
 
-                if r == goal
-                    print("Goallllll!")
-                #    @show nodeslist
+                    node = rrt.Node(maxNodeID, nn.id, newPt) #throw out r, but try to steer toward it
+                else
+                    # nodeID, prevNodeId, (x,y)
+                    node = rrt.Node(maxNodeID, nn.id, r)
+                    #@printf("Found node: %s, %s, %s, %s \n", node.id, node.iPrev, node.state.x, node.state.y)
+                end
+
+                maxNodeID += 1
+                push!(nodeslist, node)
+
+                if inGoalRegion(r, goal)
+                    print("Goallllll!\n") 
+                    @show node  #winning node
+                    @printf("Goallll! Found after %d iterations", i)
+                    isPathFound = true
                     break
                 end
-            #    if inGoalRegion(r)
-            #        break
-            #    end
             end
 
         end
     end
 
-    return nodeslist
+    @printf("\nPath found? %s Length of nodeslist: %d\n", isPathFound, length(nodeslist))
+    return isPathFound, nodeslist
 end
 
+isPathFound, nlist = rrtPathPlanner()
 
-nlist = rrtPathPlanner()
+function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFound, obs1, rrtstart, goal, room 
 
-function plotPath(nlist)
-
-    ### <COPIED FOR NOW
-    obs1 = rrt.Obstacle(rrt.Point(2,2),rrt.Point(5,5))
+    ### <COPIED FOR NOW #Todo fix hardcoding
+    obs1 = rrt.Obstacle(rrt.Point(3,4),rrt.Point(5,8))
 
     rrtstart = rrt.Point(1,0)
     goal = rrt.Point(18,18)
@@ -167,7 +211,9 @@ function plotPath(nlist)
 
     @printf("%s", "plotted\n")
     plot!(h, show=true, legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:lightcyan)
-    title!("A rrt visualization $(foo)")
+
+    nIter = 20 #fix hardcoding
+    title!("RRT nIter = $(nIter), Path Found $(isPathFound)")
 
     # plot room
     dim = 21 
@@ -185,7 +231,7 @@ function plotPath(nlist)
     #plotEdge(nlist[5], nlist)
     # # plot all paths
      for n in nlist
-         @show n
+         #@show n
          plotEdge(n, nlist)
       end
 
@@ -238,4 +284,4 @@ end
     end
 #end
 
-plotPath(nlist)
+plotPath(isPathFound,nlist)
