@@ -45,7 +45,6 @@ function isCollidingEdge(r, nn, obs)
     # lines of the rectangular obstacle intersect with our edge
     # ignore collinearity for now
 
-    @show obs
     pt1 = rrt.Point(obs.SW.x, obs.SW.y)
     pt2 = rrt.Point(obs.SW.x, obs.NE.y)
     pt3 = rrt.Point(obs.NE.x, obs.NE.y)
@@ -80,7 +79,6 @@ function nearestN(r, nodeslist)
     nearestDist = 9999;
     nearestNode = []; #I guess we can use this to delcare an empty any type?
     for n in nodeslist
-        @show n
         x2,y2 = n.state.x, n.state.y
         x1,y1 = r.x, r.y
         dist = sqrt( (x1-x2)^2 + (y1-y2)^2 )
@@ -89,6 +87,8 @@ function nearestN(r, nodeslist)
             nearestNode = n
         end
     end
+    #@show nearestNode
+
     return nearestNode
 end
 
@@ -97,7 +97,6 @@ end
 
 function rrtPathPlanner()
     nIter = 10;
-
     #room = Room(0,0,21,21);
 
     obs1 = rrt.Obstacle(rrt.Point(1,1),rrt.Point(5,5))
@@ -114,10 +113,9 @@ function rrtPathPlanner()
 
     maxNodeID = 0
     for i in 1:nIter
-        @show i
+        #@show i
         r = rrt.Point(rand(1:20),rand(1:20))
 
-    #    @printf("A random point: %d, %d\n", r.x, r.y)
 
         if r != obs1  #check node XY first
 			nn = nearestN(r, nodeslist)
@@ -127,13 +125,13 @@ function rrtPathPlanner()
 			else
                 # nodeID, prevNodeId, (x,y)
                 node = rrt.Node(maxNodeID, nn.id, r)
-                #push!(nodeslist, node)
+                push!(nodeslist, node)
                 maxNodeID += 1
                 #@printf("Found node: %s, %s, %s, %s \n", node.id, node.iPrev, node.state.x, node.state.y)
 
                 if r == goal
                     print("Goallllll!")
-                    @show nodeslist
+                #    @show nodeslist
                     break
                 end
             #    if inGoalRegion(r)
@@ -144,8 +142,6 @@ function rrtPathPlanner()
         end
     end
 
-        print("\n\nno solution found\n")
-        @show nodeslist
     return nodeslist
 end
 
