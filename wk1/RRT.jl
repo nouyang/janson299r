@@ -185,9 +185,9 @@ function rrtPathPlanner(niterations)
                 push!(nodeslist, node)
 
                 if inGoalRegion(node, goal)
-                    print("Goallllll! This is the winning node:\n") 
-                    @show node  #winning node
-                    @printf("Goallll! Found after %d iterations", i)
+                    #print("Goallllll! This is the winning node:\n") 
+                    #@show node  #winning node
+                    #@printf("Goallll! Found after %d iterations", i)
                     isPathFound = true
                     break
                 end
