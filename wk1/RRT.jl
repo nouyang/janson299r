@@ -2,7 +2,7 @@ print("Hello World! ☺ ♫ ☕ \n\n")
 
 using Plots
 
-module rrtTypes
+module rrt 
     export Node, Edge, Obstacle, Room, Point
 
     struct Point
@@ -13,7 +13,7 @@ module rrtTypes
     struct Node
         id::Int
         iPrev::Int #parent
-        state::Tuple{Point} 
+        state::Point
     end
 
     struct Edge
@@ -45,10 +45,10 @@ function isCollidingEdge(r, nn, obs)
     # lines of the rectangular obstacle intersect with our edge
     # ignore collinearity for now
 
-    pt1 = Point(obs.SW.x, obs.SW.y)
-    pt2 = Point(obs.SW.x, obs.NE.y)
-    pt3 = Point(obs.NE.x, obs.NE.y)
-    pt4 = Point(obs.NE.x, obs.SW.y)
+    pt1 = rrt.Point(obs.SW.x, obs.SW.y)
+    pt2 = rrt.Point(obs.SW.x, obs.NE.y)
+    pt3 = rrt.Point(obs.NE.x, obs.NE.y)
+    pt4 = rrt.Point(obs.NE.x, obs.SW.y)
     
     # let A, B be r, nn
     coll1 = intersectLineSeg(r, nn, pt1, pt2)
@@ -79,6 +79,7 @@ function nearestN(r, nodeslist)
     nearestDist = 9999;
     nearestNode = Node;
     for n in nodeslist
+        @show n
         x2,y2 = n.state
         x1,y1 = r
         dist = sqrt( (x1-x2)^2 + (y1-y2)^2 )
@@ -98,12 +99,12 @@ function rrtPathPlanner()
 
     #room = Room(0,0,21,21);
 
-    obs1 = (Point(1,1),Point(5,5))
+    obs1 = (rrt.Point(1,1),rrt.Point(5,5))
 
-    rrtstart = Point(1,0)
-    goal = Point(18,18)
+    rrtstart = rrt.Point(1,0)
+    goal = rrt.Point(18,18)
 
-    nodeslist = Vector{Node}()
+    nodeslist = []
 
     startNode = Node(0,0, rrtstart)
     push!(nodeslist, startNode)
@@ -111,7 +112,7 @@ function rrtPathPlanner()
 
     maxNodeID = 0
     for i in 1:nIter
-        r = Point(rand(1:20),rand(1:20))
+        r = rrt.Point(rand(1:20),rand(1:20))
 
         @printf("A random point: %d, %d\n", r.x, r.y)
 
