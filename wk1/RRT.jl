@@ -344,5 +344,5 @@ end
     end
 #end
 
-#isPathFound, nlist = rrtPathPlanner()
+#cost, isPathFound, nlist = rrtPathPlanner(40) #maxIter
 #plotPath(isPathFound,nlist)

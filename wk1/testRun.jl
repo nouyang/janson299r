@@ -13,7 +13,7 @@ cost, isPathFound, nlist = rrtPathPlanner(30)
 
 
 
-iterList = [40 80 100 120 150 180 200 150 300]
+iterList = [40 80 100 120 150 180 200 300]
 nTrials = 30
 cost = 0
 listCosts = Vector{Float32}()
@@ -47,7 +47,7 @@ end
 
 
 
-plot(iterList, listCosts', show=true, seriestype=:scatter, legend=false, yaxis=((0,100), 0:20:100), xaxis=((0,320), 0:50:300))
+plot(iterList, size=(800,800), listCosts', show=true, seriestype=:scatter, legend=false, yaxis=((0,100), 0:20:100), xaxis=((0,320), 0:50:300))
 title!("RRT nIter vs pathcost")
 xlabel!("iterations requested of RRT alg")
 ylabel!("euclidean path cost")
