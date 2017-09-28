@@ -280,7 +280,6 @@ function queryPRM(beginState, endState, nodeslist, edgeslist): #aStarSearch
     # here State is of type rrt.Point
     beginVertex = findNodeFromState(beginState, nodeslist)
     endVertex = findNodeFromState(endState, nodeslist)
-    print("\n!!! hi\n")
 
     if beginVertex == Void
         #@printf("The begin state %d, %d could not be found. Using %d, %d instead", beginState.x, beginState.y, beginVertex.x, beginVertex.y)
@@ -305,29 +304,32 @@ function queryPRM(beginState, endState, nodeslist, edgeslist): #aStarSearch
         @show endVertex
 
         #@printf("The end state %d, %d could not be found. Using %d, %d instead", endState.x, endState.y, endVertex.x, endVertex.y)
-        frontier = DataStructures.PriorityQueue{rrt.tempQueueType, Int64}()
+        #frontier = DataStructures.PriorityQueue{rrt.tempQueueType, Int64}()
+        #frontier = DataStructures.PriorityQueue{Any, Int64}()
+        frontier = DataStructures.PriorityQueue{}()
+
     pathNodes = Vector{rrt.Vertex}()
     visited = Vector{rrt.Vertex}() #nodes we've searched through
     
     # actionlist = list of nodes
     # action list = previous nodes
     # inital cost = 0
-    print("\n!!! hi\n")
-    enqueue!(frontier, rrt.tempQueueType(beginVertex, pathNodes, 0), 1) #root node has cost 0  
+    foo = rrt.tempQueueType(beginVertex, pathNodes, 1) 
+    enqueue!(frontier, foo, 1) #root node has cost 0  
     @show frontier
     peek(frontier)
 
-    print("\n!!! hi\n")
 
     #state, action, cost = 
     # h(x) heuristic = euclidean distance straight to goal
     # g(x) cost = total edge cost so far
 
-    while length(pq) != 0
-        guhh = dequeue!(frontier)
-        @show guhh
-    print("\n!!! hihi\n")
-        curVertex, pathVertices, totaledgecost = guhh.a, guhh.b, guhh.c
+    while length(frontier) != 0
+        #guhh = peek(frontier)
+        tmp = dequeue!(frontier)
+    print("\nhi\n")
+    @show tmp
+        curVertex, pathVertices, totaledgecost = tmp.a, tmp.b, tmp.c
         if curVertex == endVertex 
             return pathVertices #list of nodes in path
         else
@@ -344,7 +346,7 @@ function queryPRM(beginState, endState, nodeslist, edgeslist): #aStarSearch
         end
     end
     # Return None if no solution found
-    return None  
+    return Void
 end
 
 

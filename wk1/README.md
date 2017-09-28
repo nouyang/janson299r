@@ -469,6 +469,37 @@ ERROR: LoadError: MethodError: no method matching Tuple(::Type{rrt.Vertex}, ::Ty
 
 
 
+SIGH
+guhh = Pair{Any,Int64}(rrt.tempQueueType(rrt.Vertex(0, rrt.Point(0, 0)), rrt.Vertex[], 0), 1)
+
+!!! hihi
+ERROR: LoadError: type Pair has no field a
+Stacktrace:
+ [1] queryPRM(::rrt.Point, ::rrt.Point, ::Array{rrt.Vertex,1}, ::Array{rrt.Edge,1}) at /home/nrw/Documents/fall 2017/299r/janson299r/wk1/PRM.jl:331
+
+
+ISGH
+
+ERROR: LoadError: type Pair has no field a
+ [1] queryPRM(::rrt.Point, ::rrt.Point, ::Array{rrt.Vertex,1}, ::Array{rrt.Edge,1}) at /home/nrw/Documents/fall 2017/299r/janson299r/wk1/PRM.jl:333
+Int64)
+
+julia> a,b,c = tmp
+ERROR: MethodError: no method matching start(::rrt.tempQueueType)
+Closest candidates are:
+
+julia> tmp
+rrt.tempQueueType(rrt.Vertex(0, rrt.Point(0, 0)), rrt.Vertex[], 1)
+
+1Dicts can be created by passing pair objects constructed with =>() to a Dict constructor: Dict("A"=>1, "B"=>2). 
+
+
+        curVertex, pathVertices, totaledgecost = tmp.a, tmp.b, tmp.c
+ERROR: LoadError: MethodError: no method matching start(::rrt.tempQueueType)
+    while length(frontier) != 0
+        #guhh = peek(frontier)
+        guhh = dequeue!(frontier)
+
 
         frontier = DataStructures.PriorityQueue{(rrt.Vertex, Int64), Int64}()
 
