@@ -430,3 +430,51 @@ http://localhost:8888/notebooks/AgileRoboticsTutorial.jl/notebooks/3.%20RigidBod
 
 # Pseudocode
 
+
+### Debug
+ERROR: MethodError: no method matching Union()
+ERROR: LoadError: UndefVarError: None not defined
+
+https://stackoverflow.com/questions/37751541/none-value-in-julia#37752309
+
+
+none == Void in Julia
+
+ERROR: LoadError: BoundsError: attempt to access 0-element Array{Pair{Any,Any},1} at index [1]
+priorityQueue must start at cost 1, not cost 0
+
+
+> curVertex, pathVertices, totaledgecost = dequeue!(frontier)
+ERROR: LoadError: BoundsError: attempt to access 0-element Array{Pair{Any,Any},1} at index [1]
+
+a = DataStructures.PriorityQueue{rrt.Vertex, Int64}()
+DataStructures.PriorityQueue{rrt.Vertex,Int64,Base.Order.ForwardOrdering} with 0 entries
+
+julia> a[foo] = 1
+
+
+ERROR: LoadError: TypeError: Type{...} expression: expected UnionAll, got DataStructures.PriorityQueue{Any,Any,Base.Order.ForwardOrdering}
+parenthesis in wrong place
+a = DataStructures.PriorityQueue(){rrt.Vertex, Int64}
+
+ERROR: LoadError: TypeError: Type{...} expression: expected UnionAll, got DataStructures.PriorityQueue{Any,Any,Base.Order.ForwardOrdering}
+        frontier = DataStructures.PriorityQueue{rrt.Vertex, Int64}()
+
+ERROR: LoadError: TypeError: Type: in parameter, expected Type, got Tuple{DataType,DataType}
+    enqueue!(frontier, (beginVertex,[], 0), 1) #root node has cost 0  
+
+
+    GUHHHHHHHHHHHHHHh
+ERROR: LoadError: MethodError: no method matching Tuple(::Type{rrt.Vertex}, ::Type{Array{rrt.Vertex,1}}, ::Type{Int64})
+
+
+
+
+        frontier = DataStructures.PriorityQueue{(rrt.Vertex, Int64), Int64}()
+
+
+## hints
+typeof()
+
+
+
