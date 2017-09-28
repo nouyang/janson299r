@@ -164,8 +164,8 @@ end
 
 
 function preprocessPRM(numPts, maxDist)
-    numPts = 100
-    maxDist = 10
+    #numPts = 100
+    #maxDist = 10
     #room = Room(0,0,21,21);
 
     obs1 = rrt.Obstacle(rrt.Point(8,3),rrt.Point(10,18)) #Todo
@@ -195,6 +195,7 @@ function preprocessPRM(numPts, maxDist)
     for vStart in vlist 
         nearlist = nearV(vStart, vlist, maxDist) # parent point #TODO
         for vEnd in vlist
+            @show vEnd
             if !isCollidingEdge(vStart, vEnd, obs1) #todo
                 newEdge = rrt.Edge(startid, endid) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
                 push!(edgeslist, newEdge)
@@ -202,7 +203,8 @@ function preprocessPRM(numPts, maxDist)
         end
     end
 
-    #@show nodeslist
+    #@show nodeslist #TODO this shows nodeslist
+    @show edgeslist 
     #@printf("\nPath found? %s Length of nodeslist: %d\n", isPathFound, length(nodeslist))
     return nodeslist, edgeslist
 end
@@ -319,7 +321,6 @@ function queryPRM(beginState, endState, nodeslist, edgeslist): #aStarSearch
     @show frontier
     peek(frontier)
 
-
     #state, action, cost = 
     # h(x) heuristic = euclidean distance straight to goal
     # g(x) cost = total edge cost so far
@@ -327,10 +328,10 @@ function queryPRM(beginState, endState, nodeslist, edgeslist): #aStarSearch
     while length(frontier) != 0
         #guhh = peek(frontier)
         tmp = dequeue!(frontier)
-    print("\nhi\n")
-    @show tmp
+        @show tmp
         curVertex, pathVertices, totaledgecost = tmp.a, tmp.b, tmp.c
         if curVertex == endVertex 
+            @printf("end state reached")
             return pathVertices #list of nodes in path
         else
             if (curVertex in visited) == true #TODO: ask rd if there's better syntax, like "not in", for this
@@ -346,6 +347,7 @@ function queryPRM(beginState, endState, nodeslist, edgeslist): #aStarSearch
         end
     end
     # Return None if no solution found
+    @printf("This is length of frontier, %d", length(frontier))
     return Void
 end
 
@@ -499,12 +501,14 @@ end
 #end
 
 #cost, isPathFound, nlist = rrtPathPlanner(40) #maxIter
-nodeslist, edgeslist = preprocessPRM(20,10)
+# nnodes , maxDist
+nodeslist, edgeslist = preprocessPRM(200,10)
 
 start = rrt.Point(0,0)
 goal = rrt.Point(18,18)
 
-queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
+pathVertices = queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
+@show pathVertices
 
     #cost = costWinningPath(nodeslist)
     #return cost, isPathFound, nodeslist
