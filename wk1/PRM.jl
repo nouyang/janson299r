@@ -3,7 +3,7 @@ print("Hello World! ☺ ♫ ☕ \n\n")
 
 using Plots
 using DataStructures
-gr()
+#gr()
 
 plot([1,2],[2,3])
 
@@ -93,10 +93,10 @@ function isCollidingEdge(r, nn, obs)
     pt4 = rrt.Point(x2, y1)
     
     # let A, B be r, nn
-    coll1 = intersectLineSeg(r, nn, pt1, pt2)
-    coll2 = intersectLineSeg(r, nn, pt2, pt3)
-    coll3 = intersectLineSeg(r, nn, pt3, pt4)
-    coll4 = intersectLineSeg(r, nn, pt4, pt1)
+    coll1 = intersectLineSeg(r.state, nn.state, pt1, pt2)
+    coll2 = intersectLineSeg(r.state, nn.state, pt2, pt3)
+    coll3 = intersectLineSeg(r.state, nn.state, pt3, pt4)
+    coll4 = intersectLineSeg(r.state, nn.state, pt4, pt1)
 
     if (!coll1 && !coll2 && !coll3 && !coll4)
         return false
@@ -132,10 +132,17 @@ function intersectLineSeg(A,B,C,D) #no ":" at the end!
 end
 
 
-function nearN(r, nodeslist, maxDist)
-    Vnear = Vector{Node}()
-    
-    return Vnear
+function nearV(r, nodeslist, maxDist)
+    # r is point
+    # given maxDist, return all nodes within that distance of node
+    nearVs = Vector{rrt.Vertex}()
+    for n in nodeslist
+        dist = distPt(r.state, n.state)
+        if dist < maxDist 
+            push!(nearVs, n)
+        end
+    end
+    return nearVs
 end
 
 
@@ -192,19 +199,18 @@ function preprocessPRM(numPts, maxDist)
     end
 
     # Connect each node to its neighboring nodes within a ball or radius r
-    for vStart in vlist 
-        nearlist = nearV(vStart, vlist, maxDist) # parent point #TODO
-        for vEnd in vlist
-            @show vEnd
+    for vStart in nodeslist 
+        nearlist = nearV(vStart, nodeslist, maxDist) # parent point #TODO
+        for vEnd in nearlist
             if !isCollidingEdge(vStart, vEnd, obs1) #todo
-                newEdge = rrt.Edge(startid, endid) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
+                newEdge = rrt.Edge(vStart.id, vEnd.id) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
                 push!(edgeslist, newEdge)
             end
         end
     end
 
     #@show nodeslist #TODO this shows nodeslist
-    @show edgeslist 
+    #@show edgeslist 
     #@printf("\nPath found? %s Length of nodeslist: %d\n", isPathFound, length(nodeslist))
     return nodeslist, edgeslist
 end
@@ -215,22 +221,23 @@ function graphSearch(beginVertex, endVertex, nodeslist, edgeslist)
     endID = endVertex.id
 end
 
-function getSuccesors(nodeID, edgeslist) #assuming bidirectional for now
-    curVertex = findNode(nodeID)
+function getSuccessors(curVertex, edgeslist, nodeslist) #assuming bidirectional for now
+    #curVertex = findNode(nodeID)
+    nodeID = curVertex.id
     successorIDs = Vector{Int}()
-    successors = Vector{Vertex}()
+    successors = Vector{rrt.Vertex}()
 
     for e in edgeslist
         if e.startID == nodeID
             push!(successorIDs, e.endID)
         end
         if e.endID == nodeID
-            push!(succesorIDs, e.startID)
+            push!(successorIDs, e.startID)
         end
     end
 
-    for id in succesorIDs
-        vertex = findNode(id)
+    for id in successorIDs
+        vertex = findNode(id, nodeslist)
         push!(successors, vertex)
     end
 
@@ -334,20 +341,27 @@ function queryPRM(beginState, endState, nodeslist, edgeslist): #aStarSearch
             @printf("end state reached")
             return pathVertices #list of nodes in path
         else
-            if (curVertex in visited) == true #TODO: ask rd if there's better syntax, like "not in", for this
+            if (curVertex in visited) == false #TODO: ask rd if there's better syntax, like "not in", for this
                 push!(visited, curVertex)
                 # Add all successors to the stack
-                for newVertex in getSuccessors(curVertex, edgeslist)
+                for newVertex in getSuccessors(curVertex, edgeslist, nodeslist)
+                    @show newVertex
+
                     newEdgeCost = distPt(curVertex.state, newVertex.state) #heuristic is dist(state,state). better to pass Node than to perform node lookup everytime (vs passing id)
+
                     f_x = totaledgecost + newEdgeCost + distPt(newVertex.state, endVertex.state) #heuristic = distPt 
-                    push!(pathVertices, newVertex)
-                    frontier.enqueue!((newVertex, pathVertices, totaledgecost), f_x) 
+
+                    #push!(pathVertices, newVertex)
+                    if newVertex keys(frontier)
+                        @printf("newvertex was not in frontier")
+                        enqueue!(frontier,(newVertex, [], totaledgecost + newEdgeCost), f_x) 
+                    end
                 end
             end
         end
     end
     # Return None if no solution found
-    @printf("This is length of frontier, %d", length(frontier))
+    @printf("This is length of frontier, %d\n", length(frontier))
     return Void
 end
 
