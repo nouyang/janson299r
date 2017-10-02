@@ -1,4 +1,4 @@
-# Attempt to make a PRM.
+#Nodi Attempt to make a PRM.
 print("Hello World! ☺ ♫ ☕ \n\n")
 
 using Plots
@@ -21,10 +21,12 @@ module rrt
         state::Point
     end
 
+
     struct Vertex
         id::Int
         state::Point
     end
+
 
     struct Edge
         startID::Int
@@ -58,6 +60,10 @@ module rrt
         statesList::Vector{rrt.Vertex}
         cost::Int64
     end
+
+    Base.show(io::IO, v::Vertex) = print(io, "V($(v.id), ($(v.state.x),$(v.state.y)))")
+    Base.show(io::IO, p::Point) = print(io, "P($(p.x),$(p.y))")
+    Base.show(io::IO, qtype::tempQueueType) = print(io, Q($(v),$(statesList) $(cost)))
             
 end
 
@@ -289,6 +295,7 @@ function queryPRM(beginState, endState, nlist, edgeslist)
     edgeslist = [ rrt.Edge(101,102), rrt.Edge(104, 204), rrt.Edge(301, 302), rrt.Edge(302, 303), 
                  rrt.Edge(302, 402), rrt.Edge(303, 404), rrt.Edge(401,402) ]
 
+    @show nodeslist
 
     beginState = rrt.Point(4,1)
     endState = rrt.Point(1,4)
@@ -300,12 +307,15 @@ function queryPRM(beginState, endState, nlist, edgeslist)
     print("This is the beginVertex--> $(beginVertex) >>> and the endVertex--> $(endVertex)\n")
 
     #@printf("The end state %d, %d could not be found. Using %d, %d instead", endState.x, endState.y, endVertex.x, endVertex.y)
-    #aqueue = Queue(rrt.tempQueueType)
+    #aqueue = Queue(rrt.tempQueueType) #how to use queue type
 
     pathNodes = Vector{rrt.Vertex}()
     visited = Vector{rrt.Vertex}() #nodes we've searched through
     
     foo = rrt.tempQueueType(beginVertex, pathNodes, 1) 
+    #frontier = Vector{rrt.tempQueueType}()
+    # Ah! I'm to use heaps instead (specific implementation of priorityqueues)
+    fronter = PriorityQueue(rrt.tempQueueType)
     enqueue!(frontier, foo, 1) #root node has cost 0  
 
     while length(frontier) != 0
