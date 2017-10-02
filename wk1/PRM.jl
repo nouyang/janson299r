@@ -31,6 +31,11 @@ module rrt
         endID::Int
     end
 
+    struct Edges
+        startID::Int
+        endIDs::Vector{Vertex}
+    end
+
     struct Obstacle
         SW::Point
         NE::Point
@@ -49,9 +54,9 @@ module rrt
     end
 
     struct tempQueueType
-        a::rrt.Vertex
-        b::Vector{rrt.Vertex}
-        c::Int64
+        v::rrt.Vertex
+        statesList::Vector{rrt.Vertex}
+        cost::Int64
     end
             
 end
@@ -215,11 +220,6 @@ function preprocessPRM(numPts, maxDist)
     return nodeslist, edgeslist
 end
 
-function graphSearch(beginVertex, endVertex, nodeslist, edgeslist)
-    # implement A*
-    beginID = beginVertex.id
-    endID = endVertex.id
-end
 
 function getSuccessors(curVertex, edgeslist, nodeslist) #assuming bidirectional for now
     #curVertex = findNode(nodeID)
@@ -231,9 +231,9 @@ function getSuccessors(curVertex, edgeslist, nodeslist) #assuming bidirectional 
         if e.startID == nodeID
             push!(successorIDs, e.endID)
         end
-        if e.endID == nodeID
-            push!(successorIDs, e.startID)
-        end
+        #if e.endID == nodeID
+        #    push!(successorIDs, e.startID)
+        #end
     end
 
     for id in successorIDs
@@ -253,24 +253,23 @@ function findNodeFromState(nodestate, nodeslist)
     return Void
 end
 
-        function fuzzyState(nodestate)
-            listFuzzyStates = Vector{rrt.Point}()
-            x, y = nodestate.x, nodestate.y
-            l = rrt.Point(x-1, y)
-            r = rrt.Point(x+1, y)
-            u = rrt.Point(x, y+1) 
-            d = rrt.Point(x, y-1)
-            NW = rrt.Point(x-1, y+1)
-            SW = rrt.Point(x-1, y-1)
-            NE = rrt.Point(x+1, y+1)
-            SE = rrt.Point(x+1, y-1)
-            push!(listFuzzyStates, l, r, u, d, NW, SW, NE, SE)
-            return listFuzzyStates 
-        end
+function fuzzyState(nodestate)
+    listFuzzyStates = Vector{rrt.Point}()
+    x, y = nodestate.x, nodestate.y
+    l = rrt.Point(x-1, y)
+    r = rrt.Point(x+1, y)
+    u = rrt.Point(x, y+1) 
+    d = rrt.Point(x, y-1)
+    NW = rrt.Point(x-1, y+1)
+    SW = rrt.Point(x-1, y-1)
+    NE = rrt.Point(x+1, y+1)
+    SE = rrt.Point(x+1, y-1)
+    push!(listFuzzyStates, l, r, u, d, NW, SW, NE, SE)
+    return listFuzzyStates 
+end
+
 function fuzzyFindNodeFromState(nodestate, nodeslist)
     # nodestate x, y += 1
-
-
     for n in nodeslist
         nFuzzyState = fuzzyState(n.state)
         if nodestate in nFuzzyState
@@ -281,62 +280,39 @@ function fuzzyFindNodeFromState(nodestate, nodeslist)
 
 end
 
+function queryPRM(beginState, endState, nlist, edgeslist)
+    nodeslist = [ rrt.Vertex(101, rrt.Point(1,1)), rrt.Vertex(102, rrt.Point(1,2)), rrt.Vertex(104, rrt.Point(1,4)), 
+                  rrt.Vertex(204, rrt.Point(2,4)),  
+                  rrt.Vertex(301, rrt.Point(3,1)), rrt.Vertex(302, rrt.Point(3,2)), rrt.Vertex(303, rrt.Point(3,3)), 
+                  rrt.Vertex(401, rrt.Point(4,1)), rrt.Vertex(402, rrt.Point(4,2)), rrt.Vertex(404, rrt.Point(4,4)) ]   
+
+    edgeslist = [ rrt.Edge(101,102), rrt.Edge(104, 204), rrt.Edge(301, 302), rrt.Edge(302, 303), 
+                 rrt.Edge(302, 402), rrt.Edge(303, 404), rrt.Edge(401,402) ]
 
 
+    beginState = rrt.Point(4,1)
+    endState = rrt.Point(1,4)
 
-function queryPRM(beginState, endState, nodeslist, edgeslist): #aStarSearch
-    """Search the node that has the lowest combined cost and heuristic first."""
-    # here State is of type rrt.Point
     beginVertex = findNodeFromState(beginState, nodeslist)
     endVertex = findNodeFromState(endState, nodeslist)
 
-    if beginVertex == Void
-        #@printf("The begin state %d, %d could not be found. Using %d, %d instead", beginState.x, beginState.y, beginVertex.x, beginVertex.y)
-        beginVertex = fuzzyFindNodeFromState(beginState, nodeslist)
-    end
-    if endVertex == Void
-        endVertex = fuzzyFindNodeFromState(endState, nodeslist)
-    end
+    print("This is the beginState $(beginState) and the endState $(endState)\n")
+    print("This is the beginVertex--> $(beginVertex) >>> and the endVertex--> $(endVertex)\n")
 
-
-    if beginVertex == Void
-        #@printf("The begin state %d, %d is not in the graph", beginState.x, beginState.y)
-        return Void
-    end
-
-    if endVertex == Void
-        #@printf("The end state %d, %d is not in the graph", endState.x, endState.y)
-        return Void
-    end
-
-        @show beginVertex
-        @show endVertex
-
-        #@printf("The end state %d, %d could not be found. Using %d, %d instead", endState.x, endState.y, endVertex.x, endVertex.y)
-        #frontier = DataStructures.PriorityQueue{rrt.tempQueueType, Int64}()
-        #frontier = DataStructures.PriorityQueue{Any, Int64}()
-        frontier = DataStructures.PriorityQueue{}()
+    #@printf("The end state %d, %d could not be found. Using %d, %d instead", endState.x, endState.y, endVertex.x, endVertex.y)
+    #aqueue = Queue(rrt.tempQueueType)
 
     pathNodes = Vector{rrt.Vertex}()
     visited = Vector{rrt.Vertex}() #nodes we've searched through
     
-    # actionlist = list of nodes
-    # action list = previous nodes
-    # inital cost = 0
     foo = rrt.tempQueueType(beginVertex, pathNodes, 1) 
     enqueue!(frontier, foo, 1) #root node has cost 0  
-    @show frontier
-    peek(frontier)
-
-    #state, action, cost = 
-    # h(x) heuristic = euclidean distance straight to goal
-    # g(x) cost = total edge cost so far
 
     while length(frontier) != 0
         #guhh = peek(frontier)
-        tmp = dequeue!(frontier)
+        tmp = DataStructures.queue!(frontier)
         @show tmp
-        curVertex, pathVertices, totaledgecost = tmp.a, tmp.b, tmp.c
+        curVertex, pathVertices, totaledgecost = tmp.v, tmp.path, tmp.c
         if curVertex == endVertex 
             @printf("end state reached")
             return pathVertices #list of nodes in path
@@ -346,11 +322,8 @@ function queryPRM(beginState, endState, nodeslist, edgeslist): #aStarSearch
                 # Add all successors to the stack
                 for newVertex in getSuccessors(curVertex, edgeslist, nodeslist)
                     @show newVertex
-
                     newEdgeCost = distPt(curVertex.state, newVertex.state) #heuristic is dist(state,state). better to pass Node than to perform node lookup everytime (vs passing id)
-
                     f_x = totaledgecost + newEdgeCost + distPt(newVertex.state, endVertex.state) #heuristic = distPt 
-
                     #push!(pathVertices, newVertex)
                     if newVertex keys(frontier)
                         @printf("newvertex was not in frontier")
@@ -364,7 +337,6 @@ function queryPRM(beginState, endState, nodeslist, edgeslist): #aStarSearch
     @printf("This is length of frontier, %d\n", length(frontier))
     return Void
 end
-
 
 
 
