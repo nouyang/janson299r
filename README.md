@@ -31,7 +31,7 @@ To run a file,
 
 ### Commands
 
-> cd("/home/nrw/projects/julia/AgileRoboticsTutorial.jl/") `
+> cd("/home/nrw/projects/julia/AgileRoboticsTutorial.jl/")
 > pwd()
 
 

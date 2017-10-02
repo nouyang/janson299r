@@ -499,13 +499,51 @@ ERROR: LoadError: MethodError: no method matching start(::rrt.tempQueueType)
     while length(frontier) != 0
         #guhh = peek(frontier)
         guhh = dequeue!(frontier)
+        opp
+
+
+guhh = rrt.tempQueueType(rrt.Vertex(0, rrt.Point(0, 0)), rrt.Vertex[], 1)
+ERROR: LoadError: MethodError: no method matching start(::rrt.tempQueueType)
+Closest candidates are:
+
 
 
         frontier = DataStructures.PriorityQueue{(rrt.Vertex, Int64), Int64}()
+
+
+ERROR: LoadError: syntax: invalid assignment location ":nodeslist"
+>> ugh got bit by the "no : at the end of definiting things" thing from python, it was hidden by a comment even this time
 
 
 ## hints
 typeof()
 
 
+
+
+ERROR: LoadError: MethodError: no method matching start(::rrt.tempQueueType)
+> trying to iterate 
+
+        curVertex, pathVertices, totaledgecost = tmp
+
+
+>>>>>        what is equivalent of "not in" ???
+
+
+
+    frontier = Vector{rrt.tempQueueType(){}
+    vs
+    frontier = Vector{rrt.tempQueueType}()
+    ERROR: LoadError: MethodError: no method matching rrt.tempQueueType()
+
+
+    Base.show(io::IO, qtype::tempQueueType) = print(io, "Q($(v),$(statesList) $(cost))")
+    Base.show(io::IO, qtype::tempQueueType) = print(io, Q($(v),$(statesList) $(cost)))
+ERROR: LoadError: error compiling queryPRM: error compiling showall: syntax: prefix "$" in non-quoted expression
+
+
+ERROR: LoadError: InexactError()
+ [1] convert(::Type{Int64}, ::Float64) at ./float.jl:679
+
+OH DUH. path cost is in float, while I defined the type as Int
 

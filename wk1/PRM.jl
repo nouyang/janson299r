@@ -240,9 +240,9 @@ function getSuccessors(curVertex, edgeslist, nodeslist) #assuming bidirectional 
         if e.startID == nodeID
             push!(successorIDs, e.endID)
         end
-        #if e.endID == nodeID
-        #    push!(successorIDs, e.startID)
-        #end
+        if e.endID == nodeID #should I include endID? it is bidirectional after all. 
+            push!(successorIDs, e.startID) #yes, because local planner connects in bidirectional way
+        end
     end
 
     for id in successorIDs
@@ -290,13 +290,14 @@ function fuzzyFindNodeFromState(nodestate, nodeslist)
 end
 
 function queryPRM(beginState, endState, nlist, edgeslist)
+    # I made this test like a chessboard for whatever reason... first number is ABC going down, second number is 123 going right
     nodeslist = [ rrt.Vertex(101, rrt.Point(1,1)), rrt.Vertex(102, rrt.Point(1,2)), rrt.Vertex(104, rrt.Point(1,4)), 
                   rrt.Vertex(204, rrt.Point(2,4)),  
                   rrt.Vertex(301, rrt.Point(3,1)), rrt.Vertex(302, rrt.Point(3,2)), rrt.Vertex(303, rrt.Point(3,3)), 
                   rrt.Vertex(401, rrt.Point(4,1)), rrt.Vertex(402, rrt.Point(4,2)), rrt.Vertex(404, rrt.Point(4,4)) ]   
 
     edgeslist = [ rrt.Edge(101,102), rrt.Edge(104, 204), rrt.Edge(301, 302), rrt.Edge(302, 303), 
-                 rrt.Edge(302, 402), rrt.Edge(303, 404), rrt.Edge(401,402) ]
+                 rrt.Edge(402,302), rrt.Edge(303, 204), rrt.Edge(303, 404), rrt.Edge(401,402) ]
 
 
     beginState = rrt.Point(4,1)
@@ -321,16 +322,20 @@ function queryPRM(beginState, endState, nlist, edgeslist)
     enqueue!(frontier, foo, 1) #root node has cost 0  
 
     while length(frontier) != 0
-        #guhh = peek(frontier)
+        print("\n\nNEW ITERATION\n")
         tmp = DataStructures.dequeue!(frontier)
         curVertex, pathVertices, totaledgecost = tmp.v, tmp.statesList, tmp.cost
+
         if curVertex == endVertex 
             print("Hurrah! endState reached!")
             return pathVertices #list of nodes in path
         else
-            if !(curVertex in visited) #TODO: ask rd if there's better syntax, like "not in", for this
-                push!(visited, curVertex)
-                # Add all successors to the stack
+            @show visited
+            @show curVertex
+            if !(curVertex in visited) 
+                print("curVertex not in visited\n")
+                push!(visited, curVertex) # Add all successors to the stack
+
                 for newVertex in getSuccessors(curVertex, edgeslist, nodeslist)
                     @show newVertex
                     newEdgeCost = distPt(curVertex.state, newVertex.state) #heuristic is dist(state,state). better to pass Node than to perform node lookup everytime (vs passing id)
@@ -338,16 +343,19 @@ function queryPRM(beginState, endState, nlist, edgeslist)
                     #push!(pathVertices, newVertex)
                     if !(newVertex in keys(frontier))
                         print("newvertex --> $(newVertex) >>> was not in frontier \n")
-                        tmpq = rrt.tempQueueType(newVertex, [], totaledgecost + newEdgeCost)
-                        enqueue!(frontier,tmpq,f_x) 
+                        tmpq = rrt.tempQueueType(newVertex, [], ceil(totaledgecost + newEdgeCost))
+                        enqueue!(frontier,tmpq, ceil(f_x)) 
+                        print("Added state --> $(tmpq) >>> to frontier \n")
+                        print("This is frontier top --> $(peek(frontier)) \n")
                     end
                 end
+
             end
         end
     end
     # Return None if no solution found
-    @printf("This is length of frontier, %d\n", length(frontier))
-    return Void
+    @printf("No solution found! This is length of frontier, %d\n", length(frontier))
+    return 
 end
 
 
@@ -360,7 +368,6 @@ function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFo
     rrtstart = rrt.Point(1,0)
     goal = rrt.Point(18,18)
     ### / COPIED FOR NOW>
-
 
     foo = rand(1)
     h = plot()
@@ -385,7 +392,6 @@ function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFo
     circleObs(obs1)
 
     # plot all paths
-
 
     # plot winning path
     if isPathFound
