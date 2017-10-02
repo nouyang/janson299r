@@ -322,28 +322,32 @@ function queryPRM(beginState, endState, nlist, edgeslist)
     enqueue!(frontier, foo, 1) #root node has cost 0  
 
     while length(frontier) != 0
-        print("\n\nNEW ITERATION\n")
+        print("\n\n=========== NEW ITERATION\n")
         tmp = DataStructures.dequeue!(frontier)
+        pathVertices =[]
         curVertex, pathVertices, totaledgecost = tmp.v, tmp.statesList, tmp.cost
 
         if curVertex == endVertex 
-            print("Hurrah! endState reached!")
+            print("Hurrah! endState reached! \n")
             return pathVertices #list of nodes in path
         else
             @show visited
             @show curVertex
             if !(curVertex in visited) 
-                print("curVertex not in visited\n")
+                #print("curVertex not in visited\n")
                 push!(visited, curVertex) # Add all successors to the stack
 
                 for newVertex in getSuccessors(curVertex, edgeslist, nodeslist)
-                    @show newVertex
+                print("\n")
+                print("newvertex --> $(newVertex) \n")
                     newEdgeCost = distPt(curVertex.state, newVertex.state) #heuristic is dist(state,state). better to pass Node than to perform node lookup everytime (vs passing id)
                     f_x = totaledgecost + newEdgeCost + distPt(newVertex.state, endVertex.state) #heuristic = distPt 
-                    #push!(pathVertices, newVertex)
+                    p = deepcopy(pathVertices)
+                    push!(p,newVertex)
+                @show pathVertices
                     if !(newVertex in keys(frontier))
-                        print("newvertex --> $(newVertex) >>> was not in frontier \n")
-                        tmpq = rrt.tempQueueType(newVertex, [], ceil(totaledgecost + newEdgeCost))
+                #        print("newvertex --> $(newVertex) >>> was not in frontier \n")
+                        tmpq = rrt.tempQueueType(newVertex, p, ceil(totaledgecost + newEdgeCost))
                         enqueue!(frontier,tmpq, ceil(f_x)) 
                         print("Added state --> $(tmpq) >>> to frontier \n")
                         print("This is frontier top --> $(peek(frontier)) \n")
@@ -512,6 +516,8 @@ start = rrt.Point(0,0)
 goal = rrt.Point(18,18)
 
 pathVertices = queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
+
+print("This is the solution path: \n") 
 @show pathVertices
 
     #cost = costWinningPath(nodeslist)
