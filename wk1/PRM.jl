@@ -63,7 +63,10 @@ module rrt
 
     Base.show(io::IO, v::Vertex) = print(io, "V($(v.id), ($(v.state.x),$(v.state.y)))")
     Base.show(io::IO, p::Point) = print(io, "P($(p.x),$(p.y))")
-    Base.show(io::IO, qtype::tempQueueType) = print(io, Q($(v),$(statesList) $(cost)))
+    Base.show(io::IO, q::tempQueueType) = print(io, "Q($(q.v),$(q.statesList) $(q.cost))")
+    Base.isless(q1::tempQueueType, q2::tempQueueType) = q1.cost < q2.cost
+    Base.isless(p1::Point, p2::Point) = q1.x< q2.x
+
             
 end
 
@@ -295,7 +298,6 @@ function queryPRM(beginState, endState, nlist, edgeslist)
     edgeslist = [ rrt.Edge(101,102), rrt.Edge(104, 204), rrt.Edge(301, 302), rrt.Edge(302, 303), 
                  rrt.Edge(302, 402), rrt.Edge(303, 404), rrt.Edge(401,402) ]
 
-    @show nodeslist
 
     beginState = rrt.Point(4,1)
     endState = rrt.Point(1,4)
@@ -313,21 +315,20 @@ function queryPRM(beginState, endState, nlist, edgeslist)
     visited = Vector{rrt.Vertex}() #nodes we've searched through
     
     foo = rrt.tempQueueType(beginVertex, pathNodes, 1) 
-    #frontier = Vector{rrt.tempQueueType}()
+    #frontier = binary_maxheap(rrt.tempQueueType)
+    frontier = PriorityQueue() #rrt.tempQueueType, Int
     # Ah! I'm to use heaps instead (specific implementation of priorityqueues)
-    fronter = PriorityQueue(rrt.tempQueueType)
     enqueue!(frontier, foo, 1) #root node has cost 0  
 
     while length(frontier) != 0
         #guhh = peek(frontier)
-        tmp = DataStructures.queue!(frontier)
-        @show tmp
-        curVertex, pathVertices, totaledgecost = tmp.v, tmp.path, tmp.c
+        tmp = DataStructures.dequeue!(frontier)
+        curVertex, pathVertices, totaledgecost = tmp.v, tmp.statesList, tmp.cost
         if curVertex == endVertex 
-            @printf("end state reached")
+            print("Hurrah! endState reached!")
             return pathVertices #list of nodes in path
         else
-            if (curVertex in visited) == false #TODO: ask rd if there's better syntax, like "not in", for this
+            if !(curVertex in visited) #TODO: ask rd if there's better syntax, like "not in", for this
                 push!(visited, curVertex)
                 # Add all successors to the stack
                 for newVertex in getSuccessors(curVertex, edgeslist, nodeslist)
@@ -335,9 +336,10 @@ function queryPRM(beginState, endState, nlist, edgeslist)
                     newEdgeCost = distPt(curVertex.state, newVertex.state) #heuristic is dist(state,state). better to pass Node than to perform node lookup everytime (vs passing id)
                     f_x = totaledgecost + newEdgeCost + distPt(newVertex.state, endVertex.state) #heuristic = distPt 
                     #push!(pathVertices, newVertex)
-                    if newVertex keys(frontier)
-                        @printf("newvertex was not in frontier")
-                        enqueue!(frontier,(newVertex, [], totaledgecost + newEdgeCost), f_x) 
+                    if !(newVertex in keys(frontier))
+                        print("newvertex --> $(newVertex) >>> was not in frontier \n")
+                        tmpq = rrt.tempQueueType(newVertex, [], totaledgecost + newEdgeCost)
+                        enqueue!(frontier,tmpq,f_x) 
                     end
                 end
             end
