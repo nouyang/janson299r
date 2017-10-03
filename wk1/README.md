@@ -1,3 +1,11 @@
+# 
+closeall()
+workspace()
+
+# Todo
+
+add types to all the functions, so they throw intelligible messages if you put in the wrong types
+
 # About
 
 This is a "dirty code" repository for my work on my 299r (semeseter-long rotation) with Prof. Lucas Janson.
@@ -531,19 +539,12 @@ ERROR: LoadError: MethodError: no method matching start(::rrt.tempQueueType)
 
 
 
-    frontier = Vector{rrt.tempQueueType(){}
-    vs
-    frontier = Vector{rrt.tempQueueType}()
-    ERROR: LoadError: MethodError: no method matching rrt.tempQueueType()
+
+>> ugh, this does the MATLAB thing where if the function used to be defined, it's
+still in the workspace, even if I delete it from the file (so it doesn't throw
+an error if I call that old function elsewhere in the file)
+is there  a way to tell julia to ... not do this?
 
 
-    Base.show(io::IO, qtype::tempQueueType) = print(io, "Q($(v),$(statesList) $(cost))")
-    Base.show(io::IO, qtype::tempQueueType) = print(io, Q($(v),$(statesList) $(cost)))
-ERROR: LoadError: error compiling queryPRM: error compiling showall: syntax: prefix "$" in non-quoted expression
 
-
-ERROR: LoadError: InexactError()
- [1] convert(::Type{Int64}, ::Float64) at ./float.jl:679
-
-OH DUH. path cost is in float, while I defined the type as Int
-
+>> oooooh!!! This is super nice. NaN to plot disjoints in lines.https://juliaplots.github.io/input_data/
