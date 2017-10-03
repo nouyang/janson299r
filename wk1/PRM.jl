@@ -1,5 +1,5 @@
 #Nodi Attempt to make a PRM.
-print("Hello World! ☺ ♫ ☕ \n\n")
+#print("Hello World! ☺ ♫ ☕ \n\n")
 
 using Plots
 using DataStructures
@@ -208,7 +208,7 @@ function fuzzyFindNodeFromState(nodestate, nodeslist)
         for n in nodeslist
             nFuzzyState = fuzzyState(n.state, fuzzyDist)
             if nodestate in nFuzzyState
-                print("\nFuzzy search required to find node, using distance $(fuzzyDist)\n")
+                #print("\nFuzzy search required to find node, using distance $(fuzzyDist)\n")
                 res = n
             end
         end
@@ -297,8 +297,8 @@ function queryPRM(beginState, endState, nlist, edgeslist)
     # beginState = rrt.Point(4,1)
     # endState = rrt.Point(1,4)
 
-    beginVertex = fuzzyFindNodeFromState(beginState, nodeslist)
-    endVertex = fuzzyFindNodeFromState(endState, nodeslist)
+    beginVertex = fuzzyFindNodeFromState(beginState, nlist)
+    endVertex = fuzzyFindNodeFromState(endState, nlist)
 
     print("This is the beginState $(beginState) and the endState $(endState)\n")
     print("This is the beginVertex--> $(beginVertex) >>> and the endVertex--> $(endVertex)\n")
@@ -314,6 +314,7 @@ function queryPRM(beginState, endState, nlist, edgeslist)
     frontier = PriorityQueue() #rrt.tempQueueType, Int
     # Ah! I'm to use heaps instead (specific implementation of priorityqueues)
     enqueue!(frontier, foo, 1) #root node has cost 0  
+	zcost = 99999
 
     while length(frontier) != 0
         #print("\n\n=========== NEW ITERATION\n")
@@ -324,7 +325,8 @@ function queryPRM(beginState, endState, nlist, edgeslist)
         if curVertex == endVertex 
             print("Hurrah! endState reached! \n")
             unshift!(pathVertices, beginVertex) #prepend startVertex back to pathVertices
-            return (true, pathVertices) #list of nodes in solution path
+			zcost = costPath(pathVertices)
+            return (zcost, true, pathVertices) #list of nodes in solution path
 
         else
             #@show visited
@@ -333,7 +335,7 @@ function queryPRM(beginState, endState, nlist, edgeslist)
                 #print("curVertex not in visited\n")
                 push!(visited, curVertex) # Add all successors to the stack
 
-                for newVertex in getSuccessors(curVertex, edgeslist, nodeslist)
+                for newVertex in getSuccessors(curVertex, edgeslist, nlist)
                 #print("\n")
                 #print("newvertex --> $(newVertex) \n")
                     newEdgeCost = distPt(curVertex.state, newVertex.state) #heuristic is dist(state,state). better to pass Node than to perform node lookup everytime (vs passing id)
@@ -352,10 +354,11 @@ function queryPRM(beginState, endState, nlist, edgeslist)
 
             end
         end
-    end
+    end    
     # Return None if no solution found
-    @printf("No solution found! This is length of frontier, %d\n", length(frontier))
-    return (false, Void)
+    #@printf("No solution found! This is length of frontier, %d\n", length(frontier))
+	zcost = 99999
+    return (zcost, false, Void)
 end
 
 
@@ -414,10 +417,11 @@ function plotPath(isPathFound, nlist, elist, solPath, maxDist) #rewrite so don't
     # plot winning path
     if isPathFound
         cost = plotWinningPath(solPath)
-        @printf("\n!!!! The cost of the path was %d across %d nodes  !!!! \n", cost, length(nlist))
+        #@printf("\n!!!! The cost of the path was %d across %d nodes  !!!! \n", cost, length(nlist))
         #nEnd = nlist[end]
     end
     # display winning path cost
+	return cost
 end
 
 
@@ -468,6 +472,16 @@ end
         return cost
     end
  
+    function costPath(solPath)
+        zcost = 0
+        for i in 2:length(solPath)
+            curV  = solPath[i].state
+            prevV = solPath[i-1].state
+            zcost += distPt(curV, prevV)
+        end
+        return zcost
+    end
+
     function plotWinningPath(solPath)
         xPath = [v.state.x for v in solPath]
         yPath = [v.state.y for v in solPath]
@@ -479,7 +493,7 @@ end
         end
 
         plot!( xPath, yPath, color = :orchid, linewidth=3)
-        print("plotted winning path")
+        #print("plotted winning path")
         #@show nlist
         return cost
     end
@@ -499,18 +513,19 @@ end
 
 # nnodes , maxDist
 connectDist = 10
+# 1
 nodeslist, edgeslist= preprocessPRM(55, connectDist)
 
 start = rrt.Point(0,0)
 goal = rrt.Point(18,18)
 
+#2
+cost, isPathFound, winningPath = queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
+
+#3
+cost = plotPath(isPathFound, nodeslist, edgeslist, winningPath, connectDist)
+
+
 #@show nodeslist
-
-isPathFound, winningPath = queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
-
-print("This is the solution path: \n") 
-@show winningPath
-
-#cost = costWinningPath(nodeslist)
-
-plotPath(isPathFound, nodeslist, edgeslist, winningPath, connectDist)
+#print("This is the solution path: \n") 
+#@show winningPath
