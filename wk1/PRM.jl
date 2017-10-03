@@ -324,7 +324,7 @@ function queryPRM(beginState, endState, nlist, edgeslist)
         if curVertex == endVertex 
             print("Hurrah! endState reached! \n")
             unshift!(pathVertices, beginVertex) #prepend startVertex back to pathVertices
-            return pathVertices #list of nodes in solution path
+            return (true, pathVertices) #list of nodes in solution path
 
         else
             #@show visited
@@ -355,12 +355,13 @@ function queryPRM(beginState, endState, nlist, edgeslist)
     end
     # Return None if no solution found
     @printf("No solution found! This is length of frontier, %d\n", length(frontier))
-    return 
+    return (false, Void)
 end
 
 
 
-function plotPath(isPathFound, nlist, elist, solPath) #rewrite so don't need to pass in isPathFound, obs1, rrtstart, goal, room 
+function plotPath(isPathFound, nlist, elist, solPath, maxDist) #rewrite so don't need to pass in isPathFound, obs1, rrtstart, goal, room 
+    # maxDist only used for plot title
 
     ### <COPIED FOR NOW #Todo fix hardcoding
     obs1 = rrt.Obstacle(rrt.Point(8,3),rrt.Point(10,18)) #Todo
@@ -374,8 +375,7 @@ function plotPath(isPathFound, nlist, elist, solPath) #rewrite so don't need to 
     @printf("%s", "plotted\n")
     plot!(h, show=true, legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:lightcyan)
 
-    nIter = -1 #fix hardcoding
-    title!("RRT nIter = $(nIter), Path Found $(isPathFound)")
+    title!("PRM with $(length(nlist)) nodes, maxdist = $(maxDist), Path Found = $(isPathFound)")
 
     # plot room
     dim = 21 
@@ -397,7 +397,7 @@ function plotPath(isPathFound, nlist, elist, solPath) #rewrite so don't need to 
     y = [v.state.y for v in nlist]
     scatter!(x,y, linewidth=0.2, color=:black)
 
-    print("Done plotting $(length(nlist)) nodes")
+    print("Done plotting $(length(nlist)) nodes\n")
 
     edgeXs, edgeYs = [], []
     for e in elist
@@ -409,14 +409,12 @@ function plotPath(isPathFound, nlist, elist, solPath) #rewrite so don't need to 
         push!(edgeYs, y1, y2, NaN)
     end
     plot!(edgeXs, edgeYs, color=:tan, linewidth=0.3)
-    print("Done plotting $(length(elist)) edges")
+    print("Done plotting $(length(elist)) edges\n")
 
     # plot winning path
     if isPathFound
         cost = plotWinningPath(solPath)
-
-#        cost = plotPRMPath(solPath)
-        @printf("\n!!!! the cost of the path was %d across %d nodes  !!!! \n", cost, length(nlist))
+        @printf("\n!!!! The cost of the path was %d across %d nodes  !!!! \n", cost, length(nlist))
         #nEnd = nlist[end]
     end
     # display winning path cost
@@ -474,12 +472,12 @@ end
         xPath = [v.state.x for v in solPath]
         yPath = [v.state.y for v in solPath]
         cost = 0
-        #for i in 2:length(guhPath)
-        #    cost += distPt(guhPath[i],guhPath[i-1])
-        #end
+        for i in 2:length(solPath)
+            curV  = solPath[i].state
+            prevV = solPath[i-1].state
+            cost += distPt(curV, prevV)
+        end
 
-        #@show xPath
-        #@show yPath
         plot!( xPath, yPath, color = :orchid, linewidth=3)
         print("plotted winning path")
         #@show nlist
@@ -500,21 +498,19 @@ end
 
 
 # nnodes , maxDist
-nodeslist, edgeslist = preprocessPRM(55,10)
+connectDist = 10
+nodeslist, edgeslist= preprocessPRM(55, connectDist)
 
 start = rrt.Point(0,0)
 goal = rrt.Point(18,18)
 
 #@show nodeslist
 
-winningPath = queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
+isPathFound, winningPath = queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
 
 print("This is the solution path: \n") 
 @show winningPath
 
 #cost = costWinningPath(nodeslist)
-#return cost, isPathFound, nodeslist
 
-
-plotPath(true, nodeslist, edgeslist, winningPath)
-#, edgeslist, winningPath
+plotPath(isPathFound, nodeslist, edgeslist, winningPath, connectDist)
