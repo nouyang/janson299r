@@ -76,8 +76,11 @@ function isCollidingNode(pt,obs)
     x1,y1 = obs.SW.x, obs.SW.y
     x2,y2 = obs.NE.x, obs.NE.y 
 
-    if (px > x1 && px < x2 && py > y1 && py < y2)
-        #print("Node in obstacle, discarded.")
+    # obs1 = rrt.Obstacle(P(8,3), P(10,18))
+    # isCollidingNode(rrt.Point(1,10))
+
+    #print("Checking collision. $(px) vs obs $(obs) \n")
+    if (px >= x1 && px <= x2 && py >= y1 && py <= y2)
         return true
     else
         return false
@@ -96,10 +99,11 @@ function isCollidingEdge(r, nn, obs)
     x1,y1 = obs.SW.x, obs.SW.y
     x2,y2 = obs.NE.x, obs.NE.y 
 
-    x1 -= 1
-    y1 -= 1
-    x2 += 1
-    y2 += 1
+    # pad it out a bit?
+    # x1 -= 1
+    # y1 -= 1
+    # x2 += 1
+    # y2 += 1
 
     pt1 = rrt.Point(x1, y1)
     pt2 = rrt.Point(x1, y2)
@@ -112,11 +116,24 @@ function isCollidingEdge(r, nn, obs)
     coll3 = intersectLineSeg(r.state, nn.state, pt3, pt4)
     coll4 = intersectLineSeg(r.state, nn.state, pt4, pt1)
 
+    # isCollidingEdge(vfree1, vfree2, obs1)
+    #print("Nodes: $(pt1), $(pt2), $(pt3), $(pt4)\n")
+    # vfree1 = rrt.Vertex(3,rrt.Point(11,3))
+    # vfree2 = rrt.Vertex(4,rrt.Point(14,3))
+    # v1 = rrt.Point(8,3)
+    # v2 = rrt.Point(11,6)
+
+    #print("Inputs: obs2 $(obs), pt1 $(r), pt2 $(nn)\n")
+    #print("Collision status: $(coll1), $(coll2), $(coll3), $(coll4)\n")
+    #plot!([r.state.x, nn.state.x], [r.state.y, nn.state.y])
+    #print("$(!coll1) \n")
+    #print("$(!coll1 && !coll2) \n")
+    #print("$(!coll1 && !coll2 && !coll3) \n")
     if (!coll1 && !coll2 && !coll3 && !coll4)
+    #    print("Not collliding, the edge between pt $(r) and pt $(nn)\n")
         return false
     else
-        #print("you're colliding!\n")
-        #@show nn
+    #    print("COLLIDING, the edge between pt $(r) and pt $(nn)\n")
         return true
     end
 end
@@ -162,6 +179,7 @@ end
 # end
 
 function fuzzyState(nodestate, maxDist)
+    print("Conducting fuzzy search using maxDist $(maxDist)\n")
     dist = maxDist
     listFuzzyStates = Vector{rrt.Point}()
     x, y = nodestate.x, nodestate.y
@@ -186,8 +204,8 @@ function fuzzyFindNodeFromState(nodestate, nodeslist)
         end
     end
 
+    fuzzyDist = 1
     while res == Void
-        fuzzyDist = 1
         for n in nodeslist
             nFuzzyState = fuzzyState(n.state, fuzzyDist)
             if nodestate in nFuzzyState
@@ -214,13 +232,13 @@ function preprocessPRM(numPts, maxDist)
     nodeslist = Vector{rrt.Vertex}()
     edgeslist = Vector{rrt.Edge}()
 
-    startV = rrt.Vertex(0, rrt.Point(0,0)) #vertex: we just remove the prevID case
+    startV = rrt.Vertex(0, rrt.Point(0,0)) #vertex: we just remove the prevID from node type
     push!(nodeslist, startV)
     #@printf("string %s",nodeslist)
 
     maxID = 1
 
-    # Sample points, create list of nodes DONE
+    # Sample points, create list of nodes 
     for i in 1:numPts
         v = rrt.Point(rand(1:20),rand(1:20)) #new point
         if !isCollidingNode(v, obs1) #todo
@@ -344,7 +362,7 @@ end
 function plotPath(isPathFound, nlist, elist, solPath) #rewrite so don't need to pass in isPathFound, obs1, rrtstart, goal, room 
 
     ### <COPIED FOR NOW #Todo fix hardcoding
-    obs1 = rrt.Obstacle(rrt.Point(8,5),rrt.Point(10,18)) #Todo
+    obs1 = rrt.Obstacle(rrt.Point(8,3),rrt.Point(10,18)) #Todo
 
     rrtstart = rrt.Point(1,0)
     goal = rrt.Point(18,18)
@@ -419,11 +437,6 @@ end
         r = 0.2
         obsColor = :blue
 
-        circle(x1,y1,r,obsColor)
-        circle(x1,y2,r,obsColor)
-        circle(x2,y1,r,obsColor)
-        circle(x2,y2,r,obsColor)
-
         plot!([x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], color=obsColor, linewidth=2)
     end
 
@@ -493,12 +506,12 @@ end
 
 
 # nnodes , maxDist
-nodeslist, edgeslist = preprocessPRM(50,10)
+nodeslist, edgeslist = preprocessPRM(55,10)
 
 start = rrt.Point(0,0)
 goal = rrt.Point(18,18)
 
-@show nodeslist
+#@show nodeslist
 
 winningPath = queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
 
@@ -507,6 +520,7 @@ print("This is the solution path: \n")
 
 #cost = costWinningPath(nodeslist)
 #return cost, isPathFound, nodeslist
+
 
 plotPath(true, nodeslist, edgeslist, winningPath)
 #, edgeslist, winningPath
