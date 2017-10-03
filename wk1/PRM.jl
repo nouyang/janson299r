@@ -179,7 +179,6 @@ end
 # end
 
 function fuzzyState(nodestate, maxDist)
-    print("Conducting fuzzy search using maxDist $(maxDist)\n")
     dist = maxDist
     listFuzzyStates = Vector{rrt.Point}()
     x, y = nodestate.x, nodestate.y
@@ -324,7 +323,9 @@ function queryPRM(beginState, endState, nlist, edgeslist)
 
         if curVertex == endVertex 
             print("Hurrah! endState reached! \n")
-            return pathVertices #list of nodes in path
+            unshift!(pathVertices, beginVertex) #prepend startVertex back to pathVertices
+            return pathVertices #list of nodes in solution path
+
         else
             #@show visited
             #@show curVertex
@@ -392,7 +393,6 @@ function plotPath(isPathFound, nlist, elist, solPath) #rewrite so don't need to 
     circleObs(obs1)
 
     # plot all points?  Yes -- there may be points without edges. we only check within maxDist
-    @show nlist
     x = [v.state.x for v in nlist]
     y = [v.state.y for v in nlist]
     scatter!(x,y, linewidth=0.2, color=:black)
@@ -413,7 +413,7 @@ function plotPath(isPathFound, nlist, elist, solPath) #rewrite so don't need to 
 
     # plot winning path
     if isPathFound
-        cost = plotWinningPath(nlist)
+        cost = plotWinningPath(solPath)
 
 #        cost = plotPRMPath(solPath)
         @printf("\n!!!! the cost of the path was %d across %d nodes  !!!! \n", cost, length(nlist))
@@ -469,29 +469,23 @@ end
 
         return cost
     end
+ 
+    function plotWinningPath(solPath)
+        xPath = [v.state.x for v in solPath]
+        yPath = [v.state.y for v in solPath]
+        cost = 0
+        #for i in 2:length(guhPath)
+        #    cost += distPt(guhPath[i],guhPath[i-1])
+        #end
 
-    # function plotWinningPath(startV, solPath)
-        # endV = solPath[end]
-        # xPath = [curNode.state.x]
-        # yPath = [curNode.state.y]
-        # for v in solPath
-            # x,y = v.state.x, v.state.y
-            # push!(xPath, x)
-            # push!(yPath,y)
-        # end
-        # print("plotted winning path")
-        # cost = 0
-        # #for i in 2:length(guhPath)
-        # #    cost += distPt(guhPath[i],guhPath[i-1])
-        # #end
-# 
-        # @show xPath
-        # @show yPath
-        # plot!( xPath, yPath, color = :orchid, linewidth=3)
-        # #@show nlist
-        # return cost
-    # end
-# 
+        #@show xPath
+        #@show yPath
+        plot!( xPath, yPath, color = :orchid, linewidth=3)
+        print("plotted winning path")
+        #@show nlist
+        return cost
+    end
+
     function findNode(id, nodeslist)
         for n in nodeslist
             #TODO: switch nodeslist to use an array, where indice is the ID...
