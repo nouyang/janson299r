@@ -43,6 +43,7 @@ module rrt
             
 end
 
+
 function isCollidingNode(pt,obs)
     # this does not work.
     px,py = pt.x, pt.y
@@ -56,6 +57,7 @@ function isCollidingNode(pt,obs)
         return false
     end
 end
+
 
 function isCollidingEdge(r, nn, obs)
     # to detect collision, let's just check whether any of the four
@@ -94,6 +96,7 @@ function isCollidingEdge(r, nn, obs)
     end
 end
 
+
 function inGoalRegion(node, goal)
     goal = rrt.Point(18,18)
     n = node.state
@@ -109,18 +112,20 @@ function inGoalRegion(node, goal)
     
 end
 
+
 function ccw(A,B,C)
     # determines direction of lines formed by three points
 	return (C.y-A.y) * (B.x-A.x) > (B.y-A.y) * (C.x-A.x)
 end
 
+
 function intersectLineSeg(A,B,C,D) #no ":" at the end!
  	return ( (ccw(A, C, D) != ccw(B, C, D)) && ccw(A, B, C) != ccw(A, B, D))
 end
 
+
 function nearestN(r, nodeslist) #dear lord rewrite this so it doesn't need to pass in maxNodeId
     nearestDist = 9999;
-
     nearestNode = [];
     for n in nodeslist
         dist = distPt(r, n.state)

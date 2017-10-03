@@ -55,7 +55,6 @@ module plotHelpers
         h = plot(xunit, yunit,color=c_color,linewidth=3.0);
     end
 
-
     function circleObs(obstacle)
         x1, y1 = obstacle.SW
         x2,y2 = obstacle.NE

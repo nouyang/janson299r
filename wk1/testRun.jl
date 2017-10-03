@@ -12,11 +12,12 @@ cost, isPathFound, nlist = rrtPathPlanner(30)
 #@show nlist
 
 
-
 iterList = [40 80 100 120 150 180 200 300]
 nTrials = 30
 cost = 0
 listCosts = Vector{Float32}()
+listpSucc= Vector{Float32}()
+
 
 print("\n\n")
 for testIter in iterList 
@@ -34,23 +35,29 @@ for testIter in iterList
         idx += 1
     end
     avgCost = totalcost /  nSuccess
+    pSucc = nSuccess / testIter
     @show avgCost
     @show listCosts
     print("\n\n")
     #@printf("For the iter of %d the avg cost was %d across %d trials", maxIter, avgCost, nTrials)
     push!(listCosts, avgCost)
+    push!(listpSucc, pSucc)
 end
 
-@show listCosts
 @show iterList
-@show listCosts'
+@show listCosts
 
+sizeplot = (300,300)
 
+pRRTcost = plot(iterList, listCosts', show=true, size=sizeplot, seriestype=:scatter, 
+     legend=false, yaxis=((0,100), 0:20:100), xaxis=((0,320), 0:50:300), color=:black)
 
-plot(iterList, size=(800,800), listCosts', show=true, seriestype=:scatter, legend=false, yaxis=((0,100), 0:20:100), xaxis=((0,320), 0:50:300))
 title!("RRT nIter vs pathcost")
 xlabel!("iterations requested of RRT alg")
 ylabel!("euclidean path cost")
+
+pRRTsuccess = plot!(iterList, listpSucc', show=true, size=sizeplot, seriestype=:scatter, 
+     legend=false, yaxis=((0,1), 0:0.1:1), xaxis=((0,320), 0:50:300), color=:orange)
 #
     # roomx = [0,0,dim,dim];
     # roomy = [0,dim,dim,0];
