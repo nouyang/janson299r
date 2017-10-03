@@ -380,15 +380,18 @@ function plotPath(isPathFound, nlist, elist, solPath) #rewrite so don't need to 
     scatter!(x,y, linewidth=0.2, color=:black)
 
     print("Done plotting $(length(nlist)) nodes")
-    return
-    # plot all edges
+
+    edgeXs, edgeYs = [], []
     for e in elist
         startV = findNode(e.startID, nlist)
         endV = findNode(e.endID, nlist)
         x1,y1 = startV.state.x, startV.state.y
         x2,y2 = endV.state.x, endV.state.y
-        plot!([x1], [y1], color=:black, linewidth=1)
+        push!(edgeXs, x1, x2, NaN)
+        push!(edgeYs, y1, y2, NaN)
     end
+    plot!(edgeXs, edgeYs, color=:tan, linewidth=0.3)
+    print("Done plotting $(length(elist)) edges")
 
     # plot winning path
     if isPathFound
