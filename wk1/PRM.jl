@@ -33,10 +33,10 @@ module rrt
         endID::Int
     end
 
-    struct Edges
-        startID::Int
-        endIDs::Vector{Vertex}
-    end
+#    struct Edges
+#        startID::Int
+#        endIDs::Vector{Vertex}
+#    end
 
     struct Obstacle
         SW::Point
@@ -121,21 +121,6 @@ function isCollidingEdge(r, nn, obs)
     end
 end
 
-function inGoalRegion(node, goal)
-    goal = rrt.Point(18,18)
-    n = node.state
-    if node == goal
-        return true
-    end
-    distx = abs(n.x - goal.x)
-    disty = abs(n.y - goal.y)
-    if ( distx < 2 && disty < 2) #radius of goal
-        return true
-    end
-    return false
-    
-end
-
 function ccw(A,B,C)
     # determines direction of lines formed by three points
 	return (C.y-A.y) * (B.x-A.x) > (B.y-A.y) * (C.x-A.x)
@@ -160,26 +145,59 @@ function nearV(r, nodeslist, maxDist)
 end
 
 
-function nearestN(r, nodeslist) #dear lord rewrite this so it doesn't need to pass in maxNodeId
-    nearestDist = 9999;
-
-    nearestNode = [];
-    for n in nodeslist
-        dist = distPt(r, n.state)
-        if dist < nearestDist
-            nearestDist = dist
-            nearestNode = n
-        end
-    end
-    return nearestNode
-end
-
-
 function distPt(pt1, pt2)
     x2,y2 = pt2.x, pt2.y
     x1,y1 = pt1.x, pt1.y
     dist = sqrt( (x1-x2)^2 + (y1-y2)^2 )
     return dist
+end
+
+
+# function findNodeFromState(nodestate, nodeslist)
+    # for n in nodeslist
+        # if n.state == nodestate
+            # return n
+        # end
+    # return Void
+# end
+
+function fuzzyState(nodestate, maxDist)
+    dist = maxDist
+    listFuzzyStates = Vector{rrt.Point}()
+    x, y = nodestate.x, nodestate.y
+    l = rrt.Point(x-dist , y)
+    r = rrt.Point(x+dist , y)
+    u = rrt.Point(x, y+dist ) 
+    d = rrt.Point(x, y-dist )
+    NW = rrt.Point(x-dist , y+dist )
+    SW = rrt.Point(x-dist , y-dist )
+    NE = rrt.Point(x+dist , y+dist )
+    SE = rrt.Point(x+dist , y-dist )
+    push!(listFuzzyStates, l, r, u, d, NW, SW, NE, SE)
+    return listFuzzyStates 
+end
+
+function fuzzyFindNodeFromState(nodestate, nodeslist)
+    res = Void #result
+    for n in nodeslist
+        if n.state == nodestate
+            res = n
+            return res 
+        end
+    end
+
+    while res == Void
+        fuzzyDist = 1
+        for n in nodeslist
+            nFuzzyState = fuzzyState(n.state, fuzzyDist)
+            if nodestate in nFuzzyState
+                print("\nFuzzy search required to find node, using distance $(fuzzyDist)\n")
+                res = n
+            end
+        end
+        fuzzyDist += 1
+    end
+    return res
 end
 
 
@@ -223,7 +241,6 @@ function preprocessPRM(numPts, maxDist)
         end
     end
 
-    #@show nodeslist #TODO this shows nodeslist
     #@show edgeslist 
     #@printf("\nPath found? %s Length of nodeslist: %d\n", isPathFound, length(nodeslist))
     return nodeslist, edgeslist
@@ -252,59 +269,19 @@ function getSuccessors(curVertex, edgeslist, nodeslist) #assuming bidirectional 
 
     return successors
 end
-
-function findNodeFromState(nodestate, nodeslist)
-    for n in nodeslist
-        if n.state == nodestate
-            return n
-        end
-    end
-    return Void
-end
-
-function fuzzyState(nodestate)
-    listFuzzyStates = Vector{rrt.Point}()
-    x, y = nodestate.x, nodestate.y
-    l = rrt.Point(x-1, y)
-    r = rrt.Point(x+1, y)
-    u = rrt.Point(x, y+1) 
-    d = rrt.Point(x, y-1)
-    NW = rrt.Point(x-1, y+1)
-    SW = rrt.Point(x-1, y-1)
-    NE = rrt.Point(x+1, y+1)
-    SE = rrt.Point(x+1, y-1)
-    push!(listFuzzyStates, l, r, u, d, NW, SW, NE, SE)
-    return listFuzzyStates 
-end
-
-function fuzzyFindNodeFromState(nodestate, nodeslist)
-    # nodestate x, y += 1
-    for n in nodeslist
-        nFuzzyState = fuzzyState(n.state)
-        if nodestate in nFuzzyState
-            return  n
-        end
-    end
-    return Void
-
-end
-
 function queryPRM(beginState, endState, nlist, edgeslist)
     # I made this test like a chessboard for whatever reason... first number is ABC going down, second number is 123 going right
-    nodeslist = [ rrt.Vertex(101, rrt.Point(1,1)), rrt.Vertex(102, rrt.Point(1,2)), rrt.Vertex(104, rrt.Point(1,4)), 
-                  rrt.Vertex(204, rrt.Point(2,4)),  
-                  rrt.Vertex(301, rrt.Point(3,1)), rrt.Vertex(302, rrt.Point(3,2)), rrt.Vertex(303, rrt.Point(3,3)), 
-                  rrt.Vertex(401, rrt.Point(4,1)), rrt.Vertex(402, rrt.Point(4,2)), rrt.Vertex(404, rrt.Point(4,4)) ]   
+    # nodeslist = [ rrt.Vertex(101, rrt.Point(1,1)), rrt.Vertex(102, rrt.Point(1,2)), rrt.Vertex(104, rrt.Point(1,4)), 
+                  # rrt.Vertex(204, rrt.Point(2,4)),  
+                  # rrt.Vertex(301, rrt.Point(3,1)), rrt.Vertex(302, rrt.Point(3,2)), rrt.Vertex(303, rrt.Point(3,3)), 
+                  # rrt.Vertex(401, rrt.Point(4,1)), rrt.Vertex(402, rrt.Point(4,2)), rrt.Vertex(404, rrt.Point(4,4)) ]   
+    # edgeslist = [ rrt.Edge(101,102), rrt.Edge(104, 204), rrt.Edge(301, 302), rrt.Edge(302, 303), 
+                 # rrt.Edge(402,302), rrt.Edge(303, 204), rrt.Edge(303, 404), rrt.Edge(401,402) ]
+    # beginState = rrt.Point(4,1)
+    # endState = rrt.Point(1,4)
 
-    edgeslist = [ rrt.Edge(101,102), rrt.Edge(104, 204), rrt.Edge(301, 302), rrt.Edge(302, 303), 
-                 rrt.Edge(402,302), rrt.Edge(303, 204), rrt.Edge(303, 404), rrt.Edge(401,402) ]
-
-
-    beginState = rrt.Point(4,1)
-    endState = rrt.Point(1,4)
-
-    beginVertex = findNodeFromState(beginState, nodeslist)
-    endVertex = findNodeFromState(endState, nodeslist)
+    beginVertex = fuzzyFindNodeFromState(beginState, nodeslist)
+    endVertex = fuzzyFindNodeFromState(endState, nodeslist)
 
     print("This is the beginState $(beginState) and the endState $(endState)\n")
     print("This is the beginVertex--> $(beginVertex) >>> and the endVertex--> $(endVertex)\n")
@@ -322,35 +299,35 @@ function queryPRM(beginState, endState, nlist, edgeslist)
     enqueue!(frontier, foo, 1) #root node has cost 0  
 
     while length(frontier) != 0
-        print("\n\n=========== NEW ITERATION\n")
+        #print("\n\n=========== NEW ITERATION\n")
         tmp = DataStructures.dequeue!(frontier)
-        pathVertices =[]
+        pathVertices = []
         curVertex, pathVertices, totaledgecost = tmp.v, tmp.statesList, tmp.cost
 
         if curVertex == endVertex 
             print("Hurrah! endState reached! \n")
             return pathVertices #list of nodes in path
         else
-            @show visited
-            @show curVertex
+            #@show visited
+            #@show curVertex
             if !(curVertex in visited) 
                 #print("curVertex not in visited\n")
                 push!(visited, curVertex) # Add all successors to the stack
 
                 for newVertex in getSuccessors(curVertex, edgeslist, nodeslist)
-                print("\n")
-                print("newvertex --> $(newVertex) \n")
+                #print("\n")
+                #print("newvertex --> $(newVertex) \n")
                     newEdgeCost = distPt(curVertex.state, newVertex.state) #heuristic is dist(state,state). better to pass Node than to perform node lookup everytime (vs passing id)
                     f_x = totaledgecost + newEdgeCost + distPt(newVertex.state, endVertex.state) #heuristic = distPt 
                     p = deepcopy(pathVertices)
                     push!(p,newVertex)
-                @show pathVertices
+                #@show pathVertices
                     if !(newVertex in keys(frontier))
-                #        print("newvertex --> $(newVertex) >>> was not in frontier \n")
+                        #print("newvertex --> $(newVertex) >>> was not in frontier \n")
                         tmpq = rrt.tempQueueType(newVertex, p, ceil(totaledgecost + newEdgeCost))
                         enqueue!(frontier,tmpq, ceil(f_x)) 
-                        print("Added state --> $(tmpq) >>> to frontier \n")
-                        print("This is frontier top --> $(peek(frontier)) \n")
+                        #print("Added state --> $(tmpq) >>> to frontier \n")
+                        #print("This is frontier top --> $(peek(frontier)) \n")
                     end
                 end
 
@@ -364,7 +341,7 @@ end
 
 
 
-function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFound, obs1, rrtstart, goal, room 
+function plotPath(isPathFound, nlist, elist, solPath) #rewrite so don't need to pass in isPathFound, obs1, rrtstart, goal, room 
 
     ### <COPIED FOR NOW #Todo fix hardcoding
     obs1 = rrt.Obstacle(rrt.Point(8,5),rrt.Point(10,18)) #Todo
@@ -373,7 +350,6 @@ function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFo
     goal = rrt.Point(18,18)
     ### / COPIED FOR NOW>
 
-    foo = rand(1)
     h = plot()
 
     @printf("%s", "plotted\n")
@@ -390,30 +366,41 @@ function plotPath(isPathFound, nlist) #rewrite so don't need to pass in isPathFo
 
     # plot start and end goals
     circle(1,0, 0.5, :red)
-    circle(18,18, 1.4, :forestgreen)
+    rectEnd = rrt.Obstacle(rrt.Point(17,17),rrt.Point(19,19)) #Todo
+    circle(18,18, 0.5, :forestgreen) #NOTE: in PRM, it is the closest node -- within distance 1
+    circleObs(rectEnd)
 
     # plot obstacles
     circleObs(obs1)
 
-    # plot all paths
+    # plot all points?  Yes -- there may be points without edges. we only check within maxDist
+    @show nlist
+    x = [v.state.x for v in nlist]
+    y = [v.state.y for v in nlist]
+    scatter!(x,y, linewidth=0.2, color=:black)
+
+    print("Done plotting $(length(nlist)) nodes")
+    return
+    # plot all edges
+    for e in elist
+        startV = findNode(e.startID, nlist)
+        endV = findNode(e.endID, nlist)
+        x1,y1 = startV.state.x, startV.state.y
+        x2,y2 = endV.state.x, endV.state.y
+        plot!([x1], [y1], color=:black, linewidth=1)
+    end
 
     # plot winning path
     if isPathFound
         cost = plotWinningPath(nlist)
+
+#        cost = plotPRMPath(solPath)
         @printf("\n!!!! the cost of the path was %d across %d nodes  !!!! \n", cost, length(nlist))
         #nEnd = nlist[end]
-    end
-    for n in nlist
-        if n.id == 0
-            continue 
-        else
-            plotEdge(n,nlist)
-        end
     end
     # display winning path cost
 end
 
-#module pHelp()
 
     ### Some helper functions
     function circle(x,y,r,c_color)
@@ -467,35 +454,28 @@ end
         return cost
     end
 
-    function plotWinningPath(nlist)
-        curNode = nlist[end]
-        xPath = [curNode.state.x]
-        yPath = [curNode.state.y]
-        guhPath = [ rrt.Point(curNode.state.x, curNode.state.y)]
-        while true
-            iPrev = curNode.iPrev
-            curNode = findNode(iPrev, nlist)
-            x,y = curNode.state.x, curNode.state.y
-            push!(xPath, x)
-            push!(yPath,y)
-            push!( guhPath, rrt.Point(x,y))
-            if curNode.id == 0
-                push!(xPath, x)
-                push!(yPath,y)         
-                break
-            end
-        end
-        print("plotted winning path")
-        cost = 0
-        for i in 2:length(guhPath)
-            cost += distPt(guhPath[i],guhPath[i-1])
-        end
-
-        plot!( xPath, yPath, color = :orchid, linewidth=3)
-        #@show nlist
-        return cost
-    end
-
+    # function plotWinningPath(startV, solPath)
+        # endV = solPath[end]
+        # xPath = [curNode.state.x]
+        # yPath = [curNode.state.y]
+        # for v in solPath
+            # x,y = v.state.x, v.state.y
+            # push!(xPath, x)
+            # push!(yPath,y)
+        # end
+        # print("plotted winning path")
+        # cost = 0
+        # #for i in 2:length(guhPath)
+        # #    cost += distPt(guhPath[i],guhPath[i-1])
+        # #end
+# 
+        # @show xPath
+        # @show yPath
+        # plot!( xPath, yPath, color = :orchid, linewidth=3)
+        # #@show nlist
+        # return cost
+    # end
+# 
     function findNode(id, nodeslist)
         for n in nodeslist
             #TODO: switch nodeslist to use an array, where indice is the ID...
@@ -508,19 +488,22 @@ end
     end
 #end
 
-#cost, isPathFound, nlist = rrtPathPlanner(40) #maxIter
+
 # nnodes , maxDist
-nodeslist, edgeslist = preprocessPRM(200,10)
+nodeslist, edgeslist = preprocessPRM(50,10)
 
 start = rrt.Point(0,0)
 goal = rrt.Point(18,18)
 
-pathVertices = queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
+@show nodeslist
+
+winningPath = queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
 
 print("This is the solution path: \n") 
-@show pathVertices
+@show winningPath
 
-    #cost = costWinningPath(nodeslist)
-    #return cost, isPathFound, nodeslist
+#cost = costWinningPath(nodeslist)
+#return cost, isPathFound, nodeslist
 
-#plotPath(is#TODO: switch nodeslist to use an array, where indice is the ID... this was a really dumb implementation, making a "loop" find instead of taking advantage of fast lookup librarie#TODO: switch nodeslist to use an array, where indice is the ID... this was a really dumb implementation, making a "loop" find instead of taking advantage of fast lookup librarie#TODO: switch nodeslist to use an array, where indice is the ID... this was a really dumb implementation, making a "loop" find instead of taking advantage of fast lookup librariesssPathFound,nlist)
+plotPath(true, nodeslist, edgeslist, winningPath)
+#, edgeslist, winningPath
