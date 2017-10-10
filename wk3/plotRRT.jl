@@ -1,10 +1,9 @@
 using Plots
 gr()
-#include("PRM.jl")
 include("RRT.jl")
+closeall()
 
 
-plot([1,2],[2,3])
 
 cost, isPathFound, nlist = rrtPathPlanner(30)
 @show isPathFound
@@ -18,7 +17,6 @@ nTrials = 30
 cost = 0
 listCosts = Vector{Float32}()
 listpSucc= Vector{Float32}()
-# 
 
 print("\n\n")
 for testIter in iterList 
@@ -51,35 +49,43 @@ end
 @show listCosts
 @show listpSucc
 
-sizeplot = (300,300)
+sizeplot = (400, 600)
 
-pRRTcost = plot(iterList, listCosts', show=true, size=sizeplot, seriestype=:scatter, 
-     legend=false, yaxis=((0,100), 0:20:100), xaxis=((0,320), 0:50:300), color=:black)
+
+# plot nIter vs pathcost 
+ pRRTcost = plot(iterList, listCosts', show=true, size=sizeplot, seriestype=:scatter, 
+      legend=false, yaxis=((0,100), 0:20:100), xaxis=((0,320), 0:50:300), color=:black)
 
 title!("RRT nIter vs pathcost")
-xlabel!("iterations requested of RRT alg")
 ylabel!("euclidean path cost")
 
-
-pRRTsuccess = scatter(iterList, listpSucc', legend=false, yaxis=((0,1), 0:0.1:1), xaxis=((0,320), 0:50:300), color=:orange)
+# plot nIter vs success rate
+pRRTsuccess = scatter(iterList, listpSucc', legend=false, size=sizeplot, yaxis=((0,1), 0:0.1:1), xaxis=((0,320), 0:50:300), color=:orange)
 title!("RRT nIter vs pSuccess")
 ylabel!("# P(success) = numSucc / 30 trials")
+xlabel!("iterations requested of RRT alg")
 
-plot(pRRTcost, pRRTsuccess, layout=(1,2),legend=false)
+plot(pRRTcost, pRRTsuccess, layout=(2,1),legend=false)
 
-# 
+
+ 
+
+
+# [slack] <mkborregaard> twinx
+# [slack] <mkborregaard> plot(something); plot!(twinx(), something)
 
 
 
 ########################################
+### DO NOT USE (why is this here?)
 #pRRTsuccess[:axis] 
-
-#y = rand(100)
-#lot(0:10:100,rand(11,4),lab="lines",w=3,palette=:grays,fill=0,α=0.6)
-#scatter!(y,zcolor=abs(y - 0.5),m=(:heat,0.8,stroke(1,:green)),ms=10 * abs(y - 0.5) + 4,lab="grad")
-
-
-#cost, isPathFound, nlist = rrtPathPlanner(40) #maxIter
-#plotPath(isPathFound,nlist)
-
-
+ 
+# y = rand(100)
+# plot(0:10:100,rand(11,4),lab="lines",w=3,palette=:grays,fill=0,α=0.6)
+# scatter!(y,zcolor=abs(y - 0.5),m=(:heat,0.8,stroke(1,:green)),ms=10 * abs(y - 0.5) + 4,lab="grad")
+ # 
+ # 
+# cost, isPathFound, nlist = rrtPathPlanner(40) #maxIter
+# plotPath(isPathFound,nlist)
+ # 
+# 
