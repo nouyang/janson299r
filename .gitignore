@@ -115,5 +115,10 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+
+###
 # odt
 *.odt#
+#.swo
+
+
