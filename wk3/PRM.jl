@@ -66,9 +66,41 @@ module rrt
     Base.show(io::IO, q::tempQueueType) = print(io, "Q($(q.v),$(q.statesList) $(q.cost))")
     Base.isless(q1::tempQueueType, q2::tempQueueType) = q1.cost < q2.cost
     Base.isless(p1::Point, p2::Point) = q1.x< q2.x
-
-            
 end
+
+function isCollidingRects(rect1, rect2)
+    topEdge1 = rect1.NE.y
+    rightEdge1 = rect1.NE.x
+    leftEdge1 = rect1.SW.x
+    bottomEdge1 = rect1.SW.y
+
+    topEdge2 = rect2.NE.y
+    rightEdge2 = rect2.NE.x
+    leftEdge2 = rect2.SW.x
+    bottomEdge2 = rect2.SW.y
+
+    if ( leftEdge1 < rightEdge2 && rightEdge1 > leftEdge2 && bottomEdge1 < topEdge2 && topEdge1 > bottomEdge2)
+         return true
+	end
+    return false
+end
+
+# https://www.gamedevelopment.blog/collision-detection-circles-rectangles-and-polygons/
+# public boolean isRectanglesColliding(Rectangle rec1, Rectangle rec2){
+    # int topEdge1 = rec1.position.y + rec1.height;
+    # int rightEdge1 = rec1.position.x + rec1.width; 
+    # int leftEdge1 = rec1.position.x;
+    # int bottomEdge1 = rec1.position.y;
+    # int topEdge2 = rec2.position.y + rec2.height;
+    # int rightEdge2 = rec2.position.x + rec2.width; 
+    # int leftEdge2 = rec2.position.x;
+    # int bottomEdge2 = rec2.position.y;   
+    # 
+    # if( leftEdge1 < rightEdge2 && rightEdge1 > leftEdge2 && bottomEdge1 < topEdge2 && topEdge1 > bottomEdge2){
+        # return true; 
+   # }
+   # return false;
+# }
 
 function isCollidingNode(pt,obs)
     # this does not work.
@@ -482,7 +514,7 @@ end
 obstacleList = Vector{rrt.Obstacle}()
 obs1 = rrt.Obstacle(rrt.Point(8,3),rrt.Point(10,18)) #Todo
 push!(obstacleList,obs1)
-obs2 = rrt.Obstacle(rrt.Point(15,13),rrt.Point(17,15)) #Todo
+obs2 = rrt.Obstacle(rrt.Point(8,2),rrt.Point(17,15)) #Todo
 push!(obstacleList,obs2)
 
 # nnodes , maxDist
@@ -504,3 +536,6 @@ cost = plotPath(isPathFound, nodeslist, edgeslist, winningPath, connectDist, obs
 #@show nodeslist
 #print("This is the solution path: \n") 
 #@show winningPath
+
+print("HIIIIIIIIIIIIII")
+isCollidingRects(obs1, obs2)
