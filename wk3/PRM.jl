@@ -1,4 +1,4 @@
-#Nodi Attempt to make a PRM.
+# Attempt to make a PRM.
 #print("Hello World! ☺ ♫ ☕ \n\n")
 
 using Plots
@@ -86,7 +86,27 @@ function isCollidingNode(pt,obs)
         return false
     end
 end
+function isCollidingNodeMultipleObs(pt, obstacleList)
+    coll = false 
+    for obs in obstacleList
+        if isCollidingNode(pt, obs)
+            coll = true
+        end
+    end
+    return coll
+end
 
+
+function isCollidingEdgeMultipleObs(r, nn, obstacleList)
+    coll = false 
+    for obs in obstacleList
+        if isCollidingEdge(r, nn, obs)
+            coll = true
+        end
+    end
+    return coll
+
+end
 function isCollidingEdge(r, nn, obs)
     # to detect collision, let's just check whether any of the four
     # lines of the rectangular obstacle intersect with our edge
@@ -205,12 +225,11 @@ end
 
 
 
-function preprocessPRM(numPts, maxDist)
+function preprocessPRM(numPts, maxDist, obstacleList)
     #numPts = 100
     #maxDist = 10
     #room = Room(0,0,21,21);
 
-    obs1 = rrt.Obstacle(rrt.Point(8,3),rrt.Point(10,18)) #Todo
 
     vlist = Vector{rrt.Vertex}()
 
@@ -226,21 +245,21 @@ function preprocessPRM(numPts, maxDist)
     # Sample points, create list of nodes 
     for i in 1:numPts
         v = rrt.Point(rand(1:20),rand(1:20)) #new point
-        if !isCollidingNode(v, obs1) #todo
-            newVertex = rrt.Vertex(maxID, v)
-            maxID += 1
-            push!(nodeslist, newVertex)
-        end
+            if !isCollidingNodeMultipleObs(v, obstacleList) #todo
+                newVertex = rrt.Vertex(maxID, v)
+                maxID += 1
+                push!(nodeslist, newVertex)
+            end
     end
 
     # Connect each node to its neighboring nodes within a ball or radius r
     for vStart in nodeslist 
         nearlist = nearV(vStart, nodeslist, maxDist) # parent point #TODO
         for vEnd in nearlist
-            if !isCollidingEdge(vStart, vEnd, obs1) #todo
-                newEdge = rrt.Edge(vStart.id, vEnd.id) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
-                push!(edgeslist, newEdge)
-            end
+                if !isCollidingEdgeMultipleObs(vStart, vEnd, obstacleList) #todo
+                    newEdge = rrt.Edge(vStart.id, vEnd.id) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
+                    push!(edgeslist, newEdge)
+                end
         end
     end
 
@@ -277,8 +296,8 @@ function queryPRM(beginState, endState, nlist, edgeslist)
     beginVertex = fuzzyFindNodeFromState(beginState, nlist) #TODO: There is no reason to do this, I should use nearV instead, and add a new edge to the graph
     endVertex = fuzzyFindNodeFromState(endState, nlist)
 
-    print("This is the beginState $(beginState) and the endState $(endState)\n")
-    print("This is the beginVertex--> $(beginVertex) >>> and the endVertex--> $(endVertex)\n")
+#    print("This is the beginState $(beginState) and the endState $(endState)\n")
+#    print("This is the beginVertex--> $(beginVertex) >>> and the endVertex--> $(endVertex)\n")
 
     pathNodes = Vector{rrt.Vertex}()
     visited = Vector{rrt.Vertex}() #nodes we've searched through
@@ -297,7 +316,7 @@ function queryPRM(beginState, endState, nlist, edgeslist)
         curVertex, pathVertices, totaledgecost = tmp.v, tmp.statesList, tmp.cost
 
         if curVertex == endVertex 
-            print("Hurrah! endState reached! \n")
+            #print("Hurrah! endState reached! \n")
             unshift!(pathVertices, beginVertex) #prepend startVertex back to pathVertices
 			zcost = costPath(pathVertices)
             return (zcost, true, pathVertices) #list of nodes in solution path
@@ -337,11 +356,11 @@ end
 
 
 
-function plotPath(isPathFound, nlist, elist, solPath, maxDist) #rewrite so don't need to pass in isPathFound, obs1, rrtstart, goal, room 
+function plotPath(isPathFound, nlist, elist, solPath, maxDist, obstacleList) #rewrite so don't need to pass in isPathFound, obs1, rrtstart, goal, room 
     # maxDist only used for plot title
 
     ### <COPIED FOR NOW #Todo fix hardcoding
-    obs1 = rrt.Obstacle(rrt.Point(8,3),rrt.Point(10,18)) #Todo
+    #obs1 = rrt.Obstacle(rrt.Point(8,3),rrt.Point(10,18)) #Todo
 
     rrtstart = rrt.Point(1,0)
     goal = rrt.Point(18,18)
@@ -349,7 +368,7 @@ function plotPath(isPathFound, nlist, elist, solPath, maxDist) #rewrite so don't
 
     h = plot()
 
-    @printf("%s", "plotted\n")
+    #@printf("%s", "plotted\n")
     plot!(h, show=true, legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:lightcyan)
 
     title!("PRM with $(length(nlist)) nodes, maxdist = $(maxDist), Path Found = $(isPathFound)")
@@ -367,7 +386,9 @@ function plotPath(isPathFound, nlist, elist, solPath, maxDist) #rewrite so don't
     rectObs(rectEnd)
 
     # plot obstacles
-    rectObs(obs1)
+    for obs in obstacleList
+        rectObs(obs)
+    end
 
     # plot all points?  Yes -- there may be points without edges. we only check within maxDist
     x = [v.state.x for v in nlist]
@@ -416,37 +437,6 @@ end
         plot!([x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], color=obsColor, linewidth=2)
     end
 
-    function costWinningPath(nlist)
-        curNode = nlist[end]
-        guhPath = [ rrt.Point(curNode.state.x, curNode.state.y)]
-        while true
-            iPrev = curNode.iPrev
-            curNode = findNode(iPrev, nlist)
-            x,y = curNode.state.x, curNode.state.y
-            push!( guhPath, rrt.Point(x,y))
-            if curNode.id == 0
-                push!( guhPath, rrt.Point(x,y))
-                break
-            end
-        end
-        cost = 0
-        for i in 2:length(guhPath)
-            cost += distPt(guhPath[i],guhPath[i-1])
-        end
-
-        return cost
-    end
- 
-    function costPath(solPath)
-        zcost = 0
-        for i in 2:length(solPath)
-            curV  = solPath[i].state
-            prevV = solPath[i-1].state
-            zcost += distPt(curV, prevV)
-        end
-        return zcost
-    end
-
     function plotWinningPath(solPath)
         xPath = [v.state.x for v in solPath]
         yPath = [v.state.y for v in solPath]
@@ -460,6 +450,18 @@ end
         plot!( xPath, yPath, color = :orchid, linewidth=3)
         #print("plotted winning path")
         #@show nlist
+        return cost
+    end
+    function costPath(solPath)
+        xPath = [v.state.x for v in solPath]
+        yPath = [v.state.y for v in solPath]
+        cost = 0
+        for i in 2:length(solPath)
+            curV  = solPath[i].state
+            prevV = solPath[i-1].state
+            cost += distPt(curV, prevV)
+        end
+
         return cost
     end
 
@@ -476,10 +478,18 @@ end
 #end
 
 
+
+obstacleList = Vector{rrt.Obstacle}()
+obs1 = rrt.Obstacle(rrt.Point(8,3),rrt.Point(10,18)) #Todo
+push!(obstacleList,obs1)
+obs2 = rrt.Obstacle(rrt.Point(15,13),rrt.Point(17,15)) #Todo
+push!(obstacleList,obs2)
+
 # nnodes , maxDist
 connectDist = 10
 # 1
-nodeslist, edgeslist= preprocessPRM(25, connectDist)
+#nodeslist, edgeslist= preprocessPRM(30, connectDist)
+nodeslist, edgeslist= preprocessPRM(30, connectDist, obstacleList)
 
 start = rrt.Point(0,0)
 goal = rrt.Point(18,18)
@@ -488,7 +498,7 @@ goal = rrt.Point(18,18)
 cost, isPathFound, winningPath = queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
 
 #3
-cost = plotPath(isPathFound, nodeslist, edgeslist, winningPath, connectDist)
+cost = plotPath(isPathFound, nodeslist, edgeslist, winningPath, connectDist, obstacleList)
 
 
 #@show nodeslist
