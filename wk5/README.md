@@ -25,3 +25,46 @@ SIGH
 ERROR: LoadError: glGenBuffers returned invalid id. OpenGL Context active?
 
 
+
+
+#
+closeall()
+
+
+#
+pwd()
+cd()
+homdir()
+
+
+#
+
+
+Yay the backend works.
+```
+    using Plots
+    glvisualize()
+    x = 1:10; y = rand(10,2) # 2 columns means two lines
+    plot(x,y)
+```
+whoa and plots.jl makes it magical
+
+
+okay
+
+
+ERROR: LoadError: MethodError: no method matching view(::GLAbstraction.Context{GLAbstraction.DeviceUnit}, ::GLWindow.Screen)
+
+
+Pkg.add("GLAbstraction")
+
+GUH I just needed `_view` instead of `view`
+
+HyperRectangle(Vec3f0(0), Vec3f0(1))
+HyperCube(Vec3f0(0), 1f0)
+
+
+#
+oh on pidgin, I just needed to use Buddies > "add chat" instead of "join chat",
+then click "open chat on account sign in" and "remain in chat after window
+closed"
