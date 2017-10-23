@@ -1,6 +1,7 @@
 using Plots
 using GeometryTypes
 gr() 
+plot()
 
 ### SANITY CHECK
 #x = 1:10; y = rand(10,2) # 2 columns means two lines
@@ -27,5 +28,7 @@ end
 
 
 sizePlot = (400,400)
-r = HyperRectangle(Vec(0.5, 0.5), Vec(1., 1))
-plot!(r, opacity=0.5, legend=false, size=sizePlot, yaxis=( (0,10), 0:1:10), xaxis=( (0,10), 0:1:10)) 
+r = HyperRectangle(Vec(1,1), Vec(2,4))
+fig = plot(opacity=0.5, legend=false, size=sizePlot, yaxis=( (0,10), 0:1:10), xaxis=( (0,10), 0:1:10)) 
+#plot(r, opacity=0.5, legend=false, size=sizePlot, yaxis=( (0,10), 0:1:10), xaxis=( (0,10), 0:1:10)) 
+plot!(r)
