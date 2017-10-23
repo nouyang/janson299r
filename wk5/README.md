@@ -215,5 +215,12 @@ print("test: $bar")
 
 
 
-###
-opacity does not work on gr() ?
+##
+opacity does not work on gr() 
+
+
+##
+guhhhhhhhhhhhhhhhhhhhhhhhhhhhhh why did I do all this work. I could just use
+Shape(). Oh, well, I learned a lot I guess, and it could come in handy in the
+future. Maybe.
+
