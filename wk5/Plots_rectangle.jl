@@ -17,13 +17,17 @@ plot(x,y)
 
 
 @recipe function f(r::HyperRectangle)
-    points = decompose(Point{2,Int}, r)
-    rectpts = points[[1,2,4,3,1],:]
+    points = decompose(Point{2,Float64}, r)
+    rectpoints = points[[1,2,4,3,1],:]
+    #SW = points[1]
+    #NE = points[4]
     xs = [pt[1] for pt in rectpoints]
     ys = [pt[2] for pt in rectpoints]
     seriestype := :shape
     xs, ys #this is what we are returning
 end
+#rectangle(w, h, x, y) = Shape(x + [0,w,w,0], y + [0,0,h,h])
+
 
 
 sizePlot = (400,400)
