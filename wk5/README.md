@@ -6,7 +6,8 @@ WHELP GLVisualization is used by GeometryTypes documentation. Yay now I've to us
 
  http://docs.juliaplots.org/latest/backends/
  http://www.glvisualize.com
- http://www.glvisualize.com/examples/meshes/
+ http://www.glvisualize.com/ete string and in
+ Gxamples/meshes/
 
 
 julia> Pkg.add("GLVisualize")
@@ -142,6 +143,46 @@ julia> decompose(Point{2,Int},b)
 end
 ```
 
+#
+ERROR: LoadError: InexactError()
+
+because
+used Int instead of Float64
+
+    points = decompose(Point{2,Float64}, r)
+
+#
+ERROR: LoadError: DimensionMismatch("dimensions must match")
+
+What is difference between Array{Float64,2} and Array{Float64,1} and how to I drop from 2 to 1??
+
+julia> s = Shape(xs, ys)
+ERROR: MethodError: Cannot `convert` an object of type Array{Float64,2} to an object of type Array{Float64,1}
+This may have arisen from a call to the constructor Array{Float64,1}(...),
+since type constructors fall back to convert methods.
+Stacktrace:
+ [1] Plots.Shape(::Array{Float64,2}, ::Array{Float64,2}) at /home/nrw/.julia/v0.6/Plots/src/components.jl:15
+
+julia> Shape([1,1,1,1], [2,2,2,2])
+Plots.Shape([1.0, 1.0, 1.0, 1.0], [2.0, 2.0, 2.0, 2.0])
+
+julia> xs
+4×1 Array{Float64,2}:
+
+julia> [1,1,1,1] #column!
+4-element Array{Int64,1}:
+
+julia> [1;1;1;1]
+4-element Array{Int64,1}:
+
+julia> [1 1 1 1 ]
+1×4 Array{Int64,2}:
+
+### Found it!
+xs[:]'
+
+
+https://discourse.julialang.org/t/how-to-draw-a-rectangular-region-with-plots-jl/1719/3
 
 ## accessing matrix rows out of order
 
@@ -162,3 +203,17 @@ Pkg.status("Plots")
 
 
 
+# clear all
+workspacE()G
+
+# randint
+rand(1:10)
+
+# print variables
+bar = 123
+print("test: $bar")
+
+
+
+###
+opacity does not work on gr() ?
