@@ -12,46 +12,35 @@ using Plots, GeometryTypes
 	s = Shape(xs[:], ys[:])
 end
 
-
 @recipe function f(pt::Point)
     xs = [pt[1]]
     ys = [pt[2]]
     seriestype --> :scatter
     color := :orange
-    # markersize --> 2
     markersize := 6
     xs, ys
-    # @series begin
-        # seriestype := :scatter
-        # xs, ys
-    # end
 end
-# https://github.com/JuliaGeometry/GeometryTypes.jl/blob/7bf380a0d6aa8a4249606b6e0987ce4149788cbb/test/lines.jl
-#         a = LineSegment(Point2f0(0,0), Point2f0(1,0))
-# plot!(beam, m=(:yellow,0.3))
-
-# 
-# @recipe function f(l::LineSegment)
-	# points = decompose(Point{2,Float64}, r)
-	# rectpoints = points[[1,2,4,3],:]
-	# xs = [pt[1] for pt in rectpoints];
-	# ys = [pt[2] for pt in rectpoints];
-	# seriestype := :shape
-	# s = Shape(xs[:], ys[:])
-# end
-# 
+ 
+@recipe function f(l::LineSegment)
+    xs = [ l[1][1], l[2][1] ]
+    ys = [ l[1][2], l[2][2] ]
+    # seriestype = :line
+    color = :red
+    lw = 3
+    xs, ys
+end
 
 
 
+@recipe function f(rectList::Vector{<:HyperRectangle})
+    for r in rectList
+	  @series begin
+         r 
+	  end
+   end
+end
 
-# @recipe function f(a::Vector{<:MockRectangle})
-   # for i in a
-	  # @series begin
-		 # i
-	  # end
-   # end
-# end
- sizePlot = (400,400)
+sizePlot = (400,400)
 plot(opacity=0.5, legend=false, size=sizePlot, yaxis=( (0,10), 0:1:10), xaxis=( (0,10), 0:1:10), foreground_color_grid= :cyan) 
  
 # defined in terms of SW x,y and then w,h
@@ -60,6 +49,8 @@ rect2 = HyperRectangle(Vec(3,3), Vec(1., 2))
 rect3 = HyperRectangle(Vec(1,1), Vec(4.,4))
 rect4 = HyperRectangle(Vec(3,3), Vec(4.,4))
 rect5 = HyperRectangle(Vec(2,2), Vec(1.,1))
+
+vecR = Vector{HyperRectangle}
 
 nl = LineSegment(Point(6,8), Point(-1,0))
  np = Point(6,8) # This doesnt work with plot (error,ERROR: LoadError: No user recipe defined for Float32)
