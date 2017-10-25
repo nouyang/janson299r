@@ -68,7 +68,7 @@ rect5 = HyperRectangle(Vec(2,2), Vec(1.,1))
 vecR = Vector{HyperRectangle}()
 push!(vecR,rect1, rect2, rect3, rect4, rect5)
 
-vecPt = Vector{Point2f0}()
+vecPt = Vector{Point{2, Float64}}()
 
 
 ##########TEST POINTS################
@@ -114,9 +114,9 @@ gp = in(rect3, zp) #rec 3 and 4 definitely overlap
 
 ###############TEST LINES#################
 # Check collision of edge and rectangle
-aline = LineSegment(np, mp)
-bline = LineSegment(zp,xp)
-cline = LineSegment(zp,np)
+aline = LineSegment(np, mp) #horz at top, line in middle of nowhere
+bline = LineSegment(zp,xp) #short diagonal
+cline = LineSegment(zp,np) #long diagonal
 
 vecLine = Vector{LineSegment}()
 push!(vecLine, aline, bline, cline)
@@ -130,7 +130,7 @@ d = overlaps(rect2, rect3)
 
 ## Bline: collides with 2,4,5, but not 1 and 3?
 
-print("\nAre the rectangle and line colliding? $stmt")
+#print("\nAre the rectangle and line colliding? $stmt")
 
 
 # aline shouldn't collide with anything
@@ -138,11 +138,71 @@ print("\nAre the rectangle and line colliding? $stmt")
 # cline should collide with rect4, but not rect1
 
 
+function decompRect(r::HyperRectangle) #GeometryTypes.HyperRectangle{2,Float64}
+    corners = decompose(Point{2, Float64}, r)
+    corners = [Point(pt) for pt in corners]
+    lineBottom  = LineSegment(corners[1], corners[2])
+    lineTop     = LineSegment(corners[3], corners[4])
+    lineLeft    = LineSegment(corners[1], corners[3])
+    lineRight   = LineSegment(corners[2], corners[4])
+    lines = Vector{LineSegment}()
+    push!(lines, lineTop, lineRight, lineBottom, lineLeft)
+    return lines
+end
+
 oppa = 0.5
 plot!(vecR, opacity=oppa)
 plot!(mp, seriestype=:scatter, markersize=3, color=:blue)
 plot!(vecPt)
 plot!(vecLine)
+
+lines = decompRect(rect1);
+
+intersects(testl, testl3)
+intersects(testl, testl2);
+
+
+# test an edge now.
+
+# let's assume nodes not in rectangle for now -- or double-check again, just in case?
+function isCollidingEdge(edge::LineSegment, obsList::Vector{HyperRectangle})
+    for obs in obsList
+        rectLines = decompRect(obs)
+        for line in rectLines
+            if intersects(edge, line)[1]
+                return true
+            end
+        end
+    end
+    return false
+end
+
+
+funciton isCollidingNode(node::Point, 
+
+#testE = LineSegment(Point(1.,0), Point(1.,10)) #collinear seems to collide correctly!
+testE = LineSegment(Point(0.,0), Point(1.,2)) 
+iscol = isCollidingEdge(testE, vecR) 
+print("\nAre the rectangles and line colliding? $iscol\n")
+
+plot!(lines)
+
+testl = LineSegment(Point(0.,0), Point(5.,5)) #remember to use period for float64 instead of int64
+testl2 = LineSegment(Point(1.,1), Point(3.,3))
+testl3 = LineSegment(Point(1.,3), Point(3.,1))
+plot!(testE, color=:red)
+plot!(testl)
+plot!(testl2)
+plot!(testl3)
+
+
+
+
+
+
+#TODO: test for collinear lines....
+
+
 
 
 

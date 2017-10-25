@@ -674,3 +674,61 @@ There is one case that is not handled by the idea given by
 @templatetypedef: the case where the two endpoints of the line segment are
 inside the rectangle. But that case is easy to check: x1 < x3 && x3 < x2 && y1
 < y3 && y3 < y2
+
+
+
+##
+
+plotting transparent rectangles:
+WTF who knows.
+
+
+julia> plot!(Shape(XRECT, YRECT), lw=10, markeralpha=1, fillalpha=0.4)
+Error showing value of type Plots.Plot{Plots.PyPlotBackend}:
+ERROR: PyError (ccall(@pysym(:PyObject_Call), PyPtr, (PyPtr, PyPtr, PyPtr), o, arg, kw)) <type 'exceptions.ValueError'>
+ValueError(u'RGBA values should be within 0-1 range',)
+  File "/usr/local/lib/python2.7/dist-packages/matplotlib/patches.py", line 919, in __init__
+    Patch.__init__(self, **kwargs)
+  File "/usr/local/lib/python2.7/dist-packages/matplotlib/patches.py", line 126, in __init__
+    self.set_facecolor(facecolor)
+  File "/usr/local/lib/python2.7/dist-packages/matplotlib/patches.py", line 334, in set_facecolor
+    self._set_facecolor(color)
+  File "/usr/local/lib/python2.7/dist-packages/matplotlib/patches.py", line 324, in _set_facecolor
+    self._facecolor = colors.to_rgba(color, alpha)
+  File "/usr/local/lib/python2.7/dist-packages/matplotlib/colors.py", line 143, in to_rgba
+    rgba = _to_rgba_no_colorcycle(c, alpha)
+  File "/usr/local/lib/python2.7/dist-packages/matplotlib/colors.py", line 204, in _to_rgba_no_colorcycle
+    raise ValueError("RGBA values should be within 0-1 range")
+
+
+
+##
+
+GKS_WSTYPE=cairox11
+
+
+##
+
+WHELP it was all caused by cinnamon (my alpha GR issues)
+
+OKAY okay okay now to implmenet four line intersection. Checking if endpoitns in the rectangle is given already.
+
+
+
+##
+testl = LineSegment(Point(0.,0), Point(5.,5)) #remember to use period for float64 instead of int64
+
+julia> intersects(testl, testl3)
+ERROR: MethodError: no method matching eps(::Type{Int64})
+Closest candidates are:
+  eps(::Base.Dates.Time) at dates/types.jl:331
+  eps(::Date) at dates/types.jl:330
+  eps(::DateTime) at dates/types.jl:329
+  ...
+Stacktrace:
+ [1] intersects(::GeometryTypes.Simplex{2,GeometryTypes.Point{2,Int64}}, ::GeometryTypes.Simplex{2,GeometryTypes.Point{2,Int64}}) at /home/nrw/.julia/v0.6/GeometryTypes/src/lines.jl:34
+
+
+
+This test cannot tell collinear lines. uhhhhhhhhhhhhh . well we'll leave that for now.
+TODO: collinear lines 
