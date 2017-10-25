@@ -33,11 +33,6 @@ module rrt
         endID::Int
     end
 
-#    struct Edges
-#        startID::Int
-#        endIDs::Vector{Vertex}
-#    end
-
     struct Obstacle
         SW::Point
         NE::Point
@@ -50,9 +45,6 @@ module rrt
         x2::Int
         y2::Int
         obstacleList::Array{Obstacle}
-    end
-
-    struct robot
     end
 
     struct tempQueueType
@@ -511,31 +503,82 @@ end
 
 
 
-obstacleList = Vector{rrt.Obstacle}()
-obs1 = rrt.Obstacle(rrt.Point(8,3),rrt.Point(10,18)) #Todo
-push!(obstacleList,obs1)
-obs2 = rrt.Obstacle(rrt.Point(8,2),rrt.Point(17,15)) #Todo
-push!(obstacleList,obs2)
 
-# nnodes , maxDist
-connectDist = 10
-# 1
-#nodeslist, edgeslist= preprocessPRM(30, connectDist)
-nodeslist, edgeslist= preprocessPRM(30, connectDist, obstacleList)
+function genObs()
+    done1 = false
+    done2 = false
+    done2Rect = false
+    while done2Rect == false
+        randx, randy = rand(1:20, 1,2) 
+        randw, randh = rand(1:5, 1,2)
+        NEx =  randx+randw
+        NEy =  randy+randh
 
-start = rrt.Point(0,0)
-goal = rrt.Point(18,18)
+        if (NEx<21 && NEy<21)
+            obs1 = rrt.Obstacle(rrt.Point(randx, randy),rrt.Point(NEx,NEy)) #Todo
+            area1 = randw * randh
+            done1 = true
+        end
 
-#2
-cost, isPathFound, winningPath = queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
+        randx, randy = rand(1:20, 1,2) 
+        randw, randh = rand(1:5, 1,2)
 
-#3
-cost = plotPath(isPathFound, nodeslist, edgeslist, winningPath, connectDist, obstacleList)
+        NEx =  randx+randw
+        NEy =  randy+randh
+
+        if (NEx<21 && NEy<21)
+            obs2 = rrt.Obstacle(rrt.Point(randx, randy),rrt.Point(NEx,NEy)) #Todo
+            area2 = randw * randh
+            done2= true
+        end
+        done2Rect = done1 && done2
+    end
+
+    area1 = 2
+    area2 = 3
+    area = area1+area2
+    return obs1, obs2, area
+end
+
+function gen2Obs()
+    while true
+        obs1, obs2, area = genObs()
+        if !isCollidingRects(obs1, obs2)
+            @show obs1, obs2
+            return area, obs1, obs2
+        end
+    end
+end
 
 
-#@show nodeslist
-#print("This is the solution path: \n") 
-#@show winningPath
+function main()
 
-print("HIIIIIIIIIIIIII")
-isCollidingRects(obs1, obs2)
+    obstacleList = Vector{rrt.Obstacle}()
+    area, obs1, obs2 = gen2Obs()
+    push!(obstacleList,obs1)
+    push!(obstacleList,obs2)
+
+
+    # nnodes , maxDist
+    connectDist = 10
+    # 1
+    #nodeslist, edgeslist= preprocessPRM(30, connectDist)
+    nodeslist, edgeslist= preprocessPRM(30, connectDist, obstacleList)
+
+    start = rrt.Point(0,0)
+    goal = rrt.Point(18,18)
+
+    #2
+    cost, isPathFound, winningPath = queryPRM(start, goal, nodeslist, edgeslist) #aStarSearch
+
+    #3
+    cost = plotPath(isPathFound, nodeslist, edgeslist, winningPath, connectDist, obstacleList)
+
+
+    #@show nodeslist
+    #print("This is the solution path: \n") 
+    #@show winningPath
+
+    print("HIIIIIIIIIIIIII")
+    isCollidingRects(obs1, obs2)
+end

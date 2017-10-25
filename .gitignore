@@ -120,7 +120,8 @@ venv.bak/
 # odt
 *.odt#
 *.odt
-#.swo
+*.swo
+*.swn
 
 
 

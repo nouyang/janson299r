@@ -1,0 +1,2440 @@
+%!PS-Adobe-3.0
+%%Title: RRT.jl
+%%For: nrw
+%%Creator: VIM - Vi IMproved 7.4 (2013 Aug 10)
+%%CreationDate: Fri Oct 13 20:26:35 2017
+%%DocumentData: Clean8Bit
+%%Orientation: Portrait
+%%Pages: (atend)
+%%PageOrder: Ascend
+%%BoundingBox: 59 44 564 800
+%%DocumentMedia: A4 595 842 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-Oblique
+%%+ font Courier-BoldOblique
+%%DocumentSuppliedResources: procset VIM-Prolog 1.4 1
+%%+ encoding VIM-latin1 1.0 0
+%%Requirements: duplex collate color
+%%EndComments
+%%BeginDefaults
+%%PageResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-Oblique
+%%+ font Courier-BoldOblique
+%%PageMedia: A4
+%%EndDefaults
+%%BeginProlog
+%%BeginResource: procset VIM-Prolog
+%%BeginDocument: /usr/share/vim/vim74/print/prolog.ps
+%!PS-Adobe-3.0 Resource-ProcSet
+%%Title: VIM-Prolog
+%%Version: 1.4 1
+%%EndComments
+% Editing of this file is NOT RECOMMENDED.  You run a very good risk of causing
+% all PostScript printing from VIM failing if you do.  PostScript is not called
+% a write-only language for nothing!
+/packedarray where not{userdict begin/setpacking/pop load def/currentpacking
+false def end}{pop}ifelse/CP currentpacking def true setpacking
+/bd{bind def}bind def/ld{load def}bd/ed{exch def}bd/d/def ld
+/db{dict begin}bd/cde{currentdict end}bd
+/T true d/F false d
+/SO null d/sv{/SO save d}bd/re{SO restore}bd
+/L2 systemdict/languagelevel 2 copy known{get exec}{pop pop 1}ifelse 2 ge d
+/m/moveto ld/s/show ld /ms{m s}bd /g/setgray ld/r/setrgbcolor ld/sp{showpage}bd
+/gs/gsave ld/gr/grestore ld/cp/currentpoint ld
+/ul{gs UW setlinewidth cp UO add 2 copy newpath m 3 1 roll add exch lineto
+stroke gr}bd
+/bg{gs r cp BO add 4 -2 roll rectfill gr}bd
+/sl{90 rotate 0 exch translate}bd
+L2{
+/sspd{mark exch{setpagedevice}stopped cleartomark}bd
+/nc{1 db/NumCopies ed cde sspd}bd
+/sps{3 db/Orientation ed[3 1 roll]/PageSize ed/ImagingBBox null d cde sspd}bd
+/dt{2 db/Tumble ed/Duplex ed cde sspd}bd
+/c{1 db/Collate ed cde sspd}bd
+}{
+/nc{/#copies ed}bd
+/sps{statusdict/setpage get exec}bd
+/dt{statusdict/settumble 2 copy known{get exec}{pop pop pop}ifelse
+statusdict/setduplexmode 2 copy known{get exec}{pop pop pop}ifelse}bd
+/c{pop}bd
+}ifelse
+/ffs{findfont exch scalefont d}bd/sf{setfont}bd
+/ref{1 db findfont dup maxlength dict/NFD ed{exch dup/FID ne{exch NFD 3 1 roll
+put}{pop pop}ifelse}forall/Encoding findresource dup length 256 eq{NFD/Encoding
+3 -1 roll put}{pop}ifelse NFD dup/FontType get 3 ne{/CharStrings}{/CharProcs}
+ifelse 2 copy known{2 copy get dup maxlength dict copy[/questiondown/space]{2
+copy known{2 copy get 2 index/.notdef 3 -1 roll put pop exit}if pop}forall put
+}{pop pop}ifelse dup NFD/FontName 3 -1 roll put NFD definefont pop end}bd
+CP setpacking
+(\004)cvn{}bd
+% vim:ff=unix:
+%%EOF
+%%EndDocument
+%%EndResource
+%%BeginResource: encoding VIM-latin1
+%%BeginDocument: /usr/share/vim/vim74/print/latin1.ps
+%!PS-Adobe-3.0 Resource-Encoding
+%%Title: VIM-latin1
+%%Version: 1.0 0
+%%EndComments
+/VIM-latin1[
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash
+/zero /one /two /three /four /five /six /seven
+/eight /nine /colon /semicolon /less /equal /greater /question
+/at /A /B /C /D /E /F /G
+/H /I /J /K /L /M /N /O
+/P /Q /R /S /T /U /V /W
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore
+/grave /a /b /c /d /e /f /g
+/h /i /j /k /l /m /n /o
+/p /q /r /s /t /u /v /w
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis]
+/Encoding defineresource pop
+% vim:ff=unix:
+%%EOF
+%%EndDocument
+%%EndResource
+%%EndProlog
+%%BeginSetup
+595 842 0 sps
+1 nc
+T F dt
+T c
+%%IncludeResource: font Courier
+/_F0 /VIM-latin1 /Courier ref
+/F0 5 /_F0 ffs
+%%IncludeResource: font Courier-Bold
+/_F1 /VIM-latin1 /Courier-Bold ref
+/F1 5 /_F1 ffs
+%%IncludeResource: font Courier-Oblique
+/_F2 /VIM-latin1 /Courier-Oblique ref
+/F2 5 /_F2 ffs
+%%IncludeResource: font Courier-BoldOblique
+/_F3 /VIM-latin1 /Courier-BoldOblique ref
+/F3 5 /_F3 ffs
+/UO 0.5 d
+/UW 0.25 d
+/BO -1.25 d
+%%EndSetup
+%%Page: 1 1
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(RRT.jl                                                                                                                                                            Page 1)59.5 796.15 ms
+F0 sf
+(print\()59.5 786.15 ms
+0 0.251 0 r
+("Hello World! ¿ ¿ ¿ )s
+0.376 0 0.376 r
+(\\n\\n)s
+0 0.251 0 r
+(")s
+0 g
+(\))s
+0 0.125 0.251 r
+(using)59.5 776.15 ms
+0 g
+( Plots)s
+(gr\(\))59.5 771.15 ms
+(plot\([)59.5 761.15 ms
+0 0.251 0 r
+(1)s
+0 g
+(,)s
+0 0.251 0 r
+(2)s
+0 g
+(],[)s
+0 0.251 0 r
+(2)s
+0 g
+(,)s
+0 0.251 0 r
+(3)s
+0 g
+(]\))s
+0 0.125 0.251 r
+(module)59.5 751.15 ms
+0 g
+( rrt )s
+(    )59.5 746.15 ms
+0 0.125 0.251 r
+(export)s
+0 g
+( Node, Edge, Obstacle, Room, Point)s
+(    )59.5 736.15 ms
+0 0.125 0.251 r
+(struct)s
+0 g
+( Point)s
+(        x)59.5 731.15 ms
+0 0.125 0.251 r
+(::)s
+0 0.251 0 r
+(Int)s
+0 g
+(        y)59.5 726.15 ms
+0 0.125 0.251 r
+(::)s
+0 0.251 0 r
+(Int)s
+0 g
+(    )59.5 721.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 711.15 ms
+0 0.125 0.251 r
+(struct)s
+0 g
+( Node)s
+(        id)59.5 706.15 ms
+0 0.125 0.251 r
+(::)s
+0 0.251 0 r
+(Int)s
+0 g
+(        iPrev)59.5 701.15 ms
+0 0.125 0.251 r
+(::)s
+0 0.251 0 r
+(Int)s
+0 g
+( )s
+0.251 0.251 0 r
+(#parent)s
+0 g
+(        state)59.5 696.15 ms
+0 0.125 0.251 r
+(::)s
+0 g
+(Point)s
+(    )59.5 691.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 681.15 ms
+0 0.125 0.251 r
+(struct)s
+0 g
+( Edge)s
+(        startnode)59.5 676.15 ms
+0 0.125 0.251 r
+(::)s
+0 0.251 0 r
+(Int)s
+0 g
+(        endnode)59.5 671.15 ms
+0 0.125 0.251 r
+(::)s
+0 0.251 0 r
+(Int)s
+0 g
+(    )59.5 666.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 656.15 ms
+0 0.125 0.251 r
+(struct)s
+0 g
+( Obstacle)s
+(        SW)59.5 651.15 ms
+0 0.125 0.251 r
+(::)s
+0 g
+(Point)s
+(        NE)59.5 646.15 ms
+0 0.125 0.251 r
+(::)s
+0 g
+(Point)s
+(    )59.5 641.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 631.15 ms
+0.251 0.251 0 r
+(### Some types?)s
+0 g
+(    )59.5 626.15 ms
+0 0.125 0.251 r
+(struct)s
+0 g
+( Room )s
+0.251 0.251 0 r
+(#corners of the room)s
+0 g
+(        x1)59.5 621.15 ms
+0 0.125 0.251 r
+(::)s
+0 0.251 0 r
+(Int)s
+0 g
+(        y1)59.5 616.15 ms
+0 0.125 0.251 r
+(::)s
+0 0.251 0 r
+(Int)s
+0 g
+( )s
+0.251 0.251 0 r
+(#bottom left corner?)s
+0 g
+(        x2)59.5 611.15 ms
+0 0.125 0.251 r
+(::)s
+0 0.251 0 r
+(Int)s
+0 g
+(        y2)59.5 606.15 ms
+0 0.125 0.251 r
+(::)s
+0 0.251 0 r
+(Int)s
+0 g
+(        obstacleList)59.5 601.15 ms
+0 0.125 0.251 r
+(::)s
+0 0.251 0 r
+(Array)s
+0 g
+({Obstacle})s
+(    )59.5 596.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 586.15 ms
+0 0.125 0.251 r
+(struct)s
+0 g
+( robot)s
+(    )59.5 581.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(            )59.5 576.15 ms
+0 0.125 0.251 r
+(end)59.5 571.15 ms
+(function)59.5 556.15 ms
+0 g
+( isCollidingNode\(pt,obs\))s
+(    )59.5 551.15 ms
+0.251 0.251 0 r
+(# this does not work.)s
+0 g
+(    px,py )59.5 546.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( pt.x, pt.y)s
+(    x1,y1 )59.5 541.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( obs.SW.x, obs.SW.y)s
+(    x2,y2 )59.5 536.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( obs.NE.x, obs.NE.y )s
+(    )59.5 526.15 ms
+0 0.125 0.251 r
+(if)s
+0 g
+( \(px )s
+0 0.125 0.251 r
+(>)s
+0 g
+( x1 )s
+0 0.125 0.251 r
+(&&)s
+0 g
+( px )s
+0 0.125 0.251 r
+(<)s
+0 g
+( x2 )s
+0 0.125 0.251 r
+(&&)s
+0 g
+( py )s
+0 0.125 0.251 r
+(>)s
+0 g
+( y1 )s
+0 0.125 0.251 r
+(&&)s
+0 g
+( py )s
+0 0.125 0.251 r
+(<)s
+0 g
+( y2\))s
+(        )59.5 521.15 ms
+0.251 0.251 0 r
+(#print\("Node in obstacle, discarded."\))s
+0 g
+(        )59.5 516.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( )s
+0 0.251 0 r
+(true)s
+0 g
+(    )59.5 511.15 ms
+0 0.125 0.251 r
+(else)s
+0 g
+(        )59.5 506.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( )s
+0 0.251 0 r
+(false)s
+0 g
+(    )59.5 501.15 ms
+0 0.125 0.251 r
+(end)s
+(end)59.5 496.15 ms
+(function)59.5 481.15 ms
+0 g
+( isCollidingEdge\(r, nn, obs\))s
+(    )59.5 476.15 ms
+0.251 0.251 0 r
+(# to detect collision, let's just check whether any of the four)s
+0 g
+(    )59.5 471.15 ms
+0.251 0.251 0 r
+(# lines of the rectangular obstacle intersect with our edge)s
+0 g
+(    )59.5 466.15 ms
+0.251 0.251 0 r
+(# ignore collinearity for now)s
+0 g
+(    )59.5 456.15 ms
+0.251 0.251 0 r
+(# Tofix: To make it look prettier in the graph, I am just going to add a 1 grid pt)s
+0 g
+(    )59.5 451.15 ms
+0.251 0.251 0 r
+(# spacer for now, until I figure out how to check for coincidence of point)s
+0 g
+(    )59.5 446.15 ms
+0.251 0.251 0 r
+(# in line. Or really, I should use GeometryShapes library)s
+0 g
+(    x1,y1 )59.5 436.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( obs.SW.x, obs.SW.y)s
+(    x2,y2 )59.5 431.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( obs.NE.x, obs.NE.y )s
+(    x1 )59.5 421.15 ms
+0 0.125 0.251 r
+(-=)s
+0 g
+( )s
+0 0.251 0 r
+(1)s
+0 g
+(    y1 )59.5 416.15 ms
+0 0.125 0.251 r
+(-=)s
+0 g
+( )s
+0 0.251 0 r
+(1)s
+0 g
+(    x2 )59.5 411.15 ms
+0 0.125 0.251 r
+(+=)s
+0 g
+( )s
+0 0.251 0 r
+(1)s
+0 g
+(    y2 )59.5 406.15 ms
+0 0.125 0.251 r
+(+=)s
+0 g
+( )s
+0 0.251 0 r
+(1)s
+0 g
+(    pt1 )59.5 396.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Point\(x1, y1\))s
+(    pt2 )59.5 391.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Point\(x1, y2\))s
+(    pt3 )59.5 386.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Point\(x2, y2\))s
+(    pt4 )59.5 381.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Point\(x2, y1\))s
+(    )59.5 376.15 ms
+(    )59.5 371.15 ms
+0.251 0.251 0 r
+(# let A, B be r, nn)s
+0 g
+(    coll1 )59.5 366.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( intersectLineSeg\(r, nn, pt1, pt2\))s
+(    coll2 )59.5 361.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( intersectLineSeg\(r, nn, pt2, pt3\))s
+(    coll3 )59.5 356.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( intersectLineSeg\(r, nn, pt3, pt4\))s
+(    coll4 )59.5 351.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( intersectLineSeg\(r, nn, pt4, pt1\))s
+(    )59.5 341.15 ms
+0 0.125 0.251 r
+(if)s
+0 g
+( \()s
+0 0.125 0.251 r
+(!)s
+0 g
+(coll1 )s
+0 0.125 0.251 r
+(&&)s
+0 g
+( )s
+0 0.125 0.251 r
+(!)s
+0 g
+(coll2 )s
+0 0.125 0.251 r
+(&&)s
+0 g
+( )s
+0 0.125 0.251 r
+(!)s
+0 g
+(coll3 )s
+0 0.125 0.251 r
+(&&)s
+0 g
+( )s
+0 0.125 0.251 r
+(!)s
+0 g
+(coll4\))s
+(        )59.5 336.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( )s
+0 0.251 0 r
+(false)s
+0 g
+(    )59.5 331.15 ms
+0 0.125 0.251 r
+(else)s
+0 g
+(        )59.5 326.15 ms
+0.251 0.251 0 r
+(#print\("you're colliding!\\n"\))s
+0 g
+(        )59.5 321.15 ms
+0.251 0.251 0 r
+(#@show nn)s
+0 g
+(        )59.5 316.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( )s
+0 0.251 0 r
+(true)s
+0 g
+(    )59.5 311.15 ms
+0 0.125 0.251 r
+(end)s
+(end)59.5 306.15 ms
+(function)59.5 291.15 ms
+0 g
+( inGoalRegion\(node, goal\))s
+(    goal )59.5 286.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Point\()s
+0 0.251 0 r
+(18)s
+0 g
+(,)s
+0 0.251 0 r
+(18)s
+0 g
+(\))s
+(    n )59.5 281.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( node.state)s
+(    )59.5 276.15 ms
+0 0.125 0.251 r
+(if)s
+0 g
+( node )s
+0 0.125 0.251 r
+(==)s
+0 g
+( goal)s
+(        )59.5 271.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( )s
+0 0.251 0 r
+(true)s
+0 g
+(    )59.5 266.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    distx )59.5 261.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( abs\(n.x )s
+0 0.125 0.251 r
+(-)s
+0 g
+( goal.x\))s
+(    disty )59.5 256.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( abs\(n.y )s
+0 0.125 0.251 r
+(-)s
+0 g
+( goal.y\))s
+(    )59.5 251.15 ms
+0 0.125 0.251 r
+(if)s
+0 g
+( \( distx )s
+0 0.125 0.251 r
+(<)s
+0 g
+( )s
+0 0.251 0 r
+(2)s
+0 g
+( )s
+0 0.125 0.251 r
+(&&)s
+0 g
+( disty )s
+0 0.125 0.251 r
+(<)s
+0 g
+( )s
+0 0.251 0 r
+(2)s
+0 g
+(\) )s
+0.251 0.251 0 r
+(#radius of goal)s
+0 g
+(        )59.5 246.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( )s
+0 0.251 0 r
+(true)s
+0 g
+(    )59.5 241.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 236.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( )s
+0 0.251 0 r
+(false)s
+0 g
+(    )59.5 231.15 ms
+0 0.125 0.251 r
+(end)59.5 226.15 ms
+(function)59.5 211.15 ms
+0 g
+( ccw\(A,B,C\))s
+(    )59.5 206.15 ms
+0.251 0.251 0 r
+(# determines direction of lines formed by three points)s
+0 g
+(    )59.5 201.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( \(C.y)s
+0 0.125 0.251 r
+(-)s
+0 g
+(A.y\) )s
+0 0.125 0.251 r
+(*)s
+0 g
+( \(B.x)s
+0 0.125 0.251 r
+(-)s
+0 g
+(A.x\) )s
+0 0.125 0.251 r
+(>)s
+0 g
+( \(B.y)s
+0 0.125 0.251 r
+(-)s
+0 g
+(A.y\) )s
+0 0.125 0.251 r
+(*)s
+0 g
+( \(C.x)s
+0 0.125 0.251 r
+(-)s
+0 g
+(A.x\))s
+0 0.125 0.251 r
+(end)59.5 196.15 ms
+(function)59.5 181.15 ms
+0 g
+( intersectLineSeg\(A,B,C,D\) )s
+0.251 0.251 0 r
+(#no ":" at the end!)s
+0 g
+(    )59.5 176.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( \( \(ccw\(A, C, D\) )s
+0 0.125 0.251 r
+(!=)s
+0 g
+( ccw\(B, C, D\)\) )s
+0 0.125 0.251 r
+(&&)s
+0 g
+( ccw\(A, B, C\) )s
+0 0.125 0.251 r
+(!=)s
+0 g
+( ccw\(A, B, D\)\))s
+0 0.125 0.251 r
+(end)59.5 171.15 ms
+(function)59.5 156.15 ms
+0 g
+( nearestN\(r, nodeslist\) )s
+0.251 0.251 0 r
+(#dear lord rewrite this so it doesn't need to pass in maxNodeId)s
+0 g
+(    nearestDist )59.5 151.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+0 0.251 0 r
+(9999)s
+0 g
+(;)s
+(    nearestNode )59.5 146.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( [];)s
+(    )59.5 141.15 ms
+0 0.125 0.251 r
+(for)s
+0 g
+( n )s
+0 0.125 0.251 r
+(in)s
+0 g
+( nodeslist)s
+(        dist )59.5 136.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( distPt\(r, n.state\))s
+(        )59.5 131.15 ms
+0 0.125 0.251 r
+(if)s
+0 g
+( dist )s
+0 0.125 0.251 r
+(<)s
+0 g
+( nearestDist)s
+(            nearestDist )59.5 126.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( dist)s
+(            nearestNode )59.5 121.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( n)s
+(        )59.5 116.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 111.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 106.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( nearestNode)s
+0 0.125 0.251 r
+(end)59.5 101.15 ms
+(function)59.5 86.15 ms
+0 g
+( distPt\(pt1, pt2\))s
+(    x2,y2 )59.5 81.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( pt2.x, pt2.y)s
+(    x1,y1 )59.5 76.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( pt1.x, pt1.y)s
+(    dist )59.5 71.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( sqrt\( \(x1)s
+0 0.125 0.251 r
+(-)s
+0 g
+(x2\))s
+0 0.125 0.251 r
+(^)s
+0 0.251 0 r
+(2)s
+0 g
+( )s
+0 0.125 0.251 r
+(+)s
+0 g
+( \(y1)s
+0 0.125 0.251 r
+(-)s
+0 g
+(y2\))s
+0 0.125 0.251 r
+(^)s
+0 0.251 0 r
+(2)s
+0 g
+( \))s
+(    )59.5 66.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( dist)s
+0 0.125 0.251 r
+(end)59.5 61.15 ms
+re sp
+%%PageTrailer
+%%Page: 2 2
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(RRT.jl                                                                                                                                                            Page 2)59.5 796.15 ms
+F0 sf
+0 0.125 0.251 r
+(function)59.5 786.15 ms
+0 g
+( rrtPathPlanner\(niterations\))s
+(    nIter )59.5 781.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( niterations )s
+(    maxDist )59.5 776.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+0 0.251 0 r
+(3)s
+0 g
+(    )59.5 771.15 ms
+0.251 0.251 0 r
+(#room = Room\(0,0,21,21\);)s
+0 g
+(    obs1 )59.5 761.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Obstacle\(rrt.Point\()s
+0 0.251 0 r
+(8)s
+0 g
+(,)s
+0 0.251 0 r
+(3)s
+0 g
+(\),rrt.Point\()s
+0 0.251 0 r
+(10)s
+0 g
+(,)s
+0 0.251 0 r
+(18)s
+0 g
+(\)\) )s
+0.251 0.251 0 r
+(#Todo)s
+0 g
+(    )59.5 756.15 ms
+0.251 0.251 0 r
+(#obs2 = rrt.Obstacle\(rrt.Point\(10,12\),rrt.Point\(14,12\)\) #Todo)s
+0 g
+(    obs1 )59.5 751.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Obstacle\(rrt.Point\()s
+0 0.251 0 r
+(8)s
+0 g
+(,)s
+0 0.251 0 r
+(5)s
+0 g
+(\),rrt.Point\()s
+0 0.251 0 r
+(10)s
+0 g
+(,)s
+0 0.251 0 r
+(18)s
+0 g
+(\)\) )s
+0.251 0.251 0 r
+(#Todo)s
+0 g
+(    rrtstart )59.5 741.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Point\()s
+0 0.251 0 r
+(1)s
+0 g
+(,)s
+0 0.251 0 r
+(0)s
+0 g
+(\))s
+(    goal )59.5 736.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Point\()s
+0 0.251 0 r
+(18)s
+0 g
+(,)s
+0 0.251 0 r
+(18)s
+0 g
+(\))s
+(    nodeslist )59.5 726.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+0 0.251 0 r
+(Vector)s
+0 g
+({rrt.Node}\(\))s
+(    startNode )59.5 716.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Node\()s
+0 0.251 0 r
+(0)s
+0 g
+(,)s
+0 0.251 0 r
+(0)s
+0 g
+(, rrtstart\))s
+(    push)59.5 711.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(nodeslist, startNode\))s
+(    )59.5 706.15 ms
+0.251 0.251 0 r
+(#@printf\("string %s",nodeslist\))s
+0 g
+(    maxNodeID )59.5 696.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+0 0.251 0 r
+(1)s
+0 g
+(    isPathFound )59.5 691.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+0 0.251 0 r
+(false)s
+0 g
+(    )59.5 681.15 ms
+0 0.125 0.251 r
+(for)s
+0 g
+( i )s
+0 0.125 0.251 r
+(in)s
+0 g
+( )s
+0 0.251 0 r
+(1)s
+0 0.125 0.251 r
+(:)s
+0 g
+(nIter)s
+(        r )59.5 676.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Point\(rand\()s
+0 0.251 0 r
+(1)s
+0 0.125 0.251 r
+(:)s
+0 0.251 0 r
+(20)s
+0 g
+(\),rand\()s
+0 0.251 0 r
+(1)s
+0 0.125 0.251 r
+(:)s
+0 0.251 0 r
+(20)s
+0 g
+(\)\) )s
+0.251 0.251 0 r
+(#new point)s
+0 g
+(        nn )59.5 671.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( nearestN\(r, nodeslist\) )s
+0.251 0.251 0 r
+(# parent point)s
+0 g
+(        )59.5 661.15 ms
+0.251 0.251 0 r
+(#if !isCollidingNode\(r, obs1\)#check node XY first #Tofix: this function)s
+0 g
+(        )59.5 656.15 ms
+0 0.125 0.251 r
+(if)s
+0 g
+( )s
+0 0.125 0.251 r
+(!)s
+0 g
+(isCollidingNode\(r, obs1\) )s
+0 0.125 0.251 r
+(&&)s
+0 g
+( )s
+0 0.125 0.251 r
+(!)s
+0 g
+(isCollidingEdge\(r, nn.state, obs1\) )s
+0.251 0.251 0 r
+(# check edge #rewrite so we can check multiple obstacles...)s
+0 g
+(                nearestDist )59.5 651.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( distPt\(r, nn.state\))s
+(                    )59.5 646.15 ms
+0 0.125 0.251 r
+(if)s
+0 g
+( nearestDist )s
+0 0.125 0.251 r
+(>)s
+0 g
+( maxDist)s
+(                        x1,y1 )59.5 641.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( nn.state.x, nn.state.y)s
+(                        x2,y2 )59.5 636.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( r.x, r.y )s
+(                        tantheta )59.5 631.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( atan2\(\(y2)s
+0 0.125 0.251 r
+(-)s
+0 g
+(y1\) , \(x2)s
+0 0.125 0.251 r
+(-)s
+0 g
+(x1\)\))s
+(                        newX )59.5 626.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( x1 )s
+0 0.125 0.251 r
+(+)s
+0 g
+( maxDist )s
+0 0.125 0.251 r
+(*)s
+0 g
+( cos\(tantheta\))s
+(                        newY )59.5 621.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( y1 )s
+0 0.125 0.251 r
+(+)s
+0 g
+( maxDist )s
+0 0.125 0.251 r
+(*)s
+0 g
+( sin\(tantheta\))s
+(                        newPt )59.5 616.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Point\(floor\(newX\), floor\(newY\)\) )s
+0.251 0.251 0 r
+(#Todo: maybe I shouldn't floor?)s
+0 g
+(                        node )59.5 611.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Node\(maxNodeID, nn.id, newPt\) )s
+0.251 0.251 0 r
+(#throw out r, but try to steer toward it)s
+0 g
+(                    )59.5 606.15 ms
+0 0.125 0.251 r
+(else)s
+0 g
+(                        node )59.5 601.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Node\(maxNodeID, nn.id, r\))s
+(                    )59.5 596.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(                maxNodeID )59.5 591.15 ms
+0 0.125 0.251 r
+(+=)s
+0 g
+( )s
+0 0.251 0 r
+(1)s
+0 g
+(                push)59.5 586.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(nodeslist, node\))s
+(                )59.5 576.15 ms
+0 0.125 0.251 r
+(if)s
+0 g
+( inGoalRegion\(node, goal\))s
+(                    )59.5 571.15 ms
+0.251 0.251 0 r
+(#print\("Goallllll! This is the winning node:\\n"\) )s
+0 g
+(                    )59.5 566.15 ms
+0.251 0.251 0 r
+(#@show node  #winning node)s
+0 g
+(                    )59.5 561.15 ms
+0.251 0.251 0 r
+(#@printf\("Goallll! Found after %d iterations", i\))s
+0 g
+(                    isPathFound )59.5 556.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+0 0.251 0 r
+(true)s
+0 g
+(                    )59.5 551.15 ms
+0 0.125 0.251 r
+(break)s
+0 g
+(                )59.5 546.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(        )59.5 541.15 ms
+0 0.125 0.251 r
+(else)s
+0 g
+(            )59.5 536.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(        )59.5 531.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 521.15 ms
+0.251 0.251 0 r
+(#@show nodeslist)s
+0 g
+(    )59.5 516.15 ms
+0.251 0.251 0 r
+(#@printf\("\\nPath found? %s Length of nodeslist: %d\\n", isPathFound, length\(nodeslist\)\))s
+0 g
+(    cost )59.5 511.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( costWinningPath\(nodeslist\))s
+(    )59.5 506.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( cost, isPathFound, nodeslist)s
+0 0.125 0.251 r
+(end)59.5 501.15 ms
+(function)59.5 486.15 ms
+0 g
+( plotPath\(isPathFound, nlist\) )s
+0.251 0.251 0 r
+(#rewrite so don't need to pass in isPathFound, obs1, rrtstart, goal, room )s
+0 g
+(    )59.5 476.15 ms
+0.251 0.251 0 r
+(### <COPIED FOR NOW #Todo fix hardcoding)s
+0 g
+(    obs1 )59.5 471.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Obstacle\(rrt.Point\()s
+0 0.251 0 r
+(8)s
+0 g
+(,)s
+0 0.251 0 r
+(5)s
+0 g
+(\),rrt.Point\()s
+0 0.251 0 r
+(10)s
+0 g
+(,)s
+0 0.251 0 r
+(18)s
+0 g
+(\)\) )s
+0.251 0.251 0 r
+(#Todo)s
+0 g
+(    rrtstart )59.5 461.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Point\()s
+0 0.251 0 r
+(1)s
+0 g
+(,)s
+0 0.251 0 r
+(0)s
+0 g
+(\))s
+(    goal )59.5 456.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Point\()s
+0 0.251 0 r
+(18)s
+0 g
+(,)s
+0 0.251 0 r
+(18)s
+0 g
+(\))s
+(    )59.5 451.15 ms
+0.251 0.251 0 r
+(### / COPIED FOR NOW>)s
+0 g
+(    foo )59.5 436.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rand\()s
+0 0.251 0 r
+(1)s
+0 g
+(\))s
+(    h )59.5 431.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( plot\(\))s
+(    )59.5 421.15 ms
+0.376 0 0.376 r
+(@printf)s
+0 g
+(\()s
+0 0.251 0 r
+(")s
+0.376 0 0.376 r
+(%s)s
+0 0.251 0 r
+(")s
+0 g
+(, )s
+0 0.251 0 r
+("plotted)s
+0.376 0 0.376 r
+(\\n)s
+0 0.251 0 r
+(")s
+0 g
+(\))s
+(    plot)59.5 416.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(h, show)s
+0 0.125 0.251 r
+(=)s
+0 0.251 0 r
+(true)s
+0 g
+(, legend)s
+0 0.125 0.251 r
+(=)s
+0 0.251 0 r
+(false)s
+0 g
+(, size)s
+0 0.125 0.251 r
+(=)s
+0 g
+(\()s
+0 0.251 0 r
+(600)s
+0 g
+(,)s
+0 0.251 0 r
+(600)s
+0 g
+(\),xaxis)s
+0 0.125 0.251 r
+(=)s
+0 g
+(\(\()s
+0 0.125 0.251 r
+(-)s
+0 0.251 0 r
+(5)s
+0 g
+(,)s
+0 0.251 0 r
+(25)s
+0 g
+(\), )s
+0 0.251 0 r
+(0)s
+0 0.125 0.251 r
+(:)s
+0 0.251 0 r
+(1)s
+0 0.125 0.251 r
+(:)s
+0 0.251 0 r
+(20)s
+0 g
+( \), yaxis)s
+0 0.125 0.251 r
+(=)s
+0 g
+(\(\()s
+0 0.125 0.251 r
+(-)s
+0 0.251 0 r
+(5)s
+0 g
+(,)s
+0 0.251 0 r
+(25)s
+0 g
+(\), )s
+0 0.251 0 r
+(0)s
+0 0.125 0.251 r
+(:)s
+0 0.251 0 r
+(1)s
+0 0.125 0.251 r
+(:)s
+0 0.251 0 r
+(20)s
+0 g
+(\), foreground_color_grid)s
+0 0.125 0.251 r
+(=)s
+F1 sf
+0.251 0.251 0 r
+(:lightcyan)s
+F0 sf
+0 g
+(\))s
+(    nIter )59.5 406.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+0 0.125 0.251 r
+(-)s
+0 0.251 0 r
+(1)s
+0.251 0.251 0 r
+(#fix hardcoding)s
+0 g
+(    title)59.5 401.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\()s
+0 0.251 0 r
+("RRT nIter = )s
+F1 sf
+0.251 0.251 0 r
+($\()s
+F0 sf
+0 g
+(nIter)s
+F1 sf
+0.251 0.251 0 r
+(\))s
+F0 sf
+0 0.251 0 r
+(, Path Found )s
+F1 sf
+0.251 0.251 0 r
+($\()s
+F0 sf
+0 g
+(isPathFound)s
+F1 sf
+0.251 0.251 0 r
+(\))s
+F0 sf
+0 0.251 0 r
+(")s
+0 g
+(\))s
+(    )59.5 391.15 ms
+0.251 0.251 0 r
+(# plot room)s
+0 g
+(    dim )59.5 386.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+0 0.251 0 r
+(21)s
+0 g
+( )s
+(    roomx )59.5 381.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( [)s
+0 0.251 0 r
+(0)s
+0 g
+(,)s
+0 0.251 0 r
+(0)s
+0 g
+(,dim,dim];)s
+(    roomy )59.5 376.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( [)s
+0 0.251 0 r
+(0)s
+0 g
+(,dim,dim,)s
+0 0.251 0 r
+(0)s
+0 g
+(];)s
+(    plot)59.5 371.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(roomx, roomy, color)s
+0 0.125 0.251 r
+(=)s
+F1 sf
+0.251 0.251 0 r
+(:black)s
+F0 sf
+0 g
+(, linewidth)s
+0 0.125 0.251 r
+(=)s
+0 0.251 0 r
+(5)s
+0 g
+(\))s
+(    )59.5 361.15 ms
+0.251 0.251 0 r
+(# plot start and end goals)s
+0 g
+(    circle\()59.5 356.15 ms
+0 0.251 0 r
+(1)s
+0 g
+(,)s
+0 0.251 0 r
+(0)s
+0 g
+(, )s
+0 0.251 0 r
+(0.5)s
+0 g
+(, )s
+F1 sf
+0.251 0.251 0 r
+(:red)s
+F0 sf
+0 g
+(\))s
+(    circle\()59.5 351.15 ms
+0 0.251 0 r
+(18)s
+0 g
+(,)s
+0 0.251 0 r
+(18)s
+0 g
+(, )s
+0 0.251 0 r
+(0.5)s
+0 g
+(, )s
+F1 sf
+0.251 0.251 0 r
+(:forestgreen)s
+F0 sf
+0 g
+(\))s
+(    rectEnd )59.5 346.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrt.Obstacle\(rrt.Point\()s
+0 0.251 0 r
+(17)s
+0 g
+(,)s
+0 0.251 0 r
+(17)s
+0 g
+(\),rrt.Point\()s
+0 0.251 0 r
+(19)s
+0 g
+(,)s
+0 0.251 0 r
+(19)s
+0 g
+(\)\) )s
+0.251 0.251 0 r
+(#Todo)s
+0 g
+(    rectObs\(rectEnd\))59.5 341.15 ms
+(    )59.5 331.15 ms
+0.251 0.251 0 r
+(# plot obstacles)s
+0 g
+(    rectObs\(obs1\))59.5 326.15 ms
+(    )59.5 316.15 ms
+0.251 0.251 0 r
+(# plot all paths)s
+0 g
+(    plotEdges\(nlist\))59.5 311.15 ms
+(    )59.5 301.15 ms
+0.251 0.251 0 r
+(# plot all points)s
+0 g
+(    x )59.5 296.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( [v.state.x )s
+0 0.125 0.251 r
+(for)s
+0 g
+( v )s
+0 0.125 0.251 r
+(in)s
+0 g
+( nlist])s
+(    y )59.5 291.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( [v.state.y )s
+0 0.125 0.251 r
+(for)s
+0 g
+( v )s
+0 0.125 0.251 r
+(in)s
+0 g
+( nlist])s
+(    scatter)59.5 286.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(x,y, linewidth)s
+0 0.125 0.251 r
+(=)s
+0 0.251 0 r
+(0.1)s
+0 g
+(, color)s
+0 0.125 0.251 r
+(=)s
+F1 sf
+0.251 0.251 0 r
+(:grey)s
+F0 sf
+0 g
+(\))s
+(    print\()59.5 276.15 ms
+0 0.251 0 r
+("Done plotting )s
+F1 sf
+0.251 0.251 0 r
+($\()s
+F0 sf
+0 g
+(length\(nlist\))s
+F1 sf
+0.251 0.251 0 r
+(\))s
+F0 sf
+0 0.251 0 r
+( nodes)s
+0.376 0 0.376 r
+(\\n)s
+0 0.251 0 r
+(")s
+0 g
+(\))s
+(    )59.5 251.15 ms
+0.251 0.251 0 r
+(# plot winning path)s
+0 g
+(    )59.5 246.15 ms
+0 0.125 0.251 r
+(if)s
+0 g
+( isPathFound)s
+(        cost )59.5 241.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( plotWinningPath\(nlist\))s
+(        )59.5 236.15 ms
+0.376 0 0.376 r
+(@printf)s
+0 g
+(\()s
+0 0.251 0 r
+(")s
+0.376 0 0.376 r
+(\\n)s
+0 0.251 0 r
+(!!!! the cost of the path was )s
+0.376 0 0.376 r
+(%d)s
+0 0.251 0 r
+( across )s
+0.376 0 0.376 r
+(%d)s
+0 0.251 0 r
+( nodes  !!!! )s
+0.376 0 0.376 r
+(\\n)s
+0 0.251 0 r
+(")s
+0 g
+(, cost, length\(nlist\)\))s
+(        )59.5 231.15 ms
+0.251 0.251 0 r
+(#nEnd = nlist[end])s
+0 g
+(    )59.5 226.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 221.15 ms
+0.251 0.251 0 r
+(# for n in nlist)s
+0 g
+(        )59.5 216.15 ms
+0.251 0.251 0 r
+(# if n.id == 0)s
+0 g
+(            )59.5 211.15 ms
+0.251 0.251 0 r
+(# continue )s
+0 g
+(        )59.5 206.15 ms
+0.251 0.251 0 r
+(# else)s
+0 g
+(            )59.5 201.15 ms
+0.251 0.251 0 r
+(# plotEdge\(n,nlist\))s
+0 g
+(        )59.5 196.15 ms
+0.251 0.251 0 r
+(# end)s
+0 g
+(    )59.5 191.15 ms
+0.251 0.251 0 r
+(# end)s
+0 g
+(    )59.5 186.15 ms
+0.251 0.251 0 r
+(# display winning path cost)s
+0 0.125 0.251 r
+(end)59.5 181.15 ms
+0.251 0.251 0 r
+(#module pHelp\(\))59.5 171.15 ms
+0 g
+(    )59.5 161.15 ms
+0.251 0.251 0 r
+(### Some helper functions)s
+0 g
+(    )59.5 156.15 ms
+0 0.125 0.251 r
+(function)s
+0 g
+( circle\(x,y,r,c_color\))s
+(        th )59.5 151.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+0 0.251 0 r
+(0)s
+0 0.125 0.251 r
+(:)s
+0 0.251 0 r
+(pi)s
+0 0.125 0.251 r
+(/)s
+0 0.251 0 r
+(50)s
+0 0.125 0.251 r
+(:)s
+0 0.251 0 r
+(2)s
+0 0.125 0.251 r
+(*)s
+0 0.251 0 r
+(pi)s
+0 g
+(;)s
+(        xunit )59.5 146.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( r )s
+0 0.125 0.251 r
+(*)s
+0 g
+( cos.\(th\) )s
+0 0.125 0.251 r
+(+)s
+0 g
+( x;)s
+(        yunit )59.5 141.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( r )s
+0 0.125 0.251 r
+(*)s
+0 g
+( sin.\(th\) )s
+0 0.125 0.251 r
+(+)s
+0 g
+( y;)s
+(        plot)59.5 136.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(xunit, yunit,color)s
+0 0.125 0.251 r
+(=)s
+0 g
+(c_color,linewidth)s
+0 0.125 0.251 r
+(=)s
+0 0.251 0 r
+(3.0)s
+0 g
+(\);)s
+(    )59.5 131.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 121.15 ms
+0 0.125 0.251 r
+(function)s
+0 g
+( rectObs\(obstacle\))s
+(        x1,y1 )59.5 116.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( obstacle.SW.x, obstacle.SW.y)s
+(        x2,y2 )59.5 111.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( obstacle.NE.x, obstacle.NE.y)s
+(        r )59.5 106.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+0 0.251 0 r
+(0.2)s
+0 g
+(        obsColor )59.5 101.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+F1 sf
+0.251 0.251 0 r
+(:blue)s
+F0 sf
+0 g
+(        plot)59.5 91.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\([x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], color)s
+0 0.125 0.251 r
+(=)s
+0 g
+(obsColor, linewidth)s
+0 0.125 0.251 r
+(=)s
+0 0.251 0 r
+(2)s
+0 g
+(\))s
+(    )59.5 86.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 66.15 ms
+0 0.125 0.251 r
+(function)s
+0 g
+( plotEdges\(nlist\))s
+(        edgeXs, edgeYs )59.5 61.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( [], [])s
+(        )59.5 51.15 ms
+0 0.125 0.251 r
+(for)s
+0 g
+( n )s
+0 0.125 0.251 r
+(in)s
+0 g
+( nlist)s
+(            pt1 )59.5 46.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( n.state)s
+re sp
+%%PageTrailer
+%%Page: 3 3
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(RRT.jl                                                                                                                                                            Page 3)59.5 796.15 ms
+F0 sf
+(            iPrev )59.5 786.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( n.iPrev)s
+(            nPrev )59.5 781.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( findNode\(iPrev, nlist\))s
+(            pt2 )59.5 776.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( nPrev.state)s
+(            x1,y1 )59.5 766.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( pt1.x, pt1.y)s
+(            x2,y2 )59.5 761.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( pt2.x, pt2.y)s
+(            push)59.5 751.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(edgeXs, x1, x2, )s
+0 0.251 0 r
+(NaN)s
+0 g
+(\))s
+(            push)59.5 746.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(edgeYs, y1, y2, )s
+0 0.251 0 r
+(NaN)s
+0 g
+(\))s
+(        )59.5 741.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(        plot)59.5 736.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(edgeXs, edgeYs, color)s
+0 0.125 0.251 r
+(=)s
+F1 sf
+0.251 0.251 0 r
+(:orange)s
+F0 sf
+0 g
+(, linewidth)s
+0 0.125 0.251 r
+(=)s
+0 0.251 0 r
+(1.5)s
+0 g
+(\))s
+(        print\()59.5 731.15 ms
+0 0.251 0 r
+("Done plotting )s
+F1 sf
+0.251 0.251 0 r
+($\()s
+F0 sf
+0 g
+(length\(nlist\))s
+F1 sf
+0.251 0.251 0 r
+(\))s
+F0 sf
+0 0.251 0 r
+( edges)s
+0.376 0 0.376 r
+(\\n)s
+0 0.251 0 r
+(")s
+0 g
+(\))s
+(    )59.5 721.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 716.15 ms
+(    )59.5 696.15 ms
+0 0.125 0.251 r
+(function)s
+0 g
+( costWinningPath\(nlist\))s
+(        curNode )59.5 691.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( nlist[)s
+0 0.251 0 r
+(end)s
+0 g
+(])s
+(        guhPath )59.5 686.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( [ rrt.Point\(curNode.state.x, curNode.state.y\)])s
+(        )59.5 681.15 ms
+0 0.125 0.251 r
+(while)s
+0 g
+( )s
+0 0.251 0 r
+(true)s
+0 g
+(            iPrev )59.5 676.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( curNode.iPrev)s
+(            curNode )59.5 671.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( findNode\(iPrev, nlist\))s
+(            x,y )59.5 666.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( curNode.state.x, curNode.state.y)s
+(            push)59.5 661.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\( guhPath, rrt.Point\(x,y\)\))s
+(            )59.5 656.15 ms
+0 0.125 0.251 r
+(if)s
+0 g
+( curNode.id )s
+0 0.125 0.251 r
+(==)s
+0 g
+( )s
+0 0.251 0 r
+(0)s
+0 g
+(                push)59.5 651.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\( guhPath, rrt.Point\(x,y\)\))s
+(                )59.5 646.15 ms
+0 0.125 0.251 r
+(break)s
+0 g
+(            )59.5 641.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(        )59.5 636.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(        cost )59.5 631.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+0 0.251 0 r
+(0)s
+0 g
+(        )59.5 626.15 ms
+0 0.125 0.251 r
+(for)s
+0 g
+( i )s
+0 0.125 0.251 r
+(in)s
+0 g
+( )s
+0 0.251 0 r
+(2)s
+0 0.125 0.251 r
+(:)s
+0 g
+(length\(guhPath\))s
+(            cost )59.5 621.15 ms
+0 0.125 0.251 r
+(+=)s
+0 g
+( distPt\(guhPath[i],guhPath[i)s
+0 0.125 0.251 r
+(-)s
+0 0.251 0 r
+(1)s
+0 g
+(]\))s
+(        )59.5 616.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(        )59.5 606.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( cost)s
+(    )59.5 601.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 591.15 ms
+0 0.125 0.251 r
+(function)s
+0 g
+( plotWinningPath\(nlist\))s
+(        curNode )59.5 586.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( nlist[)s
+0 0.251 0 r
+(end)s
+0 g
+(])s
+(        xPath )59.5 581.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( [curNode.state.x])s
+(        yPath )59.5 576.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( [curNode.state.y])s
+(        guhPath )59.5 571.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( [ rrt.Point\(curNode.state.x, curNode.state.y\)])s
+(        )59.5 566.15 ms
+0 0.125 0.251 r
+(while)s
+0 g
+( )s
+0 0.251 0 r
+(true)s
+0 g
+(            iPrev )59.5 561.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( curNode.iPrev)s
+(            curNode )59.5 556.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( findNode\(iPrev, nlist\))s
+(            x,y )59.5 551.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( curNode.state.x, curNode.state.y)s
+(            push)59.5 546.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(xPath, x\))s
+(            push)59.5 541.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(yPath,y\))s
+(            push)59.5 536.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\( guhPath, rrt.Point\(x,y\)\))s
+(            )59.5 531.15 ms
+0 0.125 0.251 r
+(if)s
+0 g
+( curNode.id )s
+0 0.125 0.251 r
+(==)s
+0 g
+( )s
+0 0.251 0 r
+(0)s
+0 g
+(                push)59.5 526.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(xPath, x\))s
+(                push)59.5 521.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\(yPath,y\)         )s
+(                )59.5 516.15 ms
+0 0.125 0.251 r
+(break)s
+0 g
+(            )59.5 511.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(        )59.5 506.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(        print\()59.5 501.15 ms
+0 0.251 0 r
+("plotted winning path")s
+0 g
+(\))s
+(        cost )59.5 496.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+0 0.251 0 r
+(0)s
+0 g
+(        )59.5 491.15 ms
+0 0.125 0.251 r
+(for)s
+0 g
+( i )s
+0 0.125 0.251 r
+(in)s
+0 g
+( )s
+0 0.251 0 r
+(2)s
+0 0.125 0.251 r
+(:)s
+0 g
+(length\(guhPath\))s
+(            cost )59.5 486.15 ms
+0 0.125 0.251 r
+(+=)s
+0 g
+( distPt\(guhPath[i],guhPath[i)s
+0 0.125 0.251 r
+(-)s
+0 0.251 0 r
+(1)s
+0 g
+(]\))s
+(        )59.5 481.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(        plot)59.5 471.15 ms
+0 0.125 0.251 r
+(!)s
+0 g
+(\( xPath, yPath, color )s
+0 0.125 0.251 r
+(=)s
+0 g
+( )s
+F1 sf
+0.251 0.251 0 r
+(:green)s
+F0 sf
+0 g
+(, linewidth)s
+0 0.125 0.251 r
+(=)s
+0 0.251 0 r
+(3)s
+0 g
+(\))s
+(        )59.5 466.15 ms
+0.251 0.251 0 r
+(#@show nlist)s
+0 g
+(        )59.5 461.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( cost)s
+(    )59.5 456.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 446.15 ms
+0 0.125 0.251 r
+(function)s
+0 g
+( findNode\(id, nodeslist\))s
+(        )59.5 441.15 ms
+0 0.125 0.251 r
+(for)s
+0 g
+( n )s
+0 0.125 0.251 r
+(in)s
+0 g
+( nodeslist)s
+(            )59.5 436.15 ms
+0 0.125 0.251 r
+(if)s
+0 g
+( n.id )s
+0 0.125 0.251 r
+(==)s
+0 g
+( id)s
+(                )59.5 431.15 ms
+0 0.125 0.251 r
+(return)s
+0 g
+( n)s
+(            )59.5 426.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(        )59.5 421.15 ms
+0 0.125 0.251 r
+(end)s
+0 g
+(    )59.5 416.15 ms
+0 0.125 0.251 r
+(end)s
+0.251 0.251 0 r
+(#end)59.5 411.15 ms
+0 g
+(cost, isPathFound, nlist )59.5 401.15 ms
+0 0.125 0.251 r
+(=)s
+0 g
+( rrtPathPlanner\()s
+0 0.251 0 r
+(150)s
+0 g
+(\) )s
+0.251 0.251 0 r
+(#maxIter)s
+0 g
+(plotPath\(isPathFound,nlist\))59.5 396.15 ms
+re sp
+%%PageTrailer
+%%Trailer
+%%Pages: 3
+%%EOF
+
