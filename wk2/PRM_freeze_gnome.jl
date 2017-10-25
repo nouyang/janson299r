@@ -4,6 +4,7 @@
 using Plots
 using DataStructures
 #pyplot()
+gr()
 
 #plot([1,2],[2,3])
 
@@ -348,18 +349,20 @@ function plotPath(isPathFound, nlist, elist, solPath, maxDist) #rewrite so don't
     ### / COPIED FOR NOW>
 
 
-    @printf("%s", "plotted\n")
-    h = plot( show=true, legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:lightcyan)
+    print("\nCreating Plot\n")
+     plot()
+    print("\nPlotting world now, room first\n")
 
     title!("PRM with $(length(nlist)) nodes, maxdist = $(maxDist), Path Found = $(isPathFound)")
+    print("title plotted, plotting room next")
 
     # plot room
     dim = 21 
     roomx = [0,0,dim,dim];
     roomy = [0,dim,dim,0];
-    print("TEst $roomx $roomy")
 
-    plot!(h, roomx, roomy, color=:black, linewidth=5)
+    plot!(roomx, roomy, color=:black, linewidth=5)
+    print("room plotted, plotting circles next")
     # plot start and end goals
     circle(1,0, 0.5, :red)
     rectEnd = rrt.Obstacle(rrt.Point(17,17),rrt.Point(19,19)) #Todo
@@ -372,9 +375,10 @@ function plotPath(isPathFound, nlist, elist, solPath, maxDist) #rewrite so don't
     # plot all points?  Yes -- there may be points without edges. we only check within maxDist
     x = [v.state.x for v in nlist]
     y = [v.state.y for v in nlist]
+    print("\nplotted obstacles, plotting points now")
     scatter!(x,y, linewidth=0.2, color=:black)
 
-    print("Done plotting $(length(nlist)) nodes\n")
+    print("\nDone plotting $(length(nlist)) nodes\n")
 
     edgeXs, edgeYs = [], []
     for e in elist
@@ -385,16 +389,20 @@ function plotPath(isPathFound, nlist, elist, solPath, maxDist) #rewrite so don't
         push!(edgeXs, x1, x2, NaN)
         push!(edgeYs, y1, y2, NaN)
     end
-    plot!(h , edgeXs, edgeYs, color=:tan, linewidth=0.3)
-    print("Done plotting $(length(elist)) edges\n")
+    print("\nfinished edge calcs, plotting edges")
+    plot!( edgeXs, edgeYs, color=:tan, linewidth=0.3)
+    print("\nDone plotting $(length(elist)) edges\n")
+    plot!(legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:black)
 
     # plot winning path
     if isPathFound
         cost = plotWinningPath(solPath)
         #@printf("\n!!!! The cost of the path was %d across %d nodes  !!!! \n", cost, length(nlist))
         #nEnd = nlist[end]
+        gui()
         return cost
     end
+    gui()
     # display winning path cost
     cost = 999999
 	return cost
@@ -488,7 +496,7 @@ end
 # nnodes , maxDist
 connectDist = 10
 # 1
-nodeslist, edgeslist= preprocessPRM(15, connectDist)
+nodeslist, edgeslist= preprocessPRM(25, connectDist)
 
 start = rrt.Point(0,0)
 goal = rrt.Point(18,18)
