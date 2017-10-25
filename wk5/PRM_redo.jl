@@ -1,7 +1,7 @@
 using Plots
 using DataStructures
 using GeometryTypes 
-
+using Distributions
 gr()
 
 module alg
@@ -17,10 +17,10 @@ module alg
     end
 
     struct Edge
-        startid::Int64
-        endid::Int64
+        startID::Int64
+        endID::Int64
         #edge::LineSegment(Point{2, Float64}, Point{2, Float64})
-        edge::LineSegment{}
+        #edge::LineSegment{}
     end
 
     struct Obstacle
@@ -47,9 +47,17 @@ module alg
     end
 
     struct queueTmp
-        v::Point{2, Float64}
-        statesList::Vector{Point{2, Float64}}
+        #pt::Point{2, Float64}
+        node::alg.GraphNode
+        statesList::Vector{alg.GraphNode}
         cost::Int64
+    end
+
+    struct roadmap
+        startstate::Point{2,Float64}
+        goalstate::Point{2,Float64}
+        nodeslist::Vector{GraphNode}
+        edgeslist::Vector{Edge}
     end
 
     #Base.show(io::IO, v::Vertex) = print(io, "V($(v.id), ($(v.state.x),$(v.state.y)))")
@@ -81,18 +89,18 @@ module algfxn
     #function isCollidingNode(node::alg.GraphNode, obsList::Vector{alg.Obstacle}
     function isCollidingNode(node::Point{2, Float64}, obsList::Vector{HyperRectangle})
         for obs in obsList
-            if in(obs, node)
+            if contains(obs, node)
                 return true
             end
         end
         return false
     end
 
-    function isCollidingEdge(edge::LineSegment, obsList::Vector{HyperRectangle})
+    function isCollidingEdge(line::LineSegment, obsList::Vector{HyperRectangle})
         for obs in obsList
             rectLines = decompRect(obs)
-            for line in rectLines
-                if intersects(edge, line)[1]
+            for rectline in rectLines
+                if intersects(line, rectline)[1]
                     return true
                 end
             end
@@ -114,7 +122,23 @@ module algfxn
         # or just return list with distances included for now...
         return nearestNodes 
     end
+    
+    function costPath(solPath)
+        pathcost = 0
+        for i in 2:length(solPath)
+            curN  = solPath[i].state
+            prevN = solPath[i-1].state
+            pathcost += min_euclidean(Vec(curN), Vec(prevN))
+        end
+        return pathcost
+    end
 
+    function findNode(nodeID, nodeslist)
+        #since we haven't removed any nodes, nodeslist should be sorted by index. but just in case, let's search through it
+        index = findfirst([node.id for node in nodeslist], nodeID)
+        return nodeslist[index]
+    end
+#end
 
 end
 
@@ -129,7 +153,9 @@ function preprocessPRM(room, parameters)
 
     # Sample points, create list of nodes 
     for i in 1:numPts
-        n = Point(rand(1.:roomWidth),rand(1.:roomHeight)) #new point in room
+        xrand = rand(Uniform(1, roomWidth-1))
+        yrand = rand(Uniform(1, roomWidth-1))
+        n = Point(xrand, yrand) #new point in room
         if !algfxn.isCollidingNode(n, obstacles) #todo
             newNode = alg.GraphNode(currID, n)
             currID += 1
@@ -144,8 +170,8 @@ function preprocessPRM(room, parameters)
         for endnode in neighbors
             candidateEdge = LineSegment(startnode.state, endnode.state)
             if !algfxn.isCollidingEdge(candidateEdge, obstacles) #todo
-                line = LineSegment(startnode.state, endnode.state)
-                newEdge = alg.Edge(startnode.id, endnode.id, line) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
+                #line = LineSegment(startnode.state, endnode.state)
+                newEdge = alg.Edge(startnode.id, endnode.id) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
                 push!(edgeslist, newEdge)
             end
         end
@@ -157,22 +183,234 @@ function preprocessPRM(room, parameters)
 end
 
 
-function plotRoom(room, nodeslist, edgeslist)
+function plotRoom(room)
     roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
-    plot!(walls)
-    plot!(obstacles)
+
+    sizePlot = (600,600)
+    plot()
+
+    print("\nPlotting Room\n")
+    plot!(walls, fillalpha=0.1)
+    plot!(obstacles, fillalpha=0.5)
+
+    # this should come at the end
+    plot!(show=true, opacity=0.5, legend=false, size=sizePlot, 
+          yaxis=( (-5,roomHeight+5), 0:1:roomHeight), xaxis=( (-5,roomWidth+5), 0:1:roomWidth),
+          foreground_color_grid= :black) 
 end
 
+module recipes()
+    using GeometryTypes
+    using Plots
+
+    @recipe function f(r::HyperRectangle)
+        points = decompose(Point{2,Float64}, r)
+        rectpoints = points[[1,2,4,3],:]
+        xs = [pt[1] for pt in rectpoints];
+        ys = [pt[2] for pt in rectpoints];
+        seriestype := :shape
+        color = :orange
+        #m = (:black, stroke(0))
+        s = Shape(xs[:], ys[:])
+    end
+
+    @recipe function f(pt::Point)
+        xs = [pt[1]]
+        ys = [pt[2]]
+        seriestype --> :scatter
+        color := :orange
+        markersize := 6
+        xs, ys
+    end
+    
+    @recipe function f(l::LineSegment)
+        xs = [ l[1][1], l[2][1] ]
+        ys = [ l[1][2], l[2][2] ]
+        # seriestype = :line
+        color = :red
+        lw := 3
+        xs, ys
+    end
+
+
+    @recipe function f(rectList::Vector{<:HyperRectangle})
+        for r in rectList
+            @series begin
+                r 
+            end
+        end
+    end
+
+    @recipe function f(ptList::Vector{<:Point})
+        for p in ptList
+            @series begin
+                p
+            end
+        end
+    end
+
+    @recipe function f(lineList::Vector{<:LineSegment})
+        for l in lineList 
+            @series begin
+                l 
+            end
+        end
+    end
+
+end 
+
+
+
+function getSuccessors(curNode, edgeslist, nodeslist) #assuming bidirectional for now
+    #Find all edges that start or end at current node, and then make a list of the corresponding start or end nodes
+    nodeID = curNode.id
+    successorNodeIDs = Vector{Int}()
+    successors = Vector{alg.GraphNode}()
+
+    for e in edgeslist
+        if e.startID == nodeID
+            push!(successorNodeIDs, e.endID)
+        end
+        if e.endID == nodeID #should I include endID? it is bidirectional after all. 
+            push!(successorNodeIDs,  e.startID) #yes, because local planner connects in bidirectional way
+        end
+    end
+
+    for id in successorNodeIDs
+        node = algfxn.findNode(id, nodeslist)
+        push!(successors, node)
+    end
+
+    return successors
+end
+
+function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
+    # to find nearest node, set connect radius to be infinity for now #todo
+    connectRadius = 99;
+    n_nearStart= algfxn.findNearestNodes(startstate, nodeslist, connectRadius) #Get distance from start, for all points in graph.
+    n_nearGoal= algfxn.findNearestNodes(goalstate, nodeslist, connectRadius) 
+
+    #remove nodes that we cannot reach in a straight line without going through an obstacle
+    #todo: this is expensive, we should only check distances in order
+
+    sort!(n_nearStart, by=n_nearStart->n_nearStart[2])[1][1] #Sort by distance and pick node with smallest distance from start
+    sort!(n_nearGoal, by=n_nearGoal->n_nearGoal[2])[1][1]
+
+    for n in n_nearStart 
+        candidateline = LineSegment(Vec(startstate), Vec(n))
+        if !algfxn.isCollidingEdge(candidateline, obstaclesList)
+            nodestart = n
+            break
+        end
+    end
+
+
+    print("This is the beginState $(startstate) and the endState $(goalstate)\n")
+    print("This is the beginVertex--> $(nodestart) >>> and the endVertex--> $(nodegoal)\n")
+
+    pathNodes = Vector{alg.GraphNode}()
+    visited = Vector{alg.GraphNode}() #nodes we've searched through
+
+    frontier = PriorityQueue()
+    queue1 = alg.queueTmp(nodestart, pathNodes, 1) 
+    enqueue!(frontier, queue1, 1) #root node has cost 0  
+    pathcost = 99999
+
+    # Astar search: 
+    while length(frontier) != 0
+        front = DataStructures.dequeue!(frontier)
+        pathVertices = []
+
+        curNode, pathNodes, totalEdgeCost = front.node, front.statesList, front.cost
+
+        if curNode == nodegoal
+            print("Hurrah! endState reached! \n")
+            unshift!(pathNodes, nodestart) #prepend startVertex back to pathVertices
+
+            finalPathCost = algfxn.costPath(pathNodes) #Assuming edge cost is Euclidean cost
+            isPathFound = true
+            return (finalPathCost, isPathFound, pathNodes) #list of nodes in solution path
+
+        else
+            if !(curNode in visited) 
+                push!(visited, curNode) # Add all successors to the stack
+
+                for candidateNode in getSuccessors(curNode, edgeslist, nodeslist)
+                    newEdgeCost = min_euclidean(Vec(curNode.state),
+                                                Vec(candidateNode.state))
+                    #edgecost is euclidean dist(state,state). better to pass
+                   # Node than to perform node lookup everytime (vs passing id)
+                    f_x = totalEdgeCost + newEdgeCost + min_euclidean(Vec(candidateNode.state), Vec(nodegoal.state)) #heuristic = euclidean distance to end goal
+                    p = deepcopy(pathNodes)
+                    push!(p, candidateNode)
+                    if !(candidateNode in keys(frontier))
+                        newQ = alg.queueTmp(candidateNode, p, ceil(totalEdgeCost+ newEdgeCost))
+                        enqueue!(frontier, newQ, ceil(f_x)) 
+                    end
+                end
+
+            end
+        end
+    end    
+
+    # Return None if no solution found
+    #@printf("No solution found! This is length of frontier, %d\n", length(frontier))
+    finalPathCost = Void
+    isPathFound = false
+    pathNodes = Void
+    return (finalPathCost, isPathFound, pathNodes)
+end
+
+function plotPRM(roadmap, solPath, title)
+    startstate, goalstate, nodeslist, edgeslist = roadmap.startstate, roadmap.goalstate, roadmap.nodeslist, roadmap.edgeslist
+
+    x = [n.state[1] for n in nodeslist]
+    y = [n.state[2] for n in nodeslist]
+    scatter!(x,y, color=:black) 
+
+    edgeXs, edgeYs = [], []
+    for e in edgeslist
+        startN = algfxn.findNode(e.startID, nodeslist)
+        endN = algfxn.findNode(e.endID, nodeslist)
+        x1,y1 = startN.state[1], startN.state[2]
+        x2,y2 = endN.state[1], endN.state[2]
+        push!(edgeXs, x1, x2, NaN) #the NaNs, keep spaces between edges correctly unplotted
+        push!(edgeYs, y1, y2, NaN)
+    end
+
+    plot!( edgeXs, edgeYs, color=:tan, linewidth=0.3)
+    # todo: path cost should actually include distance from stand end to nearest nodes in the graph
+
+    plotWinningPath(solPath)
+
+    title!(title)
+end
+
+function plotWinningPath(solPath)
+    if solPath != Void
+        xPath = [n.state[1] for n in solPath] 
+        yPath = [n.state[2] for n in solPath]
+        #cost = 0
+        #for i in 2:length(solPath)
+        #    curV  = solPath[i].state
+        #    prevV = solPath[i-1].state
+        #    cost += distPt(curV, prevV)
+        #end
+        plot!( xPath, yPath, color = :orchid, linewidth=3)
+    end
+end
 
 function main()
     print("Hi")
 
-    ## Definte room
-    obs1 = HyperRectangle(Vec(8,3.), Vec(2,15.)) #Todo
-    obstacles = Vector{HyperRectangle}()
-    push!(obstacles, obs1)
+    ## Define room
+    obs1 = HyperRectangle(Vec(8,3.), Vec(2,2.)) #Todo
+    obs2 = HyperRectangle(Vec(4,4.), Vec(2,10.)) #Todo
 
-    w,h  = 21,21
+    obstacles = Vector{HyperRectangle}()
+    push!(obstacles, obs1, obs2)
+
+    w,h  = 20,20
     walls = HyperRectangle(Vec(0.,0), Vec(w,h))
 
     r = alg.Room(w,h,walls,obstacles)
@@ -185,10 +423,23 @@ function main()
 
     ## Plot preprocessing results
 
-    plotRoom(r, nodeslist, edgeslist)
+    plotRoom(r)
 
-    ## Query PRM
-    #queryPRM(Point(0.,0), Point(18.,18), nodeslist, edgeslist)
+    # todo: could write a queryPRM that takes a set of start and goal nodes, and returns answers for all of them
+    ## Query created RM
+    startstate = Point(1.,0)
+    goalstate = Point(18.,18)
+    pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
+
+
+    ## Plot path found
+    title = "PRM with # samples =$numSamples, resulting in # pts=$length(nodeslist). Pathfound = $isPathFound"
+    z = typeof(nodeslist)
+    z2 = typeof(edgeslist)
+    print("\n $z, $z2\n")
+    roadmap = alg.roadmap(startstate, goalstate, nodeslist, edgeslist)
+
+    plotPRM(roadmap, solPath, title::String)
 
 ####
 #startGoal = alg.GraphNode(0, Point(0,0))
@@ -196,153 +447,6 @@ function main()
 
 end
 
-module recipes()
-using GeometryTypes
-using Plots
-
-    sizePlot = (400,400)
-    plot(opacity=0.5, legend=false, size=sizePlot, yaxis=( (0,10), 0:1:10), xaxis=( (0,10), 0:1:10), foreground_color_grid= :cyan) 
-
-@recipe function f(r::HyperRectangle)
-    points = decompose(Point{2,Float64}, r)
-    rectpoints = points[[1,2,4,3],:]
-    xs = [pt[1] for pt in rectpoints];
-    ys = [pt[2] for pt in rectpoints];
-    seriestype := :shape
-    color = :orange
-	#m = (:black, stroke(0))
-	s = Shape(xs[:], ys[:])
-end
-
-@recipe function f(pt::Point)
-    xs = [pt[1]]
-    ys = [pt[2]]
-    seriestype --> :scatter
-    color := :orange
-    markersize := 6
-    xs, ys
-end
- 
-@recipe function f(l::LineSegment)
-    xs = [ l[1][1], l[2][1] ]
-    ys = [ l[1][2], l[2][2] ]
-    # seriestype = :line
-    color = :red
-    lw := 3
-    xs, ys
-end
-
-
-@recipe function f(rectList::Vector{<:HyperRectangle})
-    for r in rectList
-	  @series begin
-         r 
-	  end
-   end
-end
-
-@recipe function f(ptList::Vector{<:Point})
-    for p in ptList
-	  @series begin
-         p
-	  end
-   end
-end
-
-@recipe function f(lineList::Vector{<:LineSegment})
-    for l in lineList 
-	  @series begin
-         l 
-	  end
-   end
-end
-end 
 main()
 
-# 
-# function getSuccessors(curNode, edgeslist, nodeslist) #assuming bidirectional for now
-    # nodeID = curNode.id
-    # successorIDs = Vector{Int}()
-    # successors = Vector{Point}()
-# 
-    # for e in edgeslist
-        # if e.startID == nodeID
-            # push!(successorIDs, e.endID)
-        # end
-        # if e.endID == nodeID #should I include endID? it is bidirectional after all. 
-            # push!(successorIDs, e.startID) #yes, because local planner connects in bidirectional way
-        # end
-    # end
-# 
-    # for id in successorIDs
-        # node = findNode(id, nodeslist)
-        # push!(successors, node)
-    # end
-# 
-    # return successors
-# end
-# 
-# function queryPRM( startstate, goalstate, nodeslist, edgeslist)
-    # # to find nearest node, set connect radius to be infinity for now #todo
-    # connectRadius = 99;
-    # nearstart = algfxn.findNearestNodes(startstate, nodeslist, connectRadius) # parent point #TODO
-    # nodestart = sort(nearstart, by=nearstart->nearstart[2])[1][1]
-    # neargoal = algfxn.findNearestNodes(goalstate, nodeslist, connectRadius) # parent point #TODO
-    # nodegoal = sort(neargoal, by=neargoal->neargoal[2])[1][1]
-# 
-    # print("This is the beginState $(startstate) and the endState $(goalstate)\n")
-    # print("This is the beginVertex--> $(nodestart) >>> and the endVertex--> $(nodegoal)\n")
-# end
-# 
 
-
-# function queryPRM(beginState, endState, nlist, edgeslist)
-    # foo = rrt.queueTmp(nodestart, pathNodes, 1) 
-    # frontier = PriorityQueue() #rrt.tempQueueType, Int
-    # enqueue!(frontier, foo, 1) #root node has cost 0  
-	# zcost = 99999
-# 
-    # while length(frontier) != 0
-        # tmp = DataStructures.dequeue!(frontier)
-        # pathVertices = []
-        # currNode, pathVertices, totaledgecost = tmp.v, tmp.statesList, tmp.cost
-# 
-        # if curVertex == endVertex 
-            # print("Hurrah! endState reached! \n")
-            # unshift!(pathVertices, beginVertex) #prepend startVertex back to pathVertices
-			# zcost = costPath(pathVertices)
-            # return (zcost, true, pathVertices) #list of nodes in solution path
-# 
-        # else
-            # #@show visited
-            # #@show curVertex
-            # if !(curVertex in visited) 
-                # #print("curVertex not in visited\n")
-                # push!(visited, curVertex) # Add all successors to the stack
-# 
-                # for newVertex in getSuccessors(curVertex, edgeslist, nlist)
-                # #print("\n")
-                # #print("newvertex --> $(newVertex) \n")
-                    # newEdgeCost = distPt(curVertex.state, newVertex.state) #heuristic is dist(state,state). better to pass Node than to perform node lookup everytime (vs passing id)
-                    # f_x = totaledgecost + newEdgeCost + distPt(newVertex.state, endVertex.state) #heuristic = distPt 
-                    # p = deepcopy(pathVertices)
-                    # push!(p,newVertex)
-                # #@show pathVertices
-                    # if !(newVertex in keys(frontier))
-                        # #print("newvertex --> $(newVertex) >>> was not in frontier \n")
-                        # tmpq = rrt.tempQueueType(newVertex, p, ceil(totaledgecost + newEdgeCost))
-                        # enqueue!(frontier,tmpq, ceil(f_x)) 
-                        # #print("Added state --> $(tmpq) >>> to frontier \n")
-                        # #print("This is frontier top --> $(peek(frontier)) \n")
-                    # end
-                # end
-# 
-            # end
-        # end
-    # end    
-    # # Return None if no solution found
-    # #@printf("No solution found! This is length of frontier, %d\n", length(frontier))
-	# zcost = 99999
-    # return (zcost, false, Void)
-# end
-# 

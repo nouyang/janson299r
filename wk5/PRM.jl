@@ -289,7 +289,7 @@ function queryPRM(beginState, endState, nlist, edgeslist)
     frontier = PriorityQueue() #rrt.tempQueueType, Int
     # Ah! I'm to use heaps instead (specific implementation of priorityqueues)
     enqueue!(frontier, foo, 1) #root node has cost 0  
-	zcost = 99999
+    zcost = 99999
 
     while length(frontier) != 0
         #print("\n\n=========== NEW ITERATION\n")

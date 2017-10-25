@@ -33,6 +33,53 @@ Stacktrace:
         nearestNodes = Vector{Tuple{alg.GraphNode, Float64}}()
         nearestNodes = Vector{Tuple{alg.GraphNode, Int64}}()
 
+
+###
+I do like how I can copy and past into the command prompt and it will automatically strip out 'julia>'
+
 ## sort by second row
 julia> sort(a, by=a->a[2])
 
+
+## find by a specific field of type in an array
+julia> a = alg.GraphNode(1,Point(2,3))
+alg.GraphNode(1, [2.0, 3.0])
+
+julia> findfirst(a[1], ^C
+
+julia> b = alg.GraphNode(2,Point(3,1))
+alg.GraphNode(2, [3.0, 1.0])
+
+julia> z = [a,b]
+2-element Array{alg.GraphNode,1}:
+ alg.GraphNode(1, [2.0, 3.0])
+ alg.GraphNode(2, [3.0, 1.0])
+
+julia> c = alg.GraphNode(4, Point(3,1))
+alg.GraphNode(4, [3.0, 1.0])
+
+julia> d = alg.GraphNode(3,Point(2,1))
+alg.GraphNode(3, [2.0, 1.0])
+
+julia> z = [b,a,c,d]
+4-element Array{alg.GraphNode,1}:
+ alg.GraphNode(2, [3.0, 1.0])
+ alg.GraphNode(1, [2.0, 3.0])
+ alg.GraphNode(4, [3.0, 1.0])
+ alg.GraphNode(3, [2.0, 1.0])
+
+julia> findfirst([foo.id for foo in z], 2)
+1
+
+ERROR: LoadError: MethodError: no method matching min_euclidean(::GeometryTypes.Point{2,Float64}, ::GeometryTypes.Point{2,Float64})
+Stacktrace:
+
+                    newEdgeCost = min_euclidean(Vec(curNode.state), Vec(candidateNode.state)) #heuristic is dist(state,state). better to pass Node than to perform node lookup everytime (vs passing id)
+
+@ need Vec(Point)
+
+# random pfloat
+
+https://stackoverflow.com/questions/46305156/generating-random-float-points-in-julia
+
+https://www.reddit.com/r/Julia/comments/6au3n5/random_floating_point_number/
