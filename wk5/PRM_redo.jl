@@ -157,17 +157,23 @@ function preprocessPRM(room, parameters)
 end
 
 
+function plotRoom(room, nodeslist, edgeslist)
+    roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
+    plot!(walls)
+    plot!(obstacles)
+end
+
 
 function main()
     print("Hi")
 
     ## Definte room
-    obs1 = HyperRectangle(Vec(8,3), Vec(2,15)) #Todo
+    obs1 = HyperRectangle(Vec(8,3.), Vec(2,15.)) #Todo
     obstacles = Vector{HyperRectangle}()
     push!(obstacles, obs1)
 
     w,h  = 21,21
-    walls = HyperRectangle( Vec(0,0), Vec(w,h))
+    walls = HyperRectangle(Vec(0.,0), Vec(w,h))
 
     r = alg.Room(w,h,walls,obstacles)
     numSamples = 10
@@ -179,15 +185,78 @@ function main()
 
     ## Plot preprocessing results
 
+    plotRoom(r, nodeslist, edgeslist)
+
     ## Query PRM
-    queryPRM(Point(0.,0), Point(18.,18), nodeslist, edgeslist)
+    #queryPRM(Point(0.,0), Point(18.,18), nodeslist, edgeslist)
 
 ####
-startGoal = alg.GraphNode(0, Point(0,0))
-endNode = alg.GraphNode(0, Point(0,0))
+#startGoal = alg.GraphNode(0, Point(0,0))
+#endNode = alg.GraphNode(0, Point(0,0))
 
 end
 
+module recipes()
+using GeometryTypes
+using Plots
+
+    sizePlot = (400,400)
+    plot(opacity=0.5, legend=false, size=sizePlot, yaxis=( (0,10), 0:1:10), xaxis=( (0,10), 0:1:10), foreground_color_grid= :cyan) 
+
+@recipe function f(r::HyperRectangle)
+    points = decompose(Point{2,Float64}, r)
+    rectpoints = points[[1,2,4,3],:]
+    xs = [pt[1] for pt in rectpoints];
+    ys = [pt[2] for pt in rectpoints];
+    seriestype := :shape
+    color = :orange
+	#m = (:black, stroke(0))
+	s = Shape(xs[:], ys[:])
+end
+
+@recipe function f(pt::Point)
+    xs = [pt[1]]
+    ys = [pt[2]]
+    seriestype --> :scatter
+    color := :orange
+    markersize := 6
+    xs, ys
+end
+ 
+@recipe function f(l::LineSegment)
+    xs = [ l[1][1], l[2][1] ]
+    ys = [ l[1][2], l[2][2] ]
+    # seriestype = :line
+    color = :red
+    lw := 3
+    xs, ys
+end
+
+
+@recipe function f(rectList::Vector{<:HyperRectangle})
+    for r in rectList
+	  @series begin
+         r 
+	  end
+   end
+end
+
+@recipe function f(ptList::Vector{<:Point})
+    for p in ptList
+	  @series begin
+         p
+	  end
+   end
+end
+
+@recipe function f(lineList::Vector{<:LineSegment})
+    for l in lineList 
+	  @series begin
+         l 
+	  end
+   end
+end
+end 
 main()
 
 # 

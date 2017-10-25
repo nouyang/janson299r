@@ -192,7 +192,7 @@ function fuzzyFindNodeFromState(nodestate, nodeslist)
 
     fuzzyDist = 1
     while res == Void
-        for n in nodeslist
+        for n in nodeslist,
             nFuzzyState = fuzzyState(n.state, fuzzyDist)
             if nodestate in nFuzzyState
                 #print("\nFuzzy search required to find node, using distance $(fuzzyDist)\n")
