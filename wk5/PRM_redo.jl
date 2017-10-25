@@ -35,7 +35,7 @@ module alg
         height::Int64
         #walls::Vector{LineSegment{Point}}
         walls::HyperRectangle
-        obstacles::Vector{Obstacle}
+        obstacles::Vector{HyperRectangle}
     end
 
     struct AlgParameters
@@ -63,6 +63,20 @@ end
 
 module algfxn 
     using GeometryTypes
+    using alg
+
+    function decompRect(r::HyperRectangle) #GeometryTypes.HyperRectangle{2,Float64}
+        corners = decompose(Point{2, Float64}, r)
+        corners = [Point(pt) for pt in corners]
+        lineBottom  = LineSegment(corners[1], corners[2])
+        lineTop     = LineSegment(corners[3], corners[4])
+        lineLeft    = LineSegment(corners[1], corners[3])
+        lineRight   = LineSegment(corners[2], corners[4])
+        lines = Vector{LineSegment}()
+        push!(lines, lineTop, lineRight, lineBottom, lineLeft)
+        return lines
+    end
+
 
     #function isCollidingNode(node::alg.GraphNode, obsList::Vector{alg.Obstacle}
     function isCollidingNode(node::Point{2, Float64}, obsList::Vector{HyperRectangle})
@@ -87,32 +101,26 @@ module algfxn
     end
 
 
-    function findNearestNodes(node, nodeslist, maxDist)
+    function findNearestNodes(nodestate, nodeslist, maxDist)
         # given maxDist, return all nodes within that distance of node
-        nearestNodes = Vector{Point}()
+        nearestNodes = Vector{Tuple{alg.GraphNode, Float64}}()
         for n in nodeslist
-            dist = norm(node.state - n.state)
+            dist = min_euclidean(Vec(nodestate), Vec(n.state))
             if dist < maxDist 
-                push!(nearestNodes, n)
+                push!(nearestNodes, (n, dist))
             end
         end
+        # return list sorted by distance?
+        # or just return list with distances included for now...
         return nearestNodes 
     end
 
-    function findNodeFromState(nodeState, nodeslist)
-        node = Void
-        for n in nodeslist
-            if n.state == nodestate
-                return n
-            end
-        end
-    end
 
 end
 
 function preprocessPRM(room, parameters) 
-    roomWidth, roomHeight, walls, obstacles = room
-    numPts, connectRadius = parameters
+    roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
+    numPts, connectRadius = parameters.numSamples, parameters.connectRadius
 
     nodeslist = Vector{alg.GraphNode}()
     edgeslist = Vector{alg.Edge}()
@@ -121,19 +129,21 @@ function preprocessPRM(room, parameters)
 
     # Sample points, create list of nodes 
     for i in 1:numPts
-        n = Point(rand(roomWidth),rand(roomHeight)) #new point in room
+        n = Point(rand(1.:roomWidth),rand(1.:roomHeight)) #new point in room
         if !algfxn.isCollidingNode(n, obstacles) #todo
-            newNode = alg.GraphNode(maxID, n)
-            maxID += 1
+            newNode = alg.GraphNode(currID, n)
+            currID += 1
             push!(nodeslist, newNode)
         end
     end
 
     # Connect each node to its neighboring nodes within a ball or radius r, creating edges
     for startnode in nodeslist 
-        neighbors = findNearestNodes(startnode, nodeslist, connectRadius) # parent point #TODO
+        neighbors = [item[1] for item in algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point #TODO
+        n = [algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point #TODO
         for endnode in neighbors
-            if !isCollidingEdge(startnode, endnode, obstacles) #todo
+            candidateEdge = LineSegment(startnode.state, endnode.state)
+            if !algfxn.isCollidingEdge(candidateEdge, obstacles) #todo
                 line = LineSegment(startnode.state, endnode.state)
                 newEdge = alg.Edge(startnode.id, endnode.id, line) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
                 push!(edgeslist, newEdge)
@@ -148,10 +158,8 @@ end
 
 
 
-
 function main()
     print("Hi")
-
 
     ## Definte room
     obs1 = HyperRectangle(Vec(8,3), Vec(2,15)) #Todo
@@ -159,17 +167,20 @@ function main()
     push!(obstacles, obs1)
 
     w,h  = 21,21
-    walls = HyperRectangle( Vec(0,0), Vec(l,w))
+    walls = HyperRectangle( Vec(0,0), Vec(w,h))
 
-    r = Room(w,h,walls,obstacles)
+    r = alg.Room(w,h,walls,obstacles)
     numSamples = 10
     connectRadius = 10
     param = alg.AlgParameters(10,10)
 
     ## Run preprocessing
-    preprocessPRM(r, param)
+    nodeslist, edgeslist = preprocessPRM(r, param)
 
     ## Plot preprocessing results
+
+    ## Query PRM
+    queryPRM(Point(0.,0), Point(18.,18), nodeslist, edgeslist)
 
 ####
 startGoal = alg.GraphNode(0, Point(0,0))
@@ -178,3 +189,91 @@ endNode = alg.GraphNode(0, Point(0,0))
 end
 
 main()
+
+# 
+# function getSuccessors(curNode, edgeslist, nodeslist) #assuming bidirectional for now
+    # nodeID = curNode.id
+    # successorIDs = Vector{Int}()
+    # successors = Vector{Point}()
+# 
+    # for e in edgeslist
+        # if e.startID == nodeID
+            # push!(successorIDs, e.endID)
+        # end
+        # if e.endID == nodeID #should I include endID? it is bidirectional after all. 
+            # push!(successorIDs, e.startID) #yes, because local planner connects in bidirectional way
+        # end
+    # end
+# 
+    # for id in successorIDs
+        # node = findNode(id, nodeslist)
+        # push!(successors, node)
+    # end
+# 
+    # return successors
+# end
+# 
+# function queryPRM( startstate, goalstate, nodeslist, edgeslist)
+    # # to find nearest node, set connect radius to be infinity for now #todo
+    # connectRadius = 99;
+    # nearstart = algfxn.findNearestNodes(startstate, nodeslist, connectRadius) # parent point #TODO
+    # nodestart = sort(nearstart, by=nearstart->nearstart[2])[1][1]
+    # neargoal = algfxn.findNearestNodes(goalstate, nodeslist, connectRadius) # parent point #TODO
+    # nodegoal = sort(neargoal, by=neargoal->neargoal[2])[1][1]
+# 
+    # print("This is the beginState $(startstate) and the endState $(goalstate)\n")
+    # print("This is the beginVertex--> $(nodestart) >>> and the endVertex--> $(nodegoal)\n")
+# end
+# 
+
+
+# function queryPRM(beginState, endState, nlist, edgeslist)
+    # foo = rrt.queueTmp(nodestart, pathNodes, 1) 
+    # frontier = PriorityQueue() #rrt.tempQueueType, Int
+    # enqueue!(frontier, foo, 1) #root node has cost 0  
+	# zcost = 99999
+# 
+    # while length(frontier) != 0
+        # tmp = DataStructures.dequeue!(frontier)
+        # pathVertices = []
+        # currNode, pathVertices, totaledgecost = tmp.v, tmp.statesList, tmp.cost
+# 
+        # if curVertex == endVertex 
+            # print("Hurrah! endState reached! \n")
+            # unshift!(pathVertices, beginVertex) #prepend startVertex back to pathVertices
+			# zcost = costPath(pathVertices)
+            # return (zcost, true, pathVertices) #list of nodes in solution path
+# 
+        # else
+            # #@show visited
+            # #@show curVertex
+            # if !(curVertex in visited) 
+                # #print("curVertex not in visited\n")
+                # push!(visited, curVertex) # Add all successors to the stack
+# 
+                # for newVertex in getSuccessors(curVertex, edgeslist, nlist)
+                # #print("\n")
+                # #print("newvertex --> $(newVertex) \n")
+                    # newEdgeCost = distPt(curVertex.state, newVertex.state) #heuristic is dist(state,state). better to pass Node than to perform node lookup everytime (vs passing id)
+                    # f_x = totaledgecost + newEdgeCost + distPt(newVertex.state, endVertex.state) #heuristic = distPt 
+                    # p = deepcopy(pathVertices)
+                    # push!(p,newVertex)
+                # #@show pathVertices
+                    # if !(newVertex in keys(frontier))
+                        # #print("newvertex --> $(newVertex) >>> was not in frontier \n")
+                        # tmpq = rrt.tempQueueType(newVertex, p, ceil(totaledgecost + newEdgeCost))
+                        # enqueue!(frontier,tmpq, ceil(f_x)) 
+                        # #print("Added state --> $(tmpq) >>> to frontier \n")
+                        # #print("This is frontier top --> $(peek(frontier)) \n")
+                    # end
+                # end
+# 
+            # end
+        # end
+    # end    
+    # # Return None if no solution found
+    # #@printf("No solution found! This is length of frontier, %d\n", length(frontier))
+	# zcost = 99999
+    # return (zcost, false, Void)
+# end
+# 
