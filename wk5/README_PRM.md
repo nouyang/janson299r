@@ -96,3 +96,10 @@ ERROR: MethodError: no method matching enqueue!(::Type{DataStructures.PriorityQu
 Closest candidates are:
   enqueue!(::DataStructures.PriorityQueue, ::Any, ::Any) at /home/nrw/.julia/v0.6/DataStructures/src/priorityqueue.jl:238
 
+
+# markers
+
+
+http://matplotlib.org/api/markers_api.html
+
+http://docs.juliaplots.org/latest/examples/gr/#animation-with-subplots

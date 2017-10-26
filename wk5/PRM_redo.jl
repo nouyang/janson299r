@@ -166,7 +166,7 @@ module plotfxn
         ys = [pt[2]]
         seriestype --> :scatter
         color = :orange
-        markersize := 6
+        markersize := 3
         xs, ys
     end
     
@@ -248,6 +248,16 @@ module plotfxn
         if solPath != Void
             xPath = [n.state[1] for n in solPath] 
             yPath = [n.state[2] for n in solPath]
+            xstart, ystart = solPath[1].state
+            xend, yend = solPath[end].state
+            # plot start pt
+            scatter!([xstart], [ystart], 
+                     markercolor= :red, markershape = :circle,  markersize = 6, markerstrokealpha = 0.5, markerstrokewidth=1)
+            # plot goal pt
+            scatter!([xend], [yend], 
+                     markerstrokecolor = :green, markershape = :star,  markersize = 5, markerstrokealpha = 1, markerstrokewidth=5)
+
+            # plot path
             plot!( xPath, yPath, color = :orchid, linewidth=3)
         else
             print("\n --- No solution path found ----- \n")
@@ -397,8 +407,9 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
 
         if curNode == nodegoal
             print("Hurrah! endState reached! \n")
-            unshift!(pathNodes, nodestart) #prepend startNode back to pathVertices
-            unshift!(pathNodes, algT.GraphNode(0, startstate))
+            unshift!(pathNodes, nodestart) #prepend our first path node back to pathVertices
+            unshift!(pathNodes, algT.GraphNode(0, startstate)) #prepend the start 
+            push!(pathNodes, algT.GraphNode(0, goalstate)) #append the goal 
             finalPathCost = algfxn.costPath(pathNodes) #Assuming edge cost is Euclidean cost
             isPathFound = true
             return (finalPathCost, isPathFound, pathNodes) #list of nodes in solution path
@@ -451,8 +462,8 @@ function main()
     walls = HyperRectangle(Vec(0.,0), Vec(w,h))
 
     r = algT.Room(w,h,walls,obstacles)
-    numSamples = 20
-    connectRadius = 8
+    numSamples = 25
+    connectRadius =10 
     param = algT.AlgParameters(numSamples, connectRadius)
 
     ## Run preprocessing
@@ -470,7 +481,8 @@ function main()
     pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
 
     ## Plot path found
-    title = "PRM with # samples =$numSamples, \nresulting in # pts=$(length(nodeslist)). \nPathfound = $isPathFound"
+    title = "PRM with # samples =$numSamples, \nresulting in # pts=$(length(nodeslist)). \nPathfound = $isPathFound, 
+        \n Pathcost = $pathcost"
     roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
 
     plot = plotfxn.plotPRM(roadmap, solPath, title::String)
