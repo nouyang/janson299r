@@ -1,3 +1,13 @@
+####################################################
+
+#  Implementing PRM and functions for plotting PRM
+#  Parameters incude num samples, connection distance, a list of obstacles, and start and goal states
+#  Graph search implemented is Astar. Edge cost is assumed to be equal to euclidean distance.
+#  To use, call ` include("PRM.jl") ` from any Julia file in the same folder.
+#  nouyang 2017
+
+####################################################
+
 using Plots
 using DataStructures
 using GeometryTypes 
@@ -60,12 +70,13 @@ module algT
         edgeslist::Vector{Edge}
     end
 
-    #Base.show(io::IO, v::Vertex) = print(io, "V($(v.id), ($(v.state.x),$(v.state.y)))")
-    #Base.show(io::IO, p::Point) = print(io, "P($(p.x),$(p.y))")
-    #Base.show(io::IO, q::tempQueueType) = print(io, "Q($(q.v),$(q.statesList) $(q.cost))")
+    #Base.show(io::IO, v::Vertex) =# #print(io, "V($(v.id), ($(v.state.x),$(v.state.y)))")
+    #Base.show(io::IO, p::Point) =# #print(io, "P($(p.x),$(p.y))")
+    #Base.show(io::IO, q::tempQueueType) =# #print(io, "Q($(q.v),$(q.statesList) $(q.cost))")
     Base.isless(q1::queueTmp, q2::queueTmp) = q1.cost < q2.cost
     #Base.isless(p1::Point, p2::Point) = q1.x< q2.x
     #Base.isless(p1::Point, p2::Point) = q1[1] < q2[1]
+
 end
 
 
@@ -211,7 +222,7 @@ module plotfxn
     function plotRoom(room)
         roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
         plot()
-        print("\nPlotting Room\n")
+       # #print("\nPlotting Room\n")
         plot!(walls, color =:black)
         plot!(obstacles, fillalpha=0.5)
     end
@@ -260,7 +271,7 @@ module plotfxn
             # plot path
             plot!( xPath, yPath, color = :orchid, linewidth=3)
         else
-            print("\n --- No solution path found ----- \n")
+           # #print("\n --- No solution path found ----- \n")
         end
     end
 
@@ -353,7 +364,7 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
     for (n, dist) in n_nearStart 
         # bar = typeof(startstate)
         # bar2 = typeof(n)
-        # print("\n$bar, $bar2\n")
+        ## #print("\n$bar, $bar2\n")
         candidateline = LineSegment(Point(startstate), Point(n.state))
         if !algfxn.isCollidingEdge(candidateline, obstaclesList)
             nodestart = n
@@ -372,16 +383,16 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
 
     if nodestart == algT.GraphNode(9999,Point(9999,9999))
         nodestart = algT.GraphNode(0, Point(0,0))
-        print("ahhhhhh didn't find a start node")
+        #print("ahhhhhh didn't find a start node")
     end
     if nodegoal == algT.GraphNode(9999,Point(9999,9999))
         nodegoal = algT.GraphNode(0, Point(0,0))
-        print("ahhhhhh didn't find a goal node")
+       # #print("ahhhhhh didn't find a goal node")
     end
 
 
-    print("This is the beginState $(startstate) and the endState $(goalstate)\n")
-    print("This is the beginVertex--> $(nodestart) >>> and the endVertex--> $(nodegoal)\n")
+   # #print("This is the beginState $(startstate) and the endState $(goalstate)\n")
+   # #print("This is the beginVertex--> $(nodestart) >>> and the endVertex--> $(nodegoal)\n")
 
 
     pathNodes = Vector{algT.GraphNode}()
@@ -400,7 +411,7 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
         curNode, pathNodes, totalEdgeCost = front.node, front.statesList, front.cost
 
         if curNode == nodegoal
-            print("Hurrah! endState reached! \n")
+           # #print("Hurrah! endState reached! \n")
             unshift!(pathNodes, nodestart) #prepend our first path node back to pathVertices
             unshift!(pathNodes, algT.GraphNode(0, startstate)) #prepend the start 
             push!(pathNodes, algT.GraphNode(0, goalstate)) #append the goal 
@@ -438,62 +449,3 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
     return (finalPathCost, isPathFound, pathNodes)
 end
 
-
-####################
-######### MAIN
-####################
-
-function main()
-    numSamples = 25
-    connectRadius =10 
-    param = algT.AlgParameters(numSamples, connectRadius)
-
-    print("\n ---- Running PRM ------ \n")
-    ## Define obstacles
-    obs1 = HyperRectangle(Vec(8,3.), Vec(2,2.)) #Todo
-    obs2 = HyperRectangle(Vec(4,4.), Vec(2,10.)) #Todo
-
-    obstacles = Vector{HyperRectangle}()
-    push!(obstacles, obs1, obs2)
-
-    # Define walls
-    walls = Vector{LineSegment}()
-    w,h  = 20,20
-    perimeter = HyperRectangle(Vec(0.,0), Vec(w,h))
-    roomPerimeter = algfxn.decompRect(perimeter)
-    #internalwalls =  (linesegs
-    for l in roomPerimeter
-        push!(walls, l)
-    end
-
-    r = algT.Room(w,h,walls,obstacles)
-
-    ## Run preprocessing
-    nodeslist, edgeslist = preprocessPRM(r, param)
-
-    ## Plot preprocessing results
-
-    plotfxn.plotRoom(r)
-
-    # todo: could write a queryPRM that takes a set of start and goal nodes, and returns answers for all of them
-    ## Query created RM
-    startstate = Point(1.,1)
-    goalstate = Point(18.,18)
-
-    pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
-
-    ## Plot path found
-    title = "PRM with # samples =$numSamples, \nPathfound = $isPathFound, \npathcost = $pathcost"
-    roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
-
-    plot = plotfxn.plotPRM(roadmap, solPath, title::String)
-
-    plot!(legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
-
-####
-#startGoal = algT.GraphNode(0, Point(0,0))
-#endNode = algT.GraphNode(0, Point(0,0))
-
-end
-
-main()

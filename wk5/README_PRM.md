@@ -142,3 +142,15 @@ I'm using both a different geometric/collision-checking module (they define
 their own), as well as plotting library (they and I both have specialized
 functions for plotting the aforementioned shape types).
 
+
+# plotting
+
+`plot(rand(100,6),layout=@layout([a b;c]),title=["A" "B" "C"],title_location=:left,left_margin=[20mm 0mm],bottom_margin=50px,xrotation=60)`
+
+http://docs.juliaplots.org/latest/examples/gr/#animation-with-subplots
+
+GUHhhhhhhhhhhhhhhhhhhh how does @layout work/???? where are a b c coming from
+http://docs.juliaplots.org/latest/layouts/
+
+Ok right this is silly, go back to old method. 
+I guess the issue was a bunch of the plots weren't showing. Guh. Why is this plotting thing so flaky?!?!?!?!
