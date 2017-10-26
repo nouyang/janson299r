@@ -212,7 +212,7 @@ module plotfxn
         roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
         plot()
         print("\nPlotting Room\n")
-        plot!(walls, fillalpha=0.1)
+        plot!(walls, color =:black)
         plot!(obstacles, fillalpha=0.5)
     end
 
@@ -488,7 +488,7 @@ function main()
 
     plot = plotfxn.plotPRM(roadmap, solPath, title::String)
 
-    plot!(legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:black)
+    plot!(legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
 
 ####
 #startGoal = algT.GraphNode(0, Point(0,0))

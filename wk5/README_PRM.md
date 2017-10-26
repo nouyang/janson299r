@@ -103,3 +103,42 @@ Closest candidates are:
 http://matplotlib.org/api/markers_api.html
 
 http://docs.juliaplots.org/latest/examples/gr/#animation-with-subplots
+
+
+# Summary improvements
+Allow for plotting an array of arbitrary number of obstacles
+Fixed issue with snapping of start and end goals
+Switched to random floating point, and not just random integer, for sampling
+
+
+# Issues
+- > Calcified into having rectangular obstacles -- should allow for arbitrary shapes
+
+
+In retrospect, if I were to allow arbitrary obstacle shapes, I should
+definitely go for the "the edge I am checking is a super thin rectangle, that I
+am checking against the obstacles" as opposed to "assuming the obstacle is
+rectangular, wrte a decompRect function to turn the rectangle into lines."
+Admittedly, even in
+http://nbviewer.jupyter.org/github/schmrlng/MotionPlanning.jl/blob/master/docs/MotionPlanning.ipynb
+The objects are either polygonal or circles. So I could easily decompose the
+shape into lines, as before. So either approach would still work. 
+
+
+
+## thoughts
+
+Well, this is both embarrassing (what did I spend all my time on??) and also
+super useful. Would you prefer / recommend / have no opinion on if I
+standardize against their codebase? Right now, for instance, my obstacles are
+locked into being rectangular. It wouldn't be much work to allow for arbitrary
+polygons using my current approach, but I could instead put that time into
+porting over the code.
+
+Eh, but then again, there hasn't been an update in 11 months... maybe a dead
+project then.
+
+I'm using both a different geometric/collision-checking module (they define
+their own), as well as plotting library (they and I both have specialized
+functions for plotting the aforementioned shape types).
+
