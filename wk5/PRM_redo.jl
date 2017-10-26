@@ -4,7 +4,7 @@ using GeometryTypes
 using Distributions
 gr()
 
-module alg
+module algT
     using GeometryTypes 
     #export GraphNode, Edge, Obstacle, Room
     # struct PointAlg
@@ -48,8 +48,8 @@ module alg
 
     struct queueTmp
         #pt::Point{2, Float64}
-        node::alg.GraphNode
-        statesList::Vector{alg.GraphNode}
+        node::algT.GraphNode
+        statesList::Vector{algT.GraphNode}
         cost::Int64
     end
 
@@ -71,7 +71,7 @@ end
 
 module algfxn 
     using GeometryTypes
-    using alg
+    using algT
 
     function decompRect(r::HyperRectangle) #GeometryTypes.HyperRectangle{2,Float64}
         corners = decompose(Point{2, Float64}, r)
@@ -86,7 +86,7 @@ module algfxn
     end
 
 
-    #function isCollidingNode(node::alg.GraphNode, obsList::Vector{alg.Obstacle}
+    #function isCollidingNode(node::algT.GraphNode, obsList::Vector{algT.Obstacle}
     function isCollidingNode(node::Point{2, Float64}, obsList::Vector{HyperRectangle})
         for obs in obsList
             if contains(obs, node)
@@ -111,7 +111,7 @@ module algfxn
 
     function findNearestNodes(nodestate, nodeslist, maxDist)
         # given maxDist, return all nodes within that distance of node
-        nearestNodes = Vector{Tuple{alg.GraphNode, Float64}}()
+        nearestNodes = Vector{Tuple{algT.GraphNode, Float64}}()
         for n in nodeslist
             dist = min_euclidean(Vec(nodestate), Vec(n.state))
             if dist < maxDist 
@@ -142,66 +142,12 @@ module algfxn
 
 end
 
-function preprocessPRM(room, parameters) 
-    roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
-    numPts, connectRadius = parameters.numSamples, parameters.connectRadius
+module plotAlg
 
-    nodeslist = Vector{alg.GraphNode}()
-    edgeslist = Vector{alg.Edge}()
-
-    currID = 1
-
-    # Sample points, create list of nodes 
-    for i in 1:numPts
-        xrand = rand(Uniform(1, roomWidth-1))
-        yrand = rand(Uniform(1, roomWidth-1))
-        n = Point(xrand, yrand) #new point in room
-        if !algfxn.isCollidingNode(n, obstacles) #todo
-            newNode = alg.GraphNode(currID, n)
-            currID += 1
-            push!(nodeslist, newNode)
-        end
-    end
-
-    # Connect each node to its neighboring nodes within a ball or radius r, creating edges
-    for startnode in nodeslist 
-        neighbors = [item[1] for item in algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point #TODO
-        n = [algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point #TODO
-        for endnode in neighbors
-            candidateEdge = LineSegment(startnode.state, endnode.state)
-            if !algfxn.isCollidingEdge(candidateEdge, obstacles) #todo
-                #line = LineSegment(startnode.state, endnode.state)
-                newEdge = alg.Edge(startnode.id, endnode.id) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
-                push!(edgeslist, newEdge)
-            end
-        end
-    end
-
-    #@show edgeslist 
-    #@printf("\nPath found? %s Length of nodeslist: %d\n", isPathFound, length(nodeslist))
-    return nodeslist, edgeslist
-end
-
-
-function plotRoom(room)
-    roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
-
-    sizePlot = (600,600)
-    plot()
-
-    print("\nPlotting Room\n")
-    plot!(walls, fillalpha=0.1)
-    plot!(obstacles, fillalpha=0.5)
-
-    # this should come at the end
-    plot!(show=true, opacity=0.5, legend=false, size=sizePlot, 
-          yaxis=( (-5,roomHeight+5), 0:1:roomHeight), xaxis=( (-5,roomWidth+5), 0:1:roomWidth),
-          foreground_color_grid= :black) 
-end
-
-module recipes()
     using GeometryTypes
     using Plots
+
+    ###  Plots.jl recipes
 
     @recipe function f(r::HyperRectangle)
         points = decompose(Point{2,Float64}, r)
@@ -255,17 +201,105 @@ module recipes()
                 l 
             end
         end
+
+    end 
+
+
+    ####
+
+    function plotRoom(room)
+        roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
+        plot()
+        print("\nPlotting Room\n")
+        plot!(walls, fillalpha=0.1)
+        plot!(obstacles, fillalpha=0.5)
     end
 
-end 
+    function plotPRM(roadmap, solPath, title)
+        startstate, goalstate, nodeslist, edgeslist = roadmap.startstate, roadmap.goalstate, roadmap.nodeslist, roadmap.edgeslist
+
+        x = [n.state[1] for n in nodeslist]
+        y = [n.state[2] for n in nodeslist]
+        scatter!(x,y, color=:black) 
+
+        edgeXs, edgeYs = [], []
+        for e in edgeslist
+            startN = algfxn.findNode(e.startID, nodeslist)
+            endN = algfxn.findNode(e.endID, nodeslist)
+            x1,y1 = startN.state[1], startN.state[2]
+            x2,y2 = endN.state[1], endN.state[2]
+            push!(edgeXs, x1, x2, NaN) #the NaNs, keep spaces between edges correctly unplotted
+            push!(edgeYs, y1, y2, NaN)
+        end
+
+        plot!( edgeXs, edgeYs, color=:tan, linewidth=0.3)
+        # todo: path cost should actually include distance from stand end to nearest nodes in the graph
+
+        plotSolPath(solPath)
+        title!(title)
+    end
+
+    function plotSolPath(solPath)
+        print("\n ---Solution Path----- \n")
+        @show solPath
+        print("\n -------- \n")
+        if solPath != Void
+            xPath = [n.state[1] for n in solPath] 
+            yPath = [n.state[2] for n in solPath]
+            plot!( xPath, yPath, color = :orchid, linewidth=3)
+        else
+            print("\n --- No solution path found ----- \n")
+        end
+    end
 
 
+end
+
+function preprocessPRM(room, parameters) 
+    roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
+    numPts, connectRadius = parameters.numSamples, parameters.connectRadius
+
+    nodeslist = Vector{algT.GraphNode}()
+    edgeslist = Vector{algT.Edge}()
+
+    currID = 1
+
+    # Sample points, create list of nodes 
+    for i in 1:numPts
+        xrand = rand(Uniform(1, roomWidth-1))
+        yrand = rand(Uniform(1, roomWidth-1))
+        n = Point(xrand, yrand) #new point in room
+        if !algfxn.isCollidingNode(n, obstacles) #todo
+            newNode = algT.GraphNode(currID, n)
+            currID += 1
+            push!(nodeslist, newNode)
+        end
+    end
+
+    # Connect each node to its neighboring nodes within a ball or radius r, creating edges
+    for startnode in nodeslist 
+        neighbors = [item[1] for item in algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point #TODO
+        n = [algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point #TODO
+        for endnode in neighbors
+            candidateEdge = LineSegment(startnode.state, endnode.state)
+            if !algfxn.isCollidingEdge(candidateEdge, obstacles) #todo
+                #line = LineSegment(startnode.state, endnode.state)
+                newEdge = algT.Edge(startnode.id, endnode.id) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
+                push!(edgeslist, newEdge)
+            end
+        end
+    end
+
+    #@show edgeslist 
+    #@printf("\nPath found? %s Length of nodeslist: %d\n", isPathFound, length(nodeslist))
+    return nodeslist, edgeslist
+end
 
 function getSuccessors(curNode, edgeslist, nodeslist) #assuming bidirectional for now
     #Find all edges that start or end at current node, and then make a list of the corresponding start or end nodes
     nodeID = curNode.id
     successorNodeIDs = Vector{Int}()
-    successors = Vector{alg.GraphNode}()
+    successors = Vector{algT.GraphNode}()
 
     for e in edgeslist
         if e.startID == nodeID
@@ -293,26 +327,57 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
     #remove nodes that we cannot reach in a straight line without going through an obstacle
     #todo: this is expensive, we should only check distances in order
 
-    sort!(n_nearStart, by=n_nearStart->n_nearStart[2])[1][1] #Sort by distance and pick node with smallest distance from start
-    sort!(n_nearGoal, by=n_nearGoal->n_nearGoal[2])[1][1]
+    # n_nearStart is tuple of node and distance
+    sort!(n_nearStart, by=n_nearStart->n_nearStart[2]) #Sort by distance and pick node with smallest distance from start
+    sort!(n_nearGoal, by=n_nearGoal->n_nearGoal[2])
+    print("\n ----------------- \n")
+    @show n_nearStart
+    print("\n ----------------- \n")
+    @show n_nearGoal
 
-    for n in n_nearStart 
-        candidateline = LineSegment(Vec(startstate), Vec(n))
+    nodestart = algT.GraphNode(9999,Point(9999,9999))
+    nodegoal = algT.GraphNode(9999,Point(9999,9999))
+
+    for (n, dist) in n_nearStart 
+        # bar = typeof(startstate)
+        # bar2 = typeof(n)
+        # print("\n$bar, $bar2\n")
+        candidateline = LineSegment(Point(startstate), n.state)
         if !algfxn.isCollidingEdge(candidateline, obstaclesList)
             nodestart = n
-            break
         end
+    end
+
+    for (n, dist) in n_nearGoal
+        candidateline = LineSegment(Point(goalstate), n.state)
+        if !algfxn.isCollidingEdge(candidateline, obstaclesList)
+            nodegoal = n
+        end
+    end
+
+    print("\n ----------------- \n")
+    @show nodegoal
+    @show nodestart
+    print("\n ----------------- \n")
+
+    if nodestart == algT.GraphNode(9999,Point(9999,9999))
+        nodestart = algT.GraphNode(0, Point(0,0))
+        print("ahhhhhh didn't find a start node")
+    end
+    if nodegoal == algT.GraphNode(9999,Point(9999,9999))
+        nodegoal = algT.GraphNode(0, Point(0,0))
+        print("ahhhhhh didn't find a goal node")
     end
 
 
     print("This is the beginState $(startstate) and the endState $(goalstate)\n")
     print("This is the beginVertex--> $(nodestart) >>> and the endVertex--> $(nodegoal)\n")
 
-    pathNodes = Vector{alg.GraphNode}()
-    visited = Vector{alg.GraphNode}() #nodes we've searched through
+    pathNodes = Vector{algT.GraphNode}()
+    visited = Vector{algT.GraphNode}() #nodes we've searched through
 
     frontier = PriorityQueue()
-    queue1 = alg.queueTmp(nodestart, pathNodes, 1) 
+    queue1 = algT.queueTmp(nodestart, pathNodes, 1) 
     enqueue!(frontier, queue1, 1) #root node has cost 0  
     pathcost = 99999
 
@@ -325,8 +390,8 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
 
         if curNode == nodegoal
             print("Hurrah! endState reached! \n")
-            unshift!(pathNodes, nodestart) #prepend startVertex back to pathVertices
-
+            unshift!(pathNodes, nodestart) #prepend startNode back to pathVertices
+            #unshift!(pathNodes, GraphdNode(
             finalPathCost = algfxn.costPath(pathNodes) #Assuming edge cost is Euclidean cost
             isPathFound = true
             return (finalPathCost, isPathFound, pathNodes) #list of nodes in solution path
@@ -344,7 +409,7 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
                     p = deepcopy(pathNodes)
                     push!(p, candidateNode)
                     if !(candidateNode in keys(frontier))
-                        newQ = alg.queueTmp(candidateNode, p, ceil(totalEdgeCost+ newEdgeCost))
+                        newQ = algT.queueTmp(candidateNode, p, ceil(totalEdgeCost+ newEdgeCost))
                         enqueue!(frontier, newQ, ceil(f_x)) 
                     end
                 end
@@ -361,44 +426,9 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
     return (finalPathCost, isPathFound, pathNodes)
 end
 
-function plotPRM(roadmap, solPath, title)
-    startstate, goalstate, nodeslist, edgeslist = roadmap.startstate, roadmap.goalstate, roadmap.nodeslist, roadmap.edgeslist
 
-    x = [n.state[1] for n in nodeslist]
-    y = [n.state[2] for n in nodeslist]
-    scatter!(x,y, color=:black) 
-
-    edgeXs, edgeYs = [], []
-    for e in edgeslist
-        startN = algfxn.findNode(e.startID, nodeslist)
-        endN = algfxn.findNode(e.endID, nodeslist)
-        x1,y1 = startN.state[1], startN.state[2]
-        x2,y2 = endN.state[1], endN.state[2]
-        push!(edgeXs, x1, x2, NaN) #the NaNs, keep spaces between edges correctly unplotted
-        push!(edgeYs, y1, y2, NaN)
-    end
-
-    plot!( edgeXs, edgeYs, color=:tan, linewidth=0.3)
-    # todo: path cost should actually include distance from stand end to nearest nodes in the graph
-
-    plotWinningPath(solPath)
-
-    title!(title)
-end
-
-function plotWinningPath(solPath)
-    if solPath != Void
-        xPath = [n.state[1] for n in solPath] 
-        yPath = [n.state[2] for n in solPath]
-        #cost = 0
-        #for i in 2:length(solPath)
-        #    curV  = solPath[i].state
-        #    prevV = solPath[i-1].state
-        #    cost += distPt(curV, prevV)
-        #end
-        plot!( xPath, yPath, color = :orchid, linewidth=3)
-    end
-end
+####################
+####################
 
 function main()
     print("Hi")
@@ -413,10 +443,10 @@ function main()
     w,h  = 20,20
     walls = HyperRectangle(Vec(0.,0), Vec(w,h))
 
-    r = alg.Room(w,h,walls,obstacles)
-    numSamples = 10
-    connectRadius = 10
-    param = alg.AlgParameters(10,10)
+    r = algT.Room(w,h,walls,obstacles)
+    numSamples = 20
+    connectRadius = 8
+    param = algT.AlgParameters(numSamples, connectRadius)
 
     ## Run preprocessing
     nodeslist, edgeslist = preprocessPRM(r, param)
@@ -427,23 +457,22 @@ function main()
 
     # todo: could write a queryPRM that takes a set of start and goal nodes, and returns answers for all of them
     ## Query created RM
-    startstate = Point(1.,0)
+    startstate = Point(1.,1)
     goalstate = Point(18.,18)
+
     pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
 
-
     ## Plot path found
-    title = "PRM with # samples =$numSamples, resulting in # pts=$length(nodeslist). Pathfound = $isPathFound"
-    z = typeof(nodeslist)
-    z2 = typeof(edgeslist)
-    print("\n $z, $z2\n")
-    roadmap = alg.roadmap(startstate, goalstate, nodeslist, edgeslist)
+    title = "PRM with # samples =$numSamples, \nresulting in # pts=$(length(nodeslist)). \nPathfound = $isPathFound"
+    roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
 
-    plotPRM(roadmap, solPath, title::String)
+    plot = plotPRM(roadmap, solPath, title::String)
+
+    plot!(legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:black)
 
 ####
-#startGoal = alg.GraphNode(0, Point(0,0))
-#endNode = alg.GraphNode(0, Point(0,0))
+#startGoal = algT.GraphNode(0, Point(0,0))
+#endNode = algT.GraphNode(0, Point(0,0))
 
 end
 

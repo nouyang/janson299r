@@ -83,3 +83,6 @@ Stacktrace:
 https://stackoverflow.com/questions/46305156/generating-random-float-points-in-julia
 
 https://www.reddit.com/r/Julia/comments/6au3n5/random_floating_point_number/
+
+# vim search for "alg."
+\alg/.
