@@ -4,7 +4,7 @@ pyplot()
 ################
 # Setup
 
-connectRadius = 10 
+connectRadius = 5
 
 startstate = Point(1.,1)
 goalstate = Point(20.,20)
@@ -32,13 +32,10 @@ r = algT.Room(w,h,walls,obstacles)
 # Run iterations
 
 nTrials = 30 #average multiple runs for the same numSamples
-nTrials = 3 #average multiple runs for the same numSamples
 cost = 0
 listCosts = Vector{Float32}()
 listpSucc= Vector{Float32}()
-nSamples_list = [20, 30] # number of pts to use in any given PRM run
-#iterList = [20 30 ]
-iterList = [20 30 50 100 150 200 300]
+nSamples_list = [10 20 30 80 150 200 300]
 
 tic()
 for nSamples in nSamples_list
@@ -67,39 +64,38 @@ for nSamples in nSamples_list
 end
 
 
-blah = toc()
-print("Time to: $blah")
+timeExperiment = toc();
+print("Time to: $blah\n")
+timestamp = Base.Dates.now()
 
 
 @show listCosts
 @show listpSucc
-sizeplot = (400, 800)
+sizeplot = (800, 800)
 
-plot() 
 # sanity check
+plot()
 
-costTitle= "PRM numsamples vs pathcost"
-maxX = nSamples_list[end] #apparently, cannot use variables in xaxis declaration :(
 
-pPRMcost = scatter(nSamples_list, listCosts, size=sizeplot, 
+supTitle="\nPRM with maxDist=$connectRadius, nTrials=$nTrials.
+        (time to run:$timeExperiment, timestamp=$timestamp)\n\n"
+costTitle= "numsamples vs pathcost\n"
+
+pPRMcost = scatter(nSamples_list, listCosts',
     color=:black,
-    title = costTitle, ylabel = "euclidean path cost", xlabel = "numsamples parameter for PRM alg",
-    xaxis=((0, 300), 0:50:300),
+    title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "numsamples",
     yaxis=((0,100), 0:20:100))
 
-successTitle = "PRM numsamples vs pSuccess"
-pPRMsuccess = scatter(nSamples_list, listpSucc,
-    #legend=false, yaxis=((0,1.1), 0:0.1:1), xaxis=((0,maxX+20), 0:50:maxX), color = :orange, markersize= 6)
+successTitle = "\nnumsamples vs pSuccess\n"
+pPRMsuccess = scatter(nSamples_list, listpSucc',
     color = :orange, markersize= 6, 
-    ylabel = ("P(success) = numSucc / $nTrials trials"), xlabel = "numsamples parameter for PRM alg",
-    xaxis=((0, 300), 0:50:300),
-    yaxis=((0,1), 0:0.1:1), 
-    title = successTitle)
+    title = successTitle, ylabel = ("P(success)=numSucc/$nTrials trials"), xlabel = "numsamples",
+    yaxis=((0, 1.2), 0:0.1:1))
 
-plot(pPRMcost, pPRMsuccess, layout=(2,1), title="PRM with connection radius = $connectRadius", 
-     #legend=false, xaxis=((0, maxX+50), 0:50:maxX))
-    )
+plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
+    xaxis=((0, 320), 0:50:300),
+    size = sizeplot, sizeplot = (800, 800))
 
 
-
-
+# todo: save one "representative" figure from each run , to plot
+# todo: truncate timestamp and elapsed time, so that it doesn't give silly amounts of precision
