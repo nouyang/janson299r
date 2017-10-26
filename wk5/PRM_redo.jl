@@ -165,7 +165,7 @@ module plotfxn
         xs = [pt[1]]
         ys = [pt[2]]
         seriestype --> :scatter
-        color := :orange
+        color = :orange
         markersize := 6
         xs, ys
     end
@@ -344,9 +344,12 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
         # bar = typeof(startstate)
         # bar2 = typeof(n)
         # print("\n$bar, $bar2\n")
-        candidateline = LineSegment(Point(startstate), n.state)
+        @show n
+        candidateline = LineSegment(Point(startstate), Point(n.state))
+        @show candidateline
         if !algfxn.isCollidingEdge(candidateline, obstaclesList)
             nodestart = n
+            break
         end
     end
 
@@ -354,12 +357,13 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
         candidateline = LineSegment(Point(goalstate), n.state)
         if !algfxn.isCollidingEdge(candidateline, obstaclesList)
             nodegoal = n
+            break
         end
     end
 
     print("\n ----------------- \n")
-    @show nodegoal
     @show nodestart
+    @show nodegoal
     print("\n ----------------- \n")
 
     if nodestart == algT.GraphNode(9999,Point(9999,9999))
@@ -375,6 +379,7 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
     print("This is the beginState $(startstate) and the endState $(goalstate)\n")
     print("This is the beginVertex--> $(nodestart) >>> and the endVertex--> $(nodegoal)\n")
 
+
     pathNodes = Vector{algT.GraphNode}()
     visited = Vector{algT.GraphNode}() #nodes we've searched through
 
@@ -383,7 +388,7 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
     enqueue!(frontier, queue1, 1) #root node has cost 0  
     pathcost = 99999
 
-    # Astar search: 
+    #################### A star search
     while length(frontier) != 0
         front = DataStructures.dequeue!(frontier)
         pathVertices = []
@@ -393,7 +398,7 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
         if curNode == nodegoal
             print("Hurrah! endState reached! \n")
             unshift!(pathNodes, nodestart) #prepend startNode back to pathVertices
-            #unshift!(pathNodes, GraphdNode(
+            unshift!(pathNodes, algT.GraphNode(0, startstate))
             finalPathCost = algfxn.costPath(pathNodes) #Assuming edge cost is Euclidean cost
             isPathFound = true
             return (finalPathCost, isPathFound, pathNodes) #list of nodes in solution path

@@ -86,3 +86,13 @@ https://www.reddit.com/r/Julia/comments/6au3n5/random_floating_point_number/
 
 # vim search for "alg."
 \alg/.
+
+# the type vs initiazlie error again
+ulia> a
+DataStructures.PriorityQueue
+
+julia> enqueue!(a, 10, 10)
+ERROR: MethodError: no method matching enqueue!(::Type{DataStructures.PriorityQueue}, ::Int64, ::Int64)
+Closest candidates are:
+  enqueue!(::DataStructures.PriorityQueue, ::Any, ::Any) at /home/nrw/.julia/v0.6/DataStructures/src/priorityqueue.jl:238
+
