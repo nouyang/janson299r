@@ -33,8 +33,8 @@ module algT
     struct Room
         width::Int64
         height::Int64
-        #walls::Vector{LineSegment{Point}}
-        walls::HyperRectangle
+        walls::Vector{LineSegment}
+        #walls::HyperRectangle
         obstacles::Vector{HyperRectangle}
     end
 
@@ -440,24 +440,33 @@ end
 
 
 ####################
+######### MAIN
 ####################
 
 function main()
+    numSamples = 25
+    connectRadius =10 
+    param = algT.AlgParameters(numSamples, connectRadius)
+
     print("\n ---- Running PRM ------ \n")
-    ## Define room
+    ## Define obstacles
     obs1 = HyperRectangle(Vec(8,3.), Vec(2,2.)) #Todo
     obs2 = HyperRectangle(Vec(4,4.), Vec(2,10.)) #Todo
 
     obstacles = Vector{HyperRectangle}()
     push!(obstacles, obs1, obs2)
 
+    # Define walls
+    walls = Vector{LineSegment}()
     w,h  = 20,20
-    walls = HyperRectangle(Vec(0.,0), Vec(w,h))
+    perimeter = HyperRectangle(Vec(0.,0), Vec(w,h))
+    roomPerimeter = algfxn.decompRect(perimeter)
+    #internalwalls =  (linesegs
+    for l in roomPerimeter
+        push!(walls, l)
+    end
 
     r = algT.Room(w,h,walls,obstacles)
-    numSamples = 25
-    connectRadius =10 
-    param = algT.AlgParameters(numSamples, connectRadius)
 
     ## Run preprocessing
     nodeslist, edgeslist = preprocessPRM(r, param)
