@@ -250,18 +250,18 @@ module plotfxn
             yPath = [n.state[2] for n in solPath]
             xstart, ystart = solPath[1].state
             xend, yend = solPath[end].state
-            # plot start pt
-            scatter!([xstart], [ystart], 
-                     markercolor= :red, markershape = :circle,  markersize = 6, markerstrokealpha = 0.5, markerstrokewidth=1)
-            # plot goal pt
-            scatter!([xend], [yend], 
-                     markerstrokecolor = :green, markershape = :star,  markersize = 5, markerstrokealpha = 1, markerstrokewidth=5)
-
             # plot path
             plot!( xPath, yPath, color = :orchid, linewidth=3)
         else
             print("\n --- No solution path found ----- \n")
+            # plot start pt
+
         end
+        scatter!([xstart], [ystart], 
+                    markercolor= :red, markershape = :circle,  markersize = 6, markerstrokealpha = 0.5, markerstrokewidth=1)
+        # plot goal pt
+        scatter!([xend], [yend], markerstrokecolor = :green, 
+                    markershape = :star,  markersize = 5, markerstrokealpha = 1, markerstrokewidth=5)
     end
 
 
