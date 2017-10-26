@@ -138,14 +138,15 @@ module algfxn
         index = findfirst([node.id for node in nodeslist], nodeID)
         return nodeslist[index]
     end
-#end
 
 end
 
-module plotAlg
+module plotfxn
 
     using GeometryTypes
     using Plots
+    using algfxn
+    using algT
 
     ###  Plots.jl recipes
 
@@ -236,6 +237,7 @@ module plotAlg
         # todo: path cost should actually include distance from stand end to nearest nodes in the graph
 
         plotSolPath(solPath)
+        
         title!(title)
     end
 
@@ -453,7 +455,7 @@ function main()
 
     ## Plot preprocessing results
 
-    plotRoom(r)
+    plotfxn.plotRoom(r)
 
     # todo: could write a queryPRM that takes a set of start and goal nodes, and returns answers for all of them
     ## Query created RM
@@ -466,7 +468,7 @@ function main()
     title = "PRM with # samples =$numSamples, \nresulting in # pts=$(length(nodeslist)). \nPathfound = $isPathFound"
     roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
 
-    plot = plotPRM(roadmap, solPath, title::String)
+    plot = plotfxn.plotPRM(roadmap, solPath, title::String)
 
     plot!(legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid=:black)
 
@@ -477,5 +479,3 @@ function main()
 end
 
 main()
-
-
