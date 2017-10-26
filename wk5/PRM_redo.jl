@@ -242,9 +242,9 @@ module plotfxn
     end
 
     function plotSolPath(solPath)
-        print("\n ---Solution Path----- \n")
-        @show solPath
-        print("\n -------- \n")
+        #print("\n ---Solution Path----- \n")
+        #@show solPath
+        #print("\n -------- \n")
         if solPath != Void
             xPath = [n.state[1] for n in solPath] 
             yPath = [n.state[2] for n in solPath]
@@ -342,10 +342,10 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
     # n_nearStart is tuple of node and distance
     sort!(n_nearStart, by=n_nearStart->n_nearStart[2]) #Sort by distance and pick node with smallest distance from start
     sort!(n_nearGoal, by=n_nearGoal->n_nearGoal[2])
-    print("\n ----------------- \n")
-    @show n_nearStart
-    print("\n ----------------- \n")
-    @show n_nearGoal
+    #print("\n ----------------- \n")
+    #@show n_nearStart
+    #print("\n ----------------- \n")
+    #@show n_nearGoal
 
     nodestart = algT.GraphNode(9999,Point(9999,9999))
     nodegoal = algT.GraphNode(9999,Point(9999,9999))
@@ -354,9 +354,7 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
         # bar = typeof(startstate)
         # bar2 = typeof(n)
         # print("\n$bar, $bar2\n")
-        @show n
         candidateline = LineSegment(Point(startstate), Point(n.state))
-        @show candidateline
         if !algfxn.isCollidingEdge(candidateline, obstaclesList)
             nodestart = n
             break
@@ -371,10 +369,6 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
         end
     end
 
-    print("\n ----------------- \n")
-    @show nodestart
-    @show nodegoal
-    print("\n ----------------- \n")
 
     if nodestart == algT.GraphNode(9999,Point(9999,9999))
         nodestart = algT.GraphNode(0, Point(0,0))
@@ -449,8 +443,7 @@ end
 ####################
 
 function main()
-    print("Hi")
-
+    print("\n ---- Running PRM ------ \n")
     ## Define room
     obs1 = HyperRectangle(Vec(8,3.), Vec(2,2.)) #Todo
     obs2 = HyperRectangle(Vec(4,4.), Vec(2,10.)) #Todo
@@ -481,8 +474,7 @@ function main()
     pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
 
     ## Plot path found
-    title = "PRM with # samples =$numSamples, \nresulting in # pts=$(length(nodeslist)). \nPathfound = $isPathFound, 
-        \n Pathcost = $pathcost"
+    title = "PRM with # samples =$numSamples, \nPathfound = $isPathFound, \npathcost = $pathcost"
     roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
 
     plot = plotfxn.plotPRM(roadmap, solPath, title::String)
