@@ -33,15 +33,11 @@ function main()
     end
 
     r = algT.Room(w,h,walls,obstacles)
+    plotfxn.plotRoom(r)
 
     ## Run preprocessing
     nodeslist, edgeslist = preprocessPRM(r, param)
 
-    ## Plot preprocessing results
-
-    plotfxn.plotRoom(r)
-
-    # todo: could write a queryPRM that takes a set of start and goal nodes, and returns answers for all of them
     ## Query created RM
     startstate = Point(1.,1)
     goalstate = Point(18.,18)
@@ -53,8 +49,6 @@ function main()
     roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
 
     plot = plotfxn.plotPRM(roadmap, solPath, title::String)
-
-    plot!(legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
 
 ####
 #startGoal = algT.GraphNode(0, Point(0,0))

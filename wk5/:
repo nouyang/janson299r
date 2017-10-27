@@ -256,7 +256,7 @@ module plotfxn
 
     function plotSolPath(solPath)
         #print("\n ---Solution Path----- \n")
-        @show solPath
+        #@show solPath
         #print("\n -------- \n")
         if solPath != Void
             xPath = [n.state[1] for n in solPath] 

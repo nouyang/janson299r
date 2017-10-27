@@ -154,3 +154,14 @@ http://docs.juliaplots.org/latest/layouts/
 
 Ok right this is silly, go back to old method. 
 I guess the issue was a bunch of the plots weren't showing. Guh. Why is this plotting thing so flaky?!?!?!?!
+
+# combine strings
+
+"A" * "B" 
+wtf julia, what's wrong with pluses
+
+# random
+TODO !!
+there's some squirreliness with the range in which I'm plotting the room, and
+the range in which I'm randomly selecting points, etc. that might have
+off-by-one errors, and I should investigate at some point

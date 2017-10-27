@@ -158,10 +158,6 @@ plot!(vecLine)
 
 lines = decompRect(rect1);
 
-intersects(testl, testl3)
-intersects(testl, testl2);
-
-
 # test an edge now.
 
 # let's assume nodes not in rectangle for now -- or double-check again, just in case?
@@ -177,8 +173,6 @@ function isCollidingEdge(edge::LineSegment, obsList::Vector{HyperRectangle})
     return false
 end
 
-
-funciton isCollidingNode(node::Point, 
 
 #testE = LineSegment(Point(1.,0), Point(1.,10)) #collinear seems to collide correctly!
 testE = LineSegment(Point(0.,0), Point(1.,2)) 
