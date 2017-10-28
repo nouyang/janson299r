@@ -165,3 +165,11 @@ TODO !!
 there's some squirreliness with the range in which I'm plotting the room, and
 the range in which I'm randomly selecting points, etc. that might have
 off-by-one errors, and I should investigate at some point
+
+
+#### 
+Stopping Point as of Sunday  morning --
+Debug: intersect collision checking fails occasionally on floats (seems to do better on ints). :(
+Solution: use rand int for now, instead of floats, and complete clutter / nIter / tricky maze plots. 
+Todo: error bars 
+clutter todo: subtract overlap from area cals

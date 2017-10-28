@@ -30,9 +30,10 @@ end
 # Let's say on average we want to create 4 obstacles... (otherwise, *most* of
 # the time we will product one large rectangle that is falling out of the room
 
-targetNumObs = 2 
+#targetNumObs = 2 
+targetNumObs = 5
 
-clutterPercentage = 0.1
+clutterPercentage = 0.3
 roomArea = roomWidth * roomHeight
 
 targetSumObsArea= roomArea * clutterPercentage
@@ -40,8 +41,11 @@ sumObsArea = 0
 
 
 while sumObsArea < targetSumObsArea
-    x,y = rand(Uniform(1, roomWidth),2)
-    randWidth, randHeight = rand(Uniform(1, roomWidth/targetNumObs),2)
+    #x,y = rand(Uniform(1, roomWidth),2)
+    x,y = rand(1.0:roomWidth,2)
+
+    #randWidth, randHeight = rand(Uniform(1, roomWidth/targetNumObs),2)
+    randWidth, randHeight = rand(1:roomWidth/targetNumObs,2)
     protoObstacle = HyperRectangle(Vec(x, y), Vec(randWidth, randHeight)) #Todo
     if contains(perimeter, protoObstacle)
         push!(obstacles, protoObstacle)
@@ -65,7 +69,7 @@ r = algT.Room(roomWidth,roomHeight,walls,obstacles)
 plotfxn.plotRoom(r)
 
 ## Run preprocessing
-numSamples =10 
+numSamples = 25
 connectRadius =10 
 param = algT.AlgParameters(numSamples, connectRadius)
 nodeslist, edgeslist = preprocessPRM(r, param)
