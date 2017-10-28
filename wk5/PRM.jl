@@ -16,7 +16,7 @@ gr()
 
 module algT
     using GeometryTypes 
-    #export GraphNode, Edge, Obstacle, Room
+    # export GraphNode, Edge, Obstacle, Room
     # struct PointAlg
         # x::Int64
         # y::Int64
@@ -250,14 +250,15 @@ module plotfxn
         # plot solution
         plotSolPath(solPath)
         
-        plot!(legend=false, size=(600,600),xaxis=((-5,25), 0:1:20 ), yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
         title!(title)
+        plot!(legend=false, size=(600,600), xaxis=((-5,25), 0:1:20 ), 
+              yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
     end
 
     function plotSolPath(solPath)
-        #print("\n ---Solution Path----- \n")
+        print("\n ---Solution Path----- \n")
         @show solPath
-        #print("\n -------- \n")
+        print("\n -------- \n")
         if solPath != Void
             xPath = [n.state[1] for n in solPath] 
             yPath = [n.state[2] for n in solPath]
@@ -298,19 +299,24 @@ function preprocessPRM(room, parameters)
             newNode = algT.GraphNode(currID, n)
             currID += 1
             push!(nodeslist, newNode)
+
+        else
+            print("\n NODE REMOVED: $n \n")
         end
     end
 
     # Connect each node to its neighboring nodes within a ball or radius r, creating edges
     for startnode in nodeslist 
-        neighbors = [item[1] for item in algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point #TODO
-        n = [algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point #TODO
+        neighbors = [item[1] for item in algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point
+        n = [algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point
         for endnode in neighbors
             candidateEdge = LineSegment(startnode.state, endnode.state)
             if !algfxn.isCollidingEdge(candidateEdge, obstacles) #todo
                 #line = LineSegment(startnode.state, endnode.state)
                 newEdge = algT.Edge(startnode.id, endnode.id) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
                 push!(edgeslist, newEdge)
+            else 
+                print("\n EDGE REMOVED: $startnode WITH $endnode  \n")
             end
         end
     end
@@ -349,7 +355,7 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
     n_nearStart= algfxn.findNearestNodes(startstate, nodeslist, connectRadius) #Get distance from start, for all points in graph.
     n_nearGoal= algfxn.findNearestNodes(goalstate, nodeslist, connectRadius) 
 
-    #remove nodes that we cannot reach in a straight line without going through an obstacle
+    ## SECTION remove nodes that we cannot reach in a straight line without going through an obstacle
     #todo: this is expensive, we should only check distances in order
 
     # n_nearStart is tuple of node and distance
@@ -392,6 +398,7 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
        # #print("ahhhhhh didn't find a goal node")
     end
 
+    ## SECTION END
 
    # #print("This is the beginState $(startstate) and the endState $(goalstate)\n")
    # #print("This is the beginVertex--> $(nodestart) >>> and the endVertex--> $(nodegoal)\n")
