@@ -108,11 +108,25 @@ function collTest()
 	#endnode = nodeslist[10]
 	endnode = algT.GraphNode(2, [12,11])
 
-	anEdge = LineSegment(startnode.state, endnode.state)
+	l = LineSegment(Point(6,11), Point(12,11))
+	l = LineSegment(Point2f0(6,11), Point2f0(12,11))
 
-    coll = isCollidingEdge(anEdge, obstacles)
+    coll = isCollidingEdge(l, obstacles)
     @show coll
     #isCollidingNode
+
+#(intersects(line, rectline))[1] = true
+#r1 = GeometryTypes.Point{2,Float64}[[9.0, 10.0], [9.0, 13.0]]
+r1 = GeometryTypes.LineSegment( Point(9.0,10.0), Point(9.0, 13.0))
+
+
+ #-------- 
+#(intersects(line, rectline))[1] = false
+#r2 = GeometryTypes.Point{2,Float64}[[9.34365, 10.8904], [9.34365, 13.4022]]
+r2 = GeometryTypes.LineSegment( Point(9.34365, 10.890), Point(9.34365, 13.402))
+
+#https://github.com/JuliaGeometry/GeometryTypes.jl/blob/master/src/lines.jl
+
 end
 
 
