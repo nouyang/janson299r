@@ -3,20 +3,37 @@ include("PRM.jl")
 
 gr()
 
+
+#### HELPER FXN 
+
+    function areaRect(r::HyperRectangle)
+        w, h = widths(r)
+        area = w*h
+    end
+
+    function unionAreaRects(r1::HyperRectangle, r2::HyperRectangle)
+        area1 = areaRect(r1)
+        area2 = areaRect(r2)
+        overlap = areaRect(intersect(r1, r2))
+        area = area1 + area2 - overlap
+        return area
+    end
+### END 
+
+
+## PARAMETERS
 connectRadius = 8
+targetNumObs = 5
+clutterPercentage = 0.2
+roomWidth,roomHeight  = 20,20
 
 startstate = Point(1.,1)
 goalstate = Point(20.,20)
 
-# create obstacles (fixed map for now)
-#obs1 = HyperRectangle(Vec(8,3.), Vec(2,2.)) #Todo
-#obs2 = HyperRectangle(Vec(4,4.), Vec(2,10.)) #Todo
 
+
+## INIT
 obstacles = Vector{HyperRectangle}()
-#push!(obstacles, obs1, obs2)
-
-# create room
-roomWidth,roomHeight  = 20,20
 perimeter = HyperRectangle(Vec(0.,0), Vec(roomWidth,roomHeight))
 wallsPerimeter = algfxn.decompRect(perimeter)
 
@@ -31,14 +48,10 @@ end
 # the time we will product one large rectangle that is falling out of the room
 
 #targetNumObs = 2 
-targetNumObs = 5
 
-clutterPercentage = 0.1
 roomArea = roomWidth * roomHeight
-
 targetSumObsArea= roomArea * clutterPercentage
 sumObsArea = 0
-
 
 while sumObsArea < targetSumObsArea
     #x,y = rand(Uniform(1, roomWidth),2)

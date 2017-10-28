@@ -168,8 +168,13 @@ off-by-one errors, and I should investigate at some point
 
 
 #### 
-Stopping Point as of Sunday  morning --
-Debug: intersect collision checking fails occasionally on floats (seems to do better on ints). :(
-Solution: use rand int for now, instead of floats, and complete clutter / nIter / tricky maze plots. 
-Todo: error bars 
-clutter todo: subtract overlap from area cals
+Stopping Point as of Sunday  morning -- Debug: intersect collision checking
+fails occasionally on floats (seems to do better on ints). :( Solution: use
+rand int for now, instead of floats, and complete clutter / nIter / tricky maze
+plots.  Todo: error bars clutter todo: subtract overlap from area cals
+
+
+### Actual stopping point
+
+Need to calculate overlapping rectangle area, only can calculate two rectnagles
+overlap, not the case where rectangle overlaps with 2 or more other rectangles

@@ -146,12 +146,42 @@ r2 =LineSegment( Point(9.34365, 10.890), Point(9.34365, 13.402))
 end
 
 
+function rectUnionAreaTest()
+    #obs1 = HyperRectangle(Vec(8,3.), Vec(4,4.)) #Todo
+    #obs2 = HyperRectangle(Vec(10,5.), Vec(4,4.)) #Todo
+    c = HyperRectangle(Vec(0,0),Vec(2,2))
+    d = HyperRectangle(Vec(1,1),Vec(2,2))
+
+    function areaRect(r::HyperRectangle)
+        w, h = widths(r)
+        area = w*h
+    end
+
+    function unionAreaRects(r1::HyperRectangle, r2::HyperRectangle)
+        area1 = areaRect(r1)
+        area2 = areaRect(r2)
+        overlap = areaRect(intersect(r1, r2))
+        area = area1 + area2 - overlap
+        return area
+    end
+
+    bool = intersect(c,d) == HyperRectangle(Vec(1,1), Vec(1,1))
+	@show bool
+
+    areaRect(c)
+    areaRect(d)
+    unionAreaRects(c,d)
+
+end
+
+
 ########################################
 # Call main() function
 ########################################   
 
 main()
 #collTest()
+#rectUnionAreaTest()
 
 # 
  # EDGE REMOVED: algT.GraphNode(3, [13.4626, 13.6564]) WITH algT.GraphNode(10, [6.29213, 11.7306])  
