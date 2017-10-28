@@ -84,6 +84,18 @@ module algfxn
     using GeometryTypes
     using algT
 
+	function ccw(A,B,C)
+        # determines direction of lines formed by three points
+        return (C[2]-A[2]) * (B[1]-A[1]) > (B[2]-A[2]) * (C[1]-A[1])
+    end
+
+
+    function intersects(line1, line2) #no ":" at the end!
+        A, B = line1[1], line1[2]
+        C, D = line2[1], line2[2]
+        return ( (ccw(A, C, D) != ccw(B, C, D)) && ccw(A, B, C) != ccw(A, B, D))
+    end
+
     function decompRect(r::HyperRectangle) #GeometryTypes.HyperRectangle{2,Float64}
         corners = decompose(Point{2, Float64}, r)
         corners = [Point(pt) for pt in corners]
@@ -292,9 +304,8 @@ function preprocessPRM(room, parameters)
 
     # Sample points, create list of nodes 
     for i in 1:numPts
-        #xrand = rand(Uniform(1, roomWidth-1))
-        #yrand = rand(Uniform(1, roomWidth-1))
-		xrand,yrand = rand(1.0:roomWidth-1,2)
+        xrand, yrand = rand(Uniform(1, roomWidth-1), 2)
+		#xrand,yrand = rand(1.0:roomWidth-1,2)
         n = Point(xrand, yrand) #new point in room
         if !algfxn.isCollidingNode(n, obstacles) #todo
             newNode = algT.GraphNode(currID, n)

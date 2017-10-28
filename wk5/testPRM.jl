@@ -150,8 +150,8 @@ end
 # Call main() function
 ########################################   
 
-#main()
-collTest()
+main()
+#collTest()
 
 # 
  # EDGE REMOVED: algT.GraphNode(3, [13.4626, 13.6564]) WITH algT.GraphNode(10, [6.29213, 11.7306])  

@@ -33,7 +33,7 @@ end
 #targetNumObs = 2 
 targetNumObs = 5
 
-clutterPercentage = 0.3
+clutterPercentage = 0.1
 roomArea = roomWidth * roomHeight
 
 targetSumObsArea= roomArea * clutterPercentage
@@ -44,8 +44,8 @@ while sumObsArea < targetSumObsArea
     #x,y = rand(Uniform(1, roomWidth),2)
     x,y = rand(1.0:roomWidth,2)
 
-    #randWidth, randHeight = rand(Uniform(1, roomWidth/targetNumObs),2)
-    randWidth, randHeight = rand(1:roomWidth/targetNumObs,2)
+    randWidth, randHeight = rand(Uniform(1, roomWidth/targetNumObs),2)
+    #randWidth, randHeight = rand(1:roomWidth/targetNumObs,2)
     protoObstacle = HyperRectangle(Vec(x, y), Vec(randWidth, randHeight)) #Todo
     if contains(perimeter, protoObstacle)
         push!(obstacles, protoObstacle)
