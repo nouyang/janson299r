@@ -92,6 +92,18 @@ function collTest()
         return false
     end
 
+function ccw(A,B,C)
+    # determines direction of lines formed by three points
+	return (C[2]-A[2]) * (B[1]-A[1]) > (B[2]-A[2]) * (C[1]-A[1])
+	#return (C.y-A.y) * (B.x-A.x) > (B.y-A.y) * (C.x-A.x)
+end
+
+
+function intersectLineSeg(line1, line2) #no ":" at the end!
+	A, B = line1[1], line1[2]
+	C, D = line2[1], line2[2]
+ 	return ( (ccw(A, C, D) != ccw(B, C, D)) && ccw(A, B, C) != ccw(A, B, D))
+end
 ####
 	#obs1 = GeometryTypes.HyperRectangle{2,Float64}([7.67199, 10.8904], [1.67166, 2.51185])
 	obs1 = GeometryTypes.HyperRectangle{2,Float64}([7,10], [2,3])
@@ -108,8 +120,7 @@ function collTest()
 	#endnode = nodeslist[10]
 	endnode = algT.GraphNode(2, [12,11])
 
-	l = LineSegment(Point(6,11), Point(12,11))
-	l = LineSegment(Point2f0(6,11), Point2f0(12,11))
+	l = LineSegment(Point(6.0,11), Point(12.0,11))
 
     coll = isCollidingEdge(l, obstacles)
     @show coll
@@ -117,13 +128,18 @@ function collTest()
 
 #(intersects(line, rectline))[1] = true
 #r1 = GeometryTypes.Point{2,Float64}[[9.0, 10.0], [9.0, 13.0]]
-r1 = GeometryTypes.LineSegment( Point(9.0,10.0), Point(9.0, 13.0))
+r1 =LineSegment( Point(9.0,10.0), Point(9.0, 13.0))
 
 
  #-------- 
 #(intersects(line, rectline))[1] = false
 #r2 = GeometryTypes.Point{2,Float64}[[9.34365, 10.8904], [9.34365, 13.4022]]
-r2 = GeometryTypes.LineSegment( Point(9.34365, 10.890), Point(9.34365, 13.402))
+r2 =LineSegment( Point(9.34365, 10.890), Point(9.34365, 13.402))
+
+@show f= intersects(l, r1)
+@show intersects(l, r2)
+@show intersectLineSeg(l, r1)
+@show intersectLineSeg(l, r2)
 
 #https://github.com/JuliaGeometry/GeometryTypes.jl/blob/master/src/lines.jl
 
