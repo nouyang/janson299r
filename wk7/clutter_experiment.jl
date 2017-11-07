@@ -111,6 +111,8 @@ title = "PRM with # samples=$numSamples, maxDist=$connectRadius, \npathcost = $p
 roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
 
 
+#afont = Plots.Font("sans-serif",14,:hcenter,:vcenter,0.0,RGB{U8}(0.0,0.0,0.0))
+#prmPlot= plotfxn.plotPRM(roomPlot, roadmap, solPath, title::String, afont)
 prmPlot= plotfxn.plotPRM(roomPlot, roadmap, solPath, title::String)
 
 print("\n --- Time --- \n")

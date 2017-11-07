@@ -261,6 +261,7 @@ module plotfxn
         # plot solution
         prmPlot = plotSolPath(roomPlot, solPath)
         
+        #title!(prmPlot, title, titlefont = afont)
         title!(prmPlot, title)
         plot!(prmPlot, legend=false, size=(600,600), xaxis=((-5,25), 0:1:20 ), 
               yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
