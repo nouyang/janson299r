@@ -305,7 +305,7 @@ function preprocessPRM(room, parameters)
 
     # Sample points, create list of nodes 
     for i in 1:numPts
-        xrand, yrand = rand(Uniform(1, roomWidth-1), 2)
+        xrand, yrand = rand(Uniform(0, roomWidth), 2)
 		#xrand,yrand = rand(1.0:roomWidth-1,2)
         n = Point(xrand, yrand) #new point in room
         if !algfxn.isCollidingNode(n, obstacles) #todo

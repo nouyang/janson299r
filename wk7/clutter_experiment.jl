@@ -24,7 +24,7 @@ glvisualize()
 #################################### 
 ## PARAMETERS
 #################################### 
-numSamples = 100
+numSamples = 30 
 connectRadius = 5
 param = algT.AlgParameters(numSamples, connectRadius)
 
@@ -47,7 +47,6 @@ for l in wallsPerimeter
     push!(walls, l)
 end
 
-
 #################################### 
 # Randomly Generate Clutter (obstacles) 
 ####################################
@@ -57,24 +56,26 @@ end
 # the time we will product one large rectangle that is falling out of the room
 
 #targetNumObs = 2 
+function genCluster()
+    roomArea = roomWidth * roomHeight
+    targetSumObsArea= roomArea * clutterPercentage
+    sumObsArea = 0
 
-roomArea = roomWidth * roomHeight
-targetSumObsArea= roomArea * clutterPercentage
-sumObsArea = 0
+    while sumObsArea < targetSumObsArea
+        #x,y = rand(Uniform(1, roomWidth),2)
+        x,y = rand(1.0:roomWidth,2)
 
-while sumObsArea < targetSumObsArea
-    #x,y = rand(Uniform(1, roomWidth),2)
-    x,y = rand(1.0:roomWidth,2)
-
-    randWidth, randHeight = rand(Uniform(1, roomWidth/targetNumObs),2)
-    #randWidth, randHeight = rand(1:roomWidth/targetNumObs,2)
-    protoObstacle = HyperRectangle(Vec(x, y), Vec(randWidth, randHeight)) #Todo
-    if contains(perimeter, protoObstacle)
-        push!(obstacles, protoObstacle)
-        sumObsArea += randWidth*randHeight
+        randWidth, randHeight = rand(Uniform(1, roomWidth/targetNumObs),2)
+        #randWidth, randHeight = rand(1:roomWidth/targetNumObs,2)
+        protoObstacle = HyperRectangle(Vec(x, y), Vec(randWidth, randHeight)) #Todo
+        if contains(perimeter, protoObstacle)
+            push!(obstacles, protoObstacle)
+            sumObsArea += randWidth*randHeight
+        end
     end
-end
-print("obstacles generated")
+    print("obstacles generated")
+    return obstacles
+end 
 
 
 #plot!(walls, color =:black)
@@ -90,6 +91,7 @@ print("obstacles generated")
 
 
 if flagTestClutter == true
+    genCluster()
 r = algT.Room(roomWidth,roomHeight,walls,obstacles)
 roomPlot = plotfxn.plotRoom(r)
 
@@ -122,9 +124,8 @@ print("\n --- Time --- \n")
 # print("\n -------- \n")
 
 
-    r = algT.Room(roomWidth,roomHeight,walls,obstacles)
-    gui(prmPlot)
-    #print("\n --- Press ENTER to continue --- \n")
+gui(prmPlot)
+    print("\n --- Press ENTER to continue --- \n")
     #readline(STDIN)
     # todo: save one "representative" figure from each run
     # print("\n --- continue --- \n")
