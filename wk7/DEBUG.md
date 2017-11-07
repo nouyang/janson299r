@@ -162,3 +162,9 @@ Segmentation fault (core dumped)
 ERROR: LoadError: MethodError: no method matching plotPRM(::algT.roadmap, ::Type{Void}, ::String)
 
 @ need to use plot =  bloag(); gui(plot) instead of glbaog(); gui()
+
+#
+SIGH
+glvisualzie() has a tendency to hate 1000 n (as in it will freeze my computer aftwards)
+
+@ HOW TO heck do I clear all old plots()? destory them

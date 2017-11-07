@@ -1,6 +1,6 @@
 include("PRM.jl")
 #using Distributions
-flagTestClutter = true
+flagTestClutter = false
 glvisualize()
 
 
@@ -24,7 +24,7 @@ glvisualize()
 #################################### 
 ## PARAMETERS
 #################################### 
-numSamples = 30 
+numSamples = 100 
 connectRadius = 5
 param = algT.AlgParameters(numSamples, connectRadius)
 
@@ -33,7 +33,7 @@ clutterPercentage = 0.15
 roomWidth,roomHeight  = 20,20
 
 startstate = Point(1.,1)
-goalstate = Point(20.,20)
+goalstate = Point(19.,19)
 
 #################################### 
 ## INIT
@@ -56,14 +56,12 @@ end
 # the time we will product one large rectangle that is falling out of the room
 
 #targetNumObs = 2 
-function genCluster()
+function genCluster(param, targetNumObs, clutterPercentage, roomWidth, roomHeight)
     roomArea = roomWidth * roomHeight
     targetSumObsArea= roomArea * clutterPercentage
     sumObsArea = 0
-
     while sumObsArea < targetSumObsArea
-        #x,y = rand(Uniform(1, roomWidth),2)
-        x,y = rand(1.0:roomWidth,2)
+        x,y = rand(Uniform(0, roomWidth),2)
 
         randWidth, randHeight = rand(Uniform(1, roomWidth/targetNumObs),2)
         #randWidth, randHeight = rand(1:roomWidth/targetNumObs,2)
@@ -75,8 +73,8 @@ function genCluster()
     end
     print("obstacles generated")
     return obstacles
-end 
-
+end
+####
 
 #plot!(walls, color =:black)
 #plot!(obstacles, fillalpha=0.5)
@@ -91,7 +89,8 @@ end
 
 
 if flagTestClutter == true
-    genCluster()
+
+obstacles = genCluster(param, targetNumObs, clutterPercentage, roomWidth, roomHeight)
 r = algT.Room(roomWidth,roomHeight,walls,obstacles)
 roomPlot = plotfxn.plotRoom(r)
 
@@ -141,24 +140,24 @@ else
 #################################### 
 ## PARAMETERS
 #################################### 
-numSamples = 40
-connectRadius = 5
+connectRadius = 5.
+numSamples = 50.
 param = algT.AlgParameters(numSamples, connectRadius)
-
 targetNumObs = 3
 clutterPercentage = 0.15
 roomWidth,roomHeight  = 20,20
 
 startstate = Point(1.,1)
-goalstate = Point(20.,20)
+goalstate = Point(19.,19)
 
 
 ####################################
 ## PARAMETERS PART TWO 
 ####################################
-nTrials = 30
-nSamples_list = [10 20 30 80 150 200 300]
-nSamples_list = [10 ]
+nTrials = 1
+
+clutterPercentageList = [ 0  0.1]
+#clutterPercentageList = 0:0.05:0.3
 
 ####################################
 ## Init
@@ -174,14 +173,15 @@ listpSucc= Vector{Float32}()
 #@show listpSucc
 
 tic()
-for nSamples in nSamples_list
+for pClutter in clutterPercentageList
     totalcost = 0.
     idx = 0.
     nSuccess = 0.
     pathcost = 0.
-    param = algT.AlgParameters(nSamples, connectRadius)
+    param = algT.AlgParameters(numSamples, connectRadius)
     while idx < nTrials
         nodeslist, edgeslist = preprocessPRM(r, param)
+        obstacles = genCluster(param, targetNumObs, pClutter, roomWidth, roomHeight)
         pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
         if isPathFound
             nSuccess += 1
@@ -212,23 +212,25 @@ timestamp = Base.Dates.now()
 # pathcost on Y
 sizeplot = (800, 800)
 
-supTitle="\nPRM with maxDist=$connectRadius, nTrials=$nTrials.
-        (time to run:$timeExperiment, timestamp=$timestamp)\n\n"
-costTitle= "numsamples vs pathcost\n"
+supTitle= ""
+# supTitle="\nPRM with maxDist=$connectRadius, 
+        # # samples = $numSamples, nTrials=$nTrials.
+        # (time to run:$timeExperiment, timestamp=$timestamp)\n\n"
+costTitle= "clutter % vs pathcost\n"
 
-pPRMcost = scatter(nSamples_list, listCosts',
+pPRMcost = scatter(clutterPercentageList, listCosts',
     color=:black,
-    title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "numsamples",
+    title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "clutter %",
     yaxis=((0,100), 0:20:100))
 
-successTitle = "\nnumsamples vs pSuccess\n"
-pPRMsuccess = scatter(nSamples_list, listpSucc',
+successTitle = "\nclutter % vs pSuccess\n"
+pPRMsuccess = scatter(clutterPercentageList, listpSucc',
     color = :orange, markersize= 6, 
-    title = successTitle, ylabel = ("P(success)=numSucc/$nTrials trials"), xlabel = "numsamples",
+    title = successTitle, ylabel = ("P(success)=numSucc/$nTrials trials"), xlabel = "clutter %",
     yaxis=((0, 1.2), 0:0.1:1))
 
 plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
-    xaxis=((0, 320), 0:50:300),
+    xaxis=((0, 0.5), 0:0.05:0.5),
     size = sizeplot)
 
 
