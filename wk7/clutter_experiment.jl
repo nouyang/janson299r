@@ -1,6 +1,5 @@
 include("PRM.jl")
 #using Distributions
-flagTestClutter = false
 glvisualize()
 
 
@@ -24,12 +23,13 @@ glvisualize()
 #################################### 
 ## PARAMETERS
 #################################### 
-numSamples = 100 
-connectRadius = 5
+flagTestClutter = true
+numSamples = 50 
+connectRadius = 8
 param = algT.AlgParameters(numSamples, connectRadius)
 
 targetNumObs = 3
-clutterPercentage = 0.15
+clutterPercentage = 0.5
 roomWidth,roomHeight  = 20,20
 
 startstate = Point(1.,1)
@@ -56,7 +56,7 @@ end
 # the time we will product one large rectangle that is falling out of the room
 
 #targetNumObs = 2 
-function genCluster(param, targetNumObs, clutterPercentage, roomWidth, roomHeight)
+function genClutter(param, targetNumObs, clutterPercentage, roomWidth, roomHeight)
     roomArea = roomWidth * roomHeight
     targetSumObsArea= roomArea * clutterPercentage
     sumObsArea = 0
@@ -71,8 +71,9 @@ function genCluster(param, targetNumObs, clutterPercentage, roomWidth, roomHeigh
             sumObsArea += randWidth*randHeight
         end
     end
-    print("obstacles generated")
-    return obstacles
+    actualSumObsArea = sumObsArea 
+    #print("obstacles generated")
+    return actualSumObsArea, obstacles
 end
 ####
 
@@ -89,8 +90,7 @@ end
 
 
 if flagTestClutter == true
-
-obstacles = genCluster(param, targetNumObs, clutterPercentage, roomWidth, roomHeight)
+obsArea, obstacles = genClutter(param, targetNumObs, clutterPercentage, roomWidth, roomHeight)
 r = algT.Room(roomWidth,roomHeight,walls,obstacles)
 roomPlot = plotfxn.plotRoom(r)
 
@@ -140,11 +140,11 @@ else
 #################################### 
 ## PARAMETERS
 #################################### 
-connectRadius = 5.
+connectRadius = 8.
 numSamples = 50.
 param = algT.AlgParameters(numSamples, connectRadius)
-targetNumObs = 3
-clutterPercentage = 0.15
+#targetNumObs = 3
+#clutterPercentage = 0.15
 roomWidth,roomHeight  = 20,20
 
 startstate = Point(1.,1)
@@ -154,9 +154,9 @@ goalstate = Point(19.,19)
 ####################################
 ## PARAMETERS PART TWO 
 ####################################
-nTrials = 1
+nTrials = 10
 
-clutterPercentageList = [ 0  0.1]
+clutterPercentageList = [0 0.01 0.05 0.1 0.12 0.15 0.2 0.25 0.3 0.4 0.5]
 #clutterPercentageList = 0:0.05:0.3
 
 ####################################
@@ -179,10 +179,12 @@ for pClutter in clutterPercentageList
     nSuccess = 0.
     pathcost = 0.
     param = algT.AlgParameters(numSamples, connectRadius)
+    obsAreaList = Vector{Float32}()
     while idx < nTrials
         nodeslist, edgeslist = preprocessPRM(r, param)
-        obstacles = genCluster(param, targetNumObs, pClutter, roomWidth, roomHeight)
+        obsArea, obstacles = genClutter(param, targetNumObs, pClutter, roomWidth, roomHeight)
         pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
+        push!(obsAreaList, obsArea)
         if isPathFound
             nSuccess += 1
         end
@@ -213,6 +215,7 @@ timestamp = Base.Dates.now()
 sizeplot = (800, 800)
 
 supTitle= ""
+# why does glvisualize() have terrible title() issues? oh well comment out for now
 # supTitle="\nPRM with maxDist=$connectRadius, 
         # # samples = $numSamples, nTrials=$nTrials.
         # (time to run:$timeExperiment, timestamp=$timestamp)\n\n"
@@ -235,4 +238,20 @@ plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
 
 
 
+
+# pPRMcost = scatter(clutterPercentageList, listCosts',
+    # color=:black,
+    # title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "clutter %",
+    # yaxis=((0,100), 0:20:100))
+# 
+# successTitle = "\nclutter % vs pSuccess\n"
+# pPRMsuccess = scatter(clutterPercentageList, listpSucc',
+    # color = :orange, markersize= 6, 
+    # title = successTitle, ylabel = ("P(success)=numSucc/$nTrials trials"), xlabel = "clutter %",
+    # yaxis=((0, 1.2), 0:0.1:1))
+# 
+# plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
+    # xaxis=((0, 0.5), 0:0.05:0.5),
+    # size = sizeplot)
+# 
 end
