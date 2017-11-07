@@ -65,7 +65,7 @@ end
 
 
 timeExperiment = toc();
-print("Time to: $blah\n")
+print("Time to: $timeExperiment\n")
 timestamp = Base.Dates.now()
 
 
@@ -94,7 +94,7 @@ pPRMsuccess = scatter(nSamples_list, listpSucc',
 
 plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
     xaxis=((0, 320), 0:50:300),
-    size = sizeplot, sizeplot = (800, 800))
+    size = sizeplot)
 
 
 # todo: save one "representative" figure from each run , to plot
