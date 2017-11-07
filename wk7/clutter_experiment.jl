@@ -19,6 +19,13 @@ glvisualize()
     end
 ### END 
 
+
+
+
+
+
+
+
 #################################### 
 # Randomly Generate Clutter (obstacles) 
 ####################################
@@ -51,17 +58,28 @@ end
 ####
 
 
+
+
+
+
+
+
+
+
+
+
+
 function testGenClutter()
 
     #################################### 
     ## PARAMETERS
     #################################### 
-    numSamples = 50 
+    numSamples = 100 
     connectRadius = 5
     param = algT.AlgParameters(numSamples, connectRadius)
 
     targetNumObs = 3
-    clutterPercentage = 0.5
+    clutterPercentage = 0.25
     roomWidth,roomHeight  = 20,20
 
     startstate = Point(1.,1)
@@ -82,8 +100,6 @@ function testGenClutter()
     #plot!(obstacles, fillalpha=0.5)
 
 
-    @show targetSumObsArea
-    @show sumObsArea
 
 #################################### 
 # Run PRM once and display config space plot  
@@ -135,6 +151,19 @@ function testGenClutter()
 end
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 function clutterExp()
     #################################### 
     # Run multiple trials and scatterplot all cost vs area for all runs 
@@ -144,7 +173,7 @@ function clutterExp()
     ## PARAMETERS
     #################################### 
     connectRadius = 8.
-    numSamples = 25.
+    numSamples = 100.
     param = algT.AlgParameters(numSamples, connectRadius)
     targetNumObs = 5 
     #clutterPercentage = 0.15
@@ -153,13 +182,12 @@ function clutterExp()
     startstate = Point(1.,1)
     goalstate = Point(19.,19)
 
-
     ####################################
     ## PARAMETERS PART TWO 
     ####################################
-    nTrials = 20
+    nTrials = 10
 
-    clutterPercentageList = [0 0.01 0.05 0.1 0.12 0.15 0.2 0.25 0.3 0.4 0.5]
+    #clutterPercentageList = [0 0.01 0.05 0.1 0.12 0.15 0.2 0.25 0.3 0.4 0.5]
     clutterPercentageList = [0 0.1 0.2 0.5]
     #clutterPercentageList = 0 : 0.05 :0.3
 
@@ -193,7 +221,177 @@ function clutterExp()
         nSuccess = 0
         pathcost = 0.
         param = algT.AlgParameters(numSamples, connectRadius)
+        print("\n ------ \n")
+        #@show pClutter
+        while idx < nTrials
+        #    @show idx
         obsAreaList = Vector{Float32}()
+            idx += 1
+            obstacles = Vector{HyperRectangle}()
+            obsArea, obstacles = genClutter(perimeter, param, targetNumObs, pClutter, roomWidth, roomHeight)
+            r = algT.Room(roomWidth,roomHeight,walls,obstacles)
+            nodeslist, edgeslist = preprocessPRM(r, param)
+            pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
+            push!(obsAreaList, obsArea)
+            if isPathFound
+                nSuccess += 1
+        #        @show nSuccess
+            end
+            if !(pathcost == Void)
+                totalcost += pathcost
+            end
+        end
+
+        avgCost = totalcost /  nSuccess
+        pSucc = nSuccess / nTrials
+        #@printf("For the iter of %d the avg cost was %d across %d trials", maxIter, avgCost, nTrials)
+        push!(listCosts, avgCost)
+        @show pSucc
+        push!(listpSucc, pSucc)
+    end
+
+
+    timeExperiment = toc();
+    print("Time to run experiment: $timeExperiment\n")
+    timestamp = Base.Dates.now()
+
+
+    ####################################
+    # Plot Results
+    ####################################
+    # clutter (area) on X
+    # pathcost on Y
+    sizeplot = (800,600)
+
+    @show clutterPercentageList
+    @show listpSucc
+
+    supTitle= ""
+    # why does glvisualize() have terrible title() issues? oh well comment out for now
+    # supTitle="\nPRM with maxDist=$connectRadius, 
+            # # samples = $numSamples, nTrials=$nTrials.
+            # (time to run:$timeExperiment, timestamp=$timestamp)\n\n"
+    costTitle= "clutter % vs pathcost\n"
+
+    pPRMcost = scatter(clutterPercentageList, listCosts',
+        color=:black,
+        title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "clutter %",
+        yaxis=((0,40), 0:20:40))
+
+    successTitle = "\nclutter % vs pSuccess\n"
+    pPRMsuccess = scatter(clutterPercentageList, listpSucc',
+        color = :orange, markersize= 6, 
+        title = successTitle, ylabel = ("P(success)=numSucc/$nTrials trials"), xlabel = "clutter %",
+        yaxis=((0, 1.2), 0:0.1:1))
+
+    plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
+        xaxis=((0, 0.5), 0:0.05:0.5),
+        size = sizeplot)
+
+
+
+# pPRMcost = scatter(clutterPercentageList, listCosts',
+    # color=:black,
+    # title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "clutter %",
+    # yaxis=((0,100), 0:20:100))
+# 
+# successTitle = "\nclutter % vs pSuccess\n"
+# pPRMsuccess = scatter(clutterPercentageList, listpSucc',
+    # color = :orange, markersize= 6, 
+    # title = successTitle, ylabel = ("P(success)=numSucc/$nTrials trials"), xlabel = "clutter %",
+    # yaxis=((0, 1.2), 0:0.1:1))
+# 
+# plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
+    # xaxis=((0, 0.5), 0:0.05:0.5),
+    # size = sizeplot)
+# 
+
+end
+#testGenClutter()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function clutterExperimentScatter()
+    #################################### 
+    # Run multiple trials and scatterplot all cost vs area for all runs 
+    # due to varying absolute area
+    ####################################
+    #################################### 
+    ## PARAMETERS
+    #################################### 
+    connectRadius = 8.
+    numSamples = 25.
+    param = algT.AlgParameters(numSamples, connectRadius)
+    targetNumObs = 5 
+    #clutterPercentage = 0.15
+    roomWidth,roomHeight  = 20,20
+
+    startstate = Point(1.,1)
+    goalstate = Point(19.,19)
+
+
+    ####################################
+    ## PARAMETERS PART TWO 
+    ####################################
+    nTrials = 20
+
+    clutterPercentageList = [0 0.01 0.05 0.1 0.12 0.15 0.2 0.25 0.3 0.4 0.5]
+    #clutterPercentageList = [0 0.1 0.2 0.5]
+    #clutterPercentageList = 0 : 0.05 :0.3
+
+    ####################################
+    ## Init
+    ####################################
+    cost = 0
+    listCosts = Vector{Float32}()
+    listpSucc= Vector{Float32}()
+
+    obstacles = Vector{HyperRectangle}()
+    perimeter = HyperRectangle(Vec(0.,0), Vec(roomWidth,roomHeight))
+    wallsPerimeter = algfxn.decompRect(perimeter)
+
+    walls = Vector{LineSegment}()
+    for l in wallsPerimeter
+        push!(walls, l)
+    end
+
+
+    ####################################
+    # Run Trials
+    ####################################
+
+#@show listpSucc
+    plot()
+    tic()
+        obsAreaList = Vector{Float32}()
+    for pClutter in clutterPercentageList
+        totalcost = 0.
+        idx = 0
+        nSuccess = 0
+        pathcost = 0.
+        param = algT.AlgParameters(numSamples, connectRadius)
         print("\n ------ \n")
         @show pClutter
         while idx < nTrials
@@ -245,13 +443,13 @@ function clutterExp()
             # (time to run:$timeExperiment, timestamp=$timestamp)\n\n"
     costTitle= "clutter % vs pathcost\n"
 
-    pPRMcost = scatter(clutterPercentageList, listCosts',
+    pPRMcost = scatter(obsAreaList, listCosts',
         color=:black,
         title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "clutter %",
         yaxis=((0,100), 0:20:100))
 
     successTitle = "\nclutter % vs pSuccess\n"
-    pPRMsuccess = scatter(clutterPercentageList, listpSucc',
+    pPRMsuccess = scatter(obsAreaList, listpSucc',
         color = :orange, markersize= 6, 
         title = successTitle, ylabel = ("P(success)=numSucc/$nTrials trials"), xlabel = "clutter %",
         yaxis=((0, 1.2), 0:0.1:1))
@@ -259,8 +457,6 @@ function clutterExp()
     plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
         xaxis=((0, 0.5), 0:0.05:0.5),
         size = sizeplot)
-end
-
 
 
 # pPRMcost = scatter(clutterPercentageList, listCosts',
@@ -278,6 +474,9 @@ end
     # xaxis=((0, 0.5), 0:0.05:0.5),
     # size = sizeplot)
 # 
+end
 
 #testGenClutter()
-clutterExp()
+#clutterExp()
+#stdDev = sqrt((
+clutterExperimentScatter()
