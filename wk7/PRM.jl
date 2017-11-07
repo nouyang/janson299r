@@ -12,7 +12,6 @@ using Plots
 using DataStructures
 using GeometryTypes 
 using Distributions
-gr()
 
 module algT
     using GeometryTypes 
@@ -232,19 +231,20 @@ module plotfxn
     ####
 
     function plotRoom(room)
+        aPlot = plot() #Todo! this assumes plotroom is first thing called()
         roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
-        plot()
        # #print("\nPlotting Room\n")
-        plot!(walls, color =:black)
-        plot!(obstacles, fillalpha=0.5)
+        plot!(aPlot, walls, color =:black)
+        plot!(aPlot, obstacles, fillalpha=0.5)
+        return aPlot
     end
 
-    function plotPRM(roadmap, solPath, title)
+    function plotPRM(roomPlot, roadmap, solPath, title)
         startstate, goalstate, nodeslist, edgeslist = roadmap.startstate, roadmap.goalstate, roadmap.nodeslist, roadmap.edgeslist
 
         x = [n.state[1] for n in nodeslist]
         y = [n.state[2] for n in nodeslist]
-        scatter!(x,y, color=:black) 
+        scatter!(roomPlot, x,y, color=:black) 
 
         edgeXs, edgeYs = [], []
         for e in edgeslist
@@ -256,18 +256,18 @@ module plotfxn
             push!(edgeYs, y1, y2, NaN)
         end
 
-        plot!( edgeXs, edgeYs, color=:tan, linewidth=0.3)
-
+        plot!(roomPlot, edgeXs, edgeYs, color=:tan, linewidth=0.3)
 
         # plot solution
-        plotSolPath(solPath)
+        prmPlot = plotSolPath(roomPlot, solPath)
         
-        title!(title)
-        plot!(legend=false, size=(600,600), xaxis=((-5,25), 0:1:20 ), 
+        title!(prmPlot, title)
+        plot!(prmPlot, legend=false, size=(600,600), xaxis=((-5,25), 0:1:20 ), 
               yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
+        return prmPlot
     end
 
-    function plotSolPath(solPath)
+    function plotSolPath(aPlot, solPath)
         print("\n ---Solution Path----- \n")
         #@show solPath
         print("\n -------- \n")
@@ -277,17 +277,18 @@ module plotfxn
             xstart, ystart = solPath[1].state
             xend, yend = solPath[end].state
             # plot start pt
-            scatter!([xstart], [ystart], 
+            scatter!(aPlot, [xstart], [ystart], 
                      markercolor= :red, markershape = :circle,  markersize = 6, markerstrokealpha = 0.5, markerstrokewidth=1)
             # plot goal pt
-            scatter!([xend], [yend], 
+            scatter!(aPlot, [xend], [yend], 
                      markerstrokecolor = :green, markershape = :star,  markersize = 5, markerstrokealpha = 1, markerstrokewidth=5)
 
             # plot path
-            plot!( xPath, yPath, color = :orchid, linewidth=3, fillalpha = 0.3)
+            plot!(aPlot, xPath, yPath, color = :orchid, linewidth=3, fillalpha = 0.3)
         else
            # #print("\n --- No solution path found ----- \n")
         end
+        return aPlot
     end
 
 

@@ -2,6 +2,8 @@
 END DATE: 11/7
 Well. Tasks to do: 
 
+Implement RRT
+
 More PRM / RRT -> what I want to do: write up mini report, investigate
 * clutter
 * maze

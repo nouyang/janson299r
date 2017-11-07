@@ -1,8 +1,6 @@
-using Plots
 include("PRM.jl")
 #using Distributions
 
-gr()
 
 
 #### HELPER FXN 
@@ -89,10 +87,10 @@ print("obstacles generated")
 #################################### 
 # Run PRM once and display config space plot  
 ####################################
-
+plot()
 
 r = algT.Room(roomWidth,roomHeight,walls,obstacles)
-plotfxn.plotRoom(r)
+roomPlot = plotfxn.plotRoom(r)
 
 ## Run preprocessing
 nodeslist, edgeslist = preprocessPRM(r, param)
@@ -110,8 +108,8 @@ title = "PRM with # samples=$numSamples, maxDist=$connectRadius, \npathcost = $p
 roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
 
 
-plotfxn.plotPRM(roadmap, solPath, title::String)
-gui()
+fooplot = plotfxn.plotPRM(roomPlot , roadmap, solPath, title::String)
+gui(fooplot)
 
 print("\n --- Time --- \n")
 @show timestamp
@@ -208,6 +206,5 @@ pPRMsuccess = scatter(nSamples_list, listpSucc',
 plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
     xaxis=((0, 320), 0:50:300),
     size = sizeplot)
-
 
 

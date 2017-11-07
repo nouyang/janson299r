@@ -10,7 +10,7 @@
 include("PRM.jl")
 
 function main()
-    numSamples = 25
+    numSamples = 100
     connectRadius =10 
     param = algT.AlgParameters(numSamples, connectRadius)
 
@@ -33,7 +33,7 @@ function main()
     end
 
     r = algT.Room(w,h,walls,obstacles)
-    plotfxn.plotRoom(r)
+    roomPlot = plotfxn.plotRoom(r)
 
     ## Run preprocessing
     nodeslist, edgeslist = preprocessPRM(r, param)
@@ -52,7 +52,8 @@ function main()
 
     # this is the gold
     #!
-    plotfxn.plotPRM(roadmap, solPath, title::String)
+    prmPlot = plotfxn.plotPRM(roomPlot, roadmap, solPath, title::String)
+    gui(prmPlot)
 
 ####
 #startGoal = algT.GraphNode(0, Point(0,0))

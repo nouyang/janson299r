@@ -1,7 +1,7 @@
 include("PRM.jl")
 #using Distributions
-
-gr()
+flagTestClutter = true
+glvisualize()
 
 
 #### HELPER FXN 
@@ -21,21 +21,23 @@ gr()
 ### END 
 
 
+#################################### 
 ## PARAMETERS
-numSamples = 40
-connectRadius = 2 
+#################################### 
+numSamples = 100
+connectRadius = 5
 param = algT.AlgParameters(numSamples, connectRadius)
 
 targetNumObs = 3
 clutterPercentage = 0.15
 roomWidth,roomHeight  = 20,20
 
-startstate = Point(4.,4)
-goalstate = Point(15.,15)
+startstate = Point(1.,1)
+goalstate = Point(20.,20)
 
-
-
+#################################### 
 ## INIT
+#################################### 
 obstacles = Vector{HyperRectangle}()
 perimeter = HyperRectangle(Vec(0.,0), Vec(roomWidth,roomHeight))
 wallsPerimeter = algfxn.decompRect(perimeter)
@@ -45,6 +47,10 @@ for l in wallsPerimeter
     push!(walls, l)
 end
 
+
+#################################### 
+# Randomly Generate Clutter (obstacles) 
+####################################
 
 # implement function to create clutter
 # Let's say on average we want to create 4 obstacles... (otherwise, *most* of
@@ -78,11 +84,14 @@ print("obstacles generated")
 @show targetSumObsArea
 @show sumObsArea
 
+#################################### 
+# Run PRM once and display config space plot  
+####################################
 
-### Run PRM on cluttered room
 
+if flagTestClutter == true
 r = algT.Room(roomWidth,roomHeight,walls,obstacles)
-plotfxn.plotRoom(r)
+roomPlot = plotfxn.plotRoom(r)
 
 ## Run preprocessing
 nodeslist, edgeslist = preprocessPRM(r, param)
@@ -100,8 +109,7 @@ title = "PRM with # samples=$numSamples, maxDist=$connectRadius, \npathcost = $p
 roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
 
 
-plot = plotfxn.plotPRM(roadmap, solPath, title::String)
-gui()
+prmPlot= plotfxn.plotPRM(roomPlot, roadmap, solPath, title::String)
 
 print("\n --- Time --- \n")
 @show timestamp
@@ -111,19 +119,95 @@ print("\n --- Time --- \n")
 #@show nodeslist 
 #print("\n --- Edges --- \n")
 #@show edgeslist 
-print("\n -------- \n")
+# print("\n -------- \n")
 
 
-# todo: save one "representative" figure from each run
+    r = algT.Room(roomWidth,roomHeight,walls,obstacles)
+    gui(prmPlot)
+    #print("\n --- Press ENTER to continue --- \n")
+    #readline(STDIN)
+    # todo: save one "representative" figure from each run
+    # print("\n --- continue --- \n")
+
+else 
+
+#################################### 
+# Run multiple trials and scatterplot all cost vs area for all runs 
+# due to varying absolute area
+####################################
+#################################### 
+## PARAMETERS
+#################################### 
+numSamples = 40
+connectRadius = 5
+param = algT.AlgParameters(numSamples, connectRadius)
+
+targetNumObs = 3
+clutterPercentage = 0.15
+roomWidth,roomHeight  = 20,20
+
+startstate = Point(1.,1)
+goalstate = Point(20.,20)
 
 
-@show listCosts
-@show listpSucc
+####################################
+## PARAMETERS PART TWO 
+####################################
+nTrials = 30
+nSamples_list = [10 20 30 80 150 200 300]
+nSamples_list = [10 ]
+
+####################################
+## Init
+####################################
+cost = 0
+listCosts = Vector{Float32}()
+listpSucc= Vector{Float32}()
+
+####################################
+# Run Trials
+####################################
+
+#@show listpSucc
+
+tic()
+for nSamples in nSamples_list
+    totalcost = 0.
+    idx = 0.
+    nSuccess = 0.
+    pathcost = 0.
+    param = algT.AlgParameters(nSamples, connectRadius)
+    while idx < nTrials
+        nodeslist, edgeslist = preprocessPRM(r, param)
+        pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
+        if isPathFound
+            nSuccess += 1
+        end
+        if !(pathcost == Void)
+            totalcost += pathcost
+        end
+        idx += 1
+    end
+
+    avgCost = totalcost /  nSuccess
+    pSucc = nSuccess / nTrials
+    #@printf("For the iter of %d the avg cost was %d across %d trials", maxIter, avgCost, nTrials)
+    push!(listCosts, avgCost)
+    push!(listpSucc, pSucc)
+end
+
+
+timeExperiment = toc();
+print("Time to run experiment: $timeExperiment\n")
+timestamp = Base.Dates.now()
+
+
+####################################
+# Plot Results
+####################################
+# clutter (area) on X
+# pathcost on Y
 sizeplot = (800, 800)
-
-# sanity check
-plot()
-
 
 supTitle="\nPRM with maxDist=$connectRadius, nTrials=$nTrials.
         (time to run:$timeExperiment, timestamp=$timestamp)\n\n"
@@ -142,5 +226,8 @@ pPRMsuccess = scatter(nSamples_list, listpSucc',
 
 plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
     xaxis=((0, 320), 0:50:300),
-    size = sizeplot, sizeplot = (800, 800))
+    size = sizeplot)
 
+
+
+end
