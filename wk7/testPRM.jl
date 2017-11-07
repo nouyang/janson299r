@@ -10,8 +10,8 @@
 include("PRM.jl")
 
 function main()
-    numSamples = 100
-    connectRadius =10 
+    numSamples = 50
+    connectRadius = 8
     param = algT.AlgParameters(numSamples, connectRadius)
 
     print("\n ---- Running PRM ------ \n")
