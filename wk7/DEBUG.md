@@ -203,3 +203,15 @@ sooooooooooo we want our list of stddevs to be array of 2 instead of array of 1
 WELL taking the transpose fixed it. ????
 
 
+# stddev
+I think it's actually a property of stddev. If n =3 ...  (pSuccess = 0.2)
+average = very similar to all the points, thus error is small
+
+
+# plottitle
+```
+plot_title: title for whole plot, not subplots. note: not currently implemented
+```
+
+why
+do i do this to myself. why am i using julia

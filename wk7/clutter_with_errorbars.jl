@@ -146,7 +146,7 @@ function clutterExp()
     ####################################
     ## PARAMETERS - plot clutter 
     ####################################
-    N = 10
+    N = 50
 
     clutterPercentages = [0 0.01 0.05 0.1 0.12 0.15 0.2 0.25 0.3 0.4 0.5]
     clutterPercentages = [0 0.1 0.2 0.3 0.5]
@@ -205,14 +205,15 @@ function clutterExp()
 
         totalcost = sum(pathcosts)
         avgCost = totalcost /  nSuccess # average cost across the nTrials 
-        @show nSuccess
+        #@show nSuccess
         pSucc = nSuccess / N 
 
-        @show pathcosts
         sumSqdError = sum([cost - avgCost for cost in pathcosts].^2)
-        @show sumSqdError
+        #@show sumSqdError
+        #@show pathcosts
+        #@show avgCost
         stddev_n = sqrt( sumSqdError / (nSuccess -1))
-        @show stddev_n
+        #@show stddev_n
 
         #@printf("For the iter of %d the avg cost was %d across %d trials", maxIter, avgCost, nTrials)
         push!(avgCosts, avgCost) #todo combine pt1
@@ -244,6 +245,8 @@ function clutterExp()
             # (time to run:$timeExperiment, timestamp=$timestamp)\n\n"
     costTitle= "clutter % vs pathcost\n"
 
+    pfont = Plots.Font("sans-serif", 5, :hcenter, :vcenter, 0.0, RGB{U8}(0.0, 0.0, 0.0))
+
     yerrCost = 10
     print("type of stddevs, $(typeof(stddevs))")
     stddevs = stddevs'
@@ -259,7 +262,7 @@ function clutterExp()
     successTitle = "\nclutter % vs pSuccess\n"
     pPRMsuccess = scatter(clutterPercentages, listpSucc',
         color = :orange, markersize= 6, 
-        title = successTitle, ylabel = ("P(success)=numSucc/$N trials"), xlabel = "clutter %",
+        title = successTitle, title_location=:center, titlefont=pfont, ylabel = ("P(success)=numSucc/$N trials"), xlabel = "clutter %",
         yaxis=((0, 1.2), 0:0.1:1))
 
     plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
