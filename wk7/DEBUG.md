@@ -215,3 +215,16 @@ plot_title: title for whole plot, not subplots. note: not currently implemented
 
 why
 do i do this to myself. why am i using julia
+
+#Plots.scalefontsizes(0.2)
+WELL each time I run it it gets smaller and smaller. sigh
+
+
+# freezing with glvisualize and crashing julia
+
+every so often glvisualize says "cannot start" or something.
+solution: take glvisualize() out of top of file
+
+
+# well glvisualize()
+The subplot title is chilling in the middle of the plot...

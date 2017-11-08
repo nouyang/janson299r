@@ -1,7 +1,9 @@
 include("PRM.jl")
 #using Distributions
-glvisualize()
-
+pfont = Plots.Font("sans-serif", 8, :hcenter, :vcenter, 0.0, RGB{U8}(0.0, 0.0, 0.0))
+glvisualize(titlefont = pfont, guidefont = pfont)
+#Plots.resetfontsizes()
+#Plots.scalefontsizes(0.9)
 
 
 
@@ -108,8 +110,8 @@ function testGenClutter()
     #@show edgeslist 
     # print("\n -------- \n")
 
-    f = Plots.Font(05,"Liberation Serif")
-    plot!(prmPlot,titlefont = f)
+    #f = Plots.Font(05,"Liberation Serif")
+    #plot!(prmPlot,titlefont = f)
 
     gui(prmPlot)
         print("\n --- Press ENTER to continue --- \n")
@@ -119,7 +121,6 @@ function testGenClutter()
     @show  isPathFound
 
 end
-
 
 
 
@@ -146,7 +147,7 @@ function clutterExp()
     ####################################
     ## PARAMETERS - plot clutter 
     ####################################
-    N = 50
+    N = 5
 
     clutterPercentages = [0 0.01 0.05 0.1 0.12 0.15 0.2 0.25 0.3 0.4 0.5]
     clutterPercentages = [0 0.1 0.2 0.3 0.5]
@@ -238,14 +239,14 @@ function clutterExp()
     @show stddevs'
     @show listpSucc
 
-    supTitle= ""
+    #supTitle= ""
     # why does glvisualize() have terrible title() issues? oh well comment out for now
-    # supTitle="\nPRM with maxDist=$connectRadius, 
-            # # samples = $numSamples, nTrials=$nTrials.
-            # (time to run:$timeExperiment, timestamp=$timestamp)\n\n"
+    supTitle="\nprm with maxdist=$connectRadius, "*
+            "\n# samples = $N, numPts = $numPts."*
+            "(time to run:$timeExperiment, "*
+            "\ntimestamp=$timestamp)\n\n"
     costTitle= "clutter % vs pathcost\n"
 
-    pfont = Plots.Font("sans-serif", 5, :hcenter, :vcenter, 0.0, RGB{U8}(0.0, 0.0, 0.0))
 
     yerrCost = 10
     print("type of stddevs, $(typeof(stddevs))")
@@ -256,13 +257,13 @@ function clutterExp()
     pPRMcost = scatter(clutterPercentages, avgCosts',
         markercolor = :black,
         title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "clutter %",
-        yaxis=((20,40), 0:5:40), yerr = stddevs)
+        yaxis=((0,60), 0:5:40), yerr = stddevs)
          # yerr = yerrCost)
 
-    successTitle = "\nclutter % vs pSuccess\n"
+    successTitle = "\n\n\nclutter % vs pSuccess\n"
     pPRMsuccess = scatter(clutterPercentages, listpSucc',
         color = :orange, markersize= 6, 
-        title = successTitle, title_location=:center, titlefont=pfont, ylabel = ("P(success)=numSucc/$N trials"), xlabel = "clutter %",
+        title = successTitle, title_location=:center, ylabel = ("P(success)=numSucc/$N trials"), xlabel = "clutter %",
         yaxis=((0, 1.2), 0:0.1:1))
 
     plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
