@@ -1,5 +1,5 @@
-# 
-END DATE: 11/7
+# wk8
+END DATE: 11/21
 Well. Tasks to do: 
 
 Implement RRT
@@ -19,26 +19,37 @@ Read `RRT*`-> more proof magic?  Read `FMT*`
 
 
 ## Timeline
-
-* 9/14: read RRT and PRM initial papers, confirmed this is happening
-* 9/21: have RRT and PRM implemented in code with some simulation results
-* 9/28: have more comprehensive simulation results and have read probabilistic completeness papers for RRT and PRM
-* 10/5: talk more about probabilistic completeness and any exercises from previous week
-* 10/12: discuss `RRT*` and its algorithms and mathematical results
-* 10/19: dedicating entire week to fellowship applications
-* 10/26: discuss `RRT*` paper more and just have read `FMT*` paper
-* 11/2: have implementations of `RRT*`, `PRM*` and `FMT*`
-* 11/9: go over some simulation results, discuss idea for improving algorithms
-* 11/16: go through improved algorithm simulations, maybe produce videos
-* 11/23: surprise!
-* 11/30: outline / very rough draft due
-* 12/7: rough draft or report due
-* 12/14: Final report due and we'll talk about it
-
+Plan for final 5 weeks:
+```
+11/14 - (actually we'll meet 11/15) have read RRT*/FMT* papers, maybe not 100% as this task will bleed into next week
+11/21 - have actually finished reading RRT*/FMT* papers and implemented RRT*/PRM*/FMT* in simulation
+11/28 - have a few genuine experiments run and have tried some alterations to the algorithms (which we will have discussed last time)
+12/5 - finish up any final things from the past few weeks and have outline and/or early draft of final report
+12/12 - close-to-final draft of final report
+```
 
 # Todo
-
 * Error bars
 * Calculate area *within* the room, as opposed to removing rectangles that fall
 outside the room at all. I do the latter currently which results in a lot of
 paths going through the narrow extra spaces near the walls.
+
+# Todo
+plot one of each pClutter, together on a subplot,  directly within the clutterExp() code
+
+doublecheck yerr takes in 1 stddev or 1/2 stddev to center around the mean
+
+!!!! Plot start and end goals, even if fail to find path...
+This should DEFINITELY be done.
+
+
+Check if obstacle covers start or end goals...(can a path be found at all?)
+
+Allow obstacles to be generated outside of room (just calculate contained area)
+
+
+# To run
+use 
+`clutter_with_errorbars.jl`
+and 
+`walls_experiment.jl`
