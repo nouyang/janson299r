@@ -235,3 +235,14 @@ The subplot title is chilling in the middle of the plot...
 elapsed time: 3.182331313 seconds
 Time to run experiment: 3.182331313
 ERROR: LoadError: DivideError: integer division error
+
+
+# 
+ERROR: LoadError: syntax: invalid assignment location "8"
+Stacktrace:
+ [1] include_from_node1(::String) at ./loading.jl:569
+ [2] include(::String) at ./sysimg.jl:14
+while loading /home/nrw/Documents/fall 2017/299r/janson299r/wk7/walls_experiment.jl, in expression starting
+
+
+solution: had 8.0. insetad of 8.0,

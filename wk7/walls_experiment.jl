@@ -312,11 +312,11 @@ function doorSize_vs_pathCost()
     #################################### 
     ## PARAMETERS - RRT  
     #################################### 
-    connectRadius = 8.
-    numPts = 50.
+    connectRadius = 4.
+    numPts = 100.
     param = algT.AlgParameters(numPts, connectRadius)
-    targetNumObs = 5 
-    percentClutter = 0.15
+    targetNumObs = 4 
+    percentClutter = 0.1
     roomWidth,roomHeight  = 20,20
 
     goalstate = Point(19.,19)
@@ -330,8 +330,8 @@ function doorSize_vs_pathCost()
     #clutterPercentages = [0 0.1 0.2 0.3 0.5]
 
     #numPtsList = [10 20 30 80 100]
-    doorSizes = [0.5 0.7 1 1.5 2 2.5 3 3.5 4 4.5]
-    sample = [1 2 3 4 5 6 7 8 9 10]
+    doorSizes = [ 0.2 0.5 0.7 1 1.5 2 2.5 3 3.5 4 4.5 4.8]
+    #doorSizes = [0.5 1 2 3 4 4.5]
     #doorSizes = [1]
 
     ####################################
@@ -374,9 +374,9 @@ function doorSize_vs_pathCost()
         for l in wallsPerimeter
             push!(walls, l)
         end
-        #for l in trapwalls
-        #    push!(walls, l)
-        #end
+        for l in trapwalls
+            push!(walls, l)
+        end
 
         idx, nSuccess, pathcost = 0,0,0.
         pathcosts = Vector{Float32}() #one per %clutter
@@ -431,30 +431,31 @@ function doorSize_vs_pathCost()
     # pathcost on Y
     sizeplot = (600,800)
 
-    supTitle="NO TRAP prm with samples=$numPts, maxdist=$connectRadius, 
+    supTitle="TRAP prm with numPts=$numPts, maxdist=$connectRadius, 
     targetNumObs=$targetNumObs, percentClutter=$percentClutter, 
-    Avgd across #samples = $N, \n(time to run:$(ceil(timeExperiment, 2)) sec"*
-            "\ntimestamp=$timestamp)"
+    Avgd across #samples = $N, \n(time to run:$(ceil(timeExperiment, 2)) secs "*
+            "timestamp=$timestamp)"
 
-    costTitle= "\nsample# vs pathcost\n"
+
+    costTitle= "\ndoorSizes vs pathcost\n"
 
 
     stddevs = stddevs' #why is this needed for the errors to plot correctly (not constant error)?
 
-    pPRMcost = scatter(sample, avgCosts',
+    pPRMcost = scatter(doorSizes, avgCosts',
         markercolor = :black,
-        title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "sample#", 
-        yaxis=((0,50), 0:5:40), yerr = stddevs) #this automatically centers the 1 stddev, I think. So each side is +- 0.5 stddev?
+        title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "doorSizes", 
+        yaxis=((20,50), 20:5:40), yerr = stddevs) #this automatically centers the 1 stddev, I think. So each side is +- 0.5 stddev?
          # yerr = yerrCost)
 
-    successTitle = "sample# vs pSuccess"
-    pPRMsuccess = scatter(sample, listpSucc',
+    successTitle = "doorSizes vs pSuccess"
+    pPRMsuccess = scatter(doorSizes, listpSucc',
         color = :orange, markersize= 6, 
-        title = successTitle, title_location=:center, ylabel = ("P(success)=numSucc/$N trials"), xlabel = "sample#",
+        title = successTitle, title_location=:center, ylabel = ("P(success)=numSucc/$N trials"), xlabel = "doorSizes",
         yaxis=((0, 1.2), 0:0.1:1))
 
     plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
-         xaxis=((0,11), 0:1:10),
+         xaxis=((0,5), 0:0.5:5),
         size = sizeplot)
 end
 
@@ -505,11 +506,11 @@ function plotDoorSize()
         pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
 
     ## Plot path found
-    targetNumObs = 3 
-    percentClutter = 0.1
     timestamp = Base.Dates.now()
     title = "PRM with #doorsize=$doorSize, samples=$numPts, maxDist=$connectRadius, 
     pathcost = $(round(pathcost,2)), targetNumObs=$targetNumObs, percentClutter=$percentClutter, \ntimestamp=$timestamp)\n"
+    targetNumObs = 3 
+    percentClutter = 0.1
     roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
 
 
