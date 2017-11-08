@@ -235,3 +235,9 @@ plot one of each pClutter, together on a subplot
 directly within the clutterExp() code
 
 doublecheck yerr takes in 1 stddev or 1/2 stddev to center around the mean
+
+!!!! Plot start and end goals, even if fail to find path...
+This should DEFINITELY be done.
+
+
+Check if obstacle covers start or end goals...(can a path be found at all?)

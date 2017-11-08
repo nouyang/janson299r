@@ -118,7 +118,7 @@ module algfxn
         return false
     end
 
-    function isCollidingEdge(line::LineSegment, obsList::Vector{HyperRectangle})
+    function isCollidingObstacles(line::LineSegment, obsList::Vector{HyperRectangle})
         for obs in obsList
             rectLines = decompRect(obs)
             for rectline in rectLines
@@ -130,6 +130,14 @@ module algfxn
         return false
     end
 
+    function isCollidingWalls(line::LineSegment, walls::Vector{LineSegment})
+        for wall in walls
+            if intersects(line, wall)
+                return true
+            end
+        end
+        return false
+    end
 
     function findNearestNodes(nodestate, nodeslist, maxDist)
         # given maxDist, return all nodes within that distance of node
@@ -309,7 +317,7 @@ function preprocessPRM(room, parameters)
         xrand, yrand = rand(Uniform(0, roomWidth), 2)
 		#xrand,yrand = rand(1.0:roomWidth-1,2)
         n = Point(xrand, yrand) #new point in room
-        if !algfxn.isCollidingNode(n, obstacles) #todo
+        if !algfxn.isCollidingNode(n, obstacles) #should write fxn to check for sampling *on* a wall at some point TODO
             newNode = algT.GraphNode(currID, n)
             currID += 1
             push!(nodeslist, newNode)
@@ -325,7 +333,7 @@ function preprocessPRM(room, parameters)
         n = [algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point
         for endnode in neighbors
             candidateEdge = LineSegment(startnode.state, endnode.state)
-            if !algfxn.isCollidingEdge(candidateEdge, obstacles) #todo
+            if !algfxn.isCollidingObstacles(candidateEdge, obstacles) & !algfxn.isCollidingWalls(candidateEdge, walls)
                 #line = LineSegment(startnode.state, endnode.state)
                 newEdge = algT.Edge(startnode.id, endnode.id) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
                 push!(edgeslist, newEdge)
@@ -388,7 +396,7 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
         # bar2 = typeof(n)
         ## #print("\n$bar, $bar2\n")
         candidateline = LineSegment(Point(startstate), Point(n.state))
-        if !algfxn.isCollidingEdge(candidateline, obstaclesList)
+        if !algfxn.isCollidingObstacles(candidateline, obstaclesList)
             nodestart = n
             break
         end
@@ -396,7 +404,7 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
 
     for (n, dist) in n_nearGoal
         candidateline = LineSegment(Point(goalstate), n.state)
-        if !algfxn.isCollidingEdge(candidateline, obstaclesList)
+        if !algfxn.isCollidingObstacles(candidateline, obstaclesList)
             nodegoal = n
             break
         end

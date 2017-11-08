@@ -48,12 +48,12 @@ function testGenWalls()
     #################################### 
     ## PARAMETERS
     #################################### 
-    numSamples = 100 
-    connectRadius = 5
-    param = algT.AlgParameters(numSamples, connectRadius)
+    numPts = 100 
+    connectRadius = 10 
+    param = algT.AlgParameters(numPts, connectRadius)
 
     targetNumObs = 3
-    clutterPercentage = 0.2
+    clutterPercentage = 0.1
     roomWidth,roomHeight  = 20,20
 
     startstate = Point(7.,7)
@@ -73,15 +73,21 @@ function testGenWalls()
 
     lineL = LineSegment( Point(5,5), Point(5,10))
     lineR = LineSegment( Point(10,5), Point(10,10))
-    lineBot = LineSegment( Point(5,5), Point(10,5))
-    lineLeftTop = LineSegment( Point(5,10), Point(7,10))
-    lineRightTop = LineSegment( Point(8,10), Point(10,10))
+    #lineBot = LineSegment( Point(5,5), Point(10,5))
+    lineTop = LineSegment( Point(5,10), Point(10,10))
+    lineBotRight = LineSegment( Point(8,5), (10,5))
+    lineBotLeft = LineSegment( Point(5,5), (7,5))
+    #lineLeftTop = LineSegment( Point(5,10), Point(7,10))
+    #lineRightTop = LineSegment( Point(8,10), Point(10,10))
 
-    push!(walls, lineL, lineR, lineBot, lineLeftTop, lineRightTop)
+    #push!(walls, lineL, lineR, lineBot, lineLeftTop, lineRightTop) #opening at bottom
+    push!(walls, lineL, lineR, lineTop , lineBotLeft, lineBotRight) #opening at top
+
     #plot!(walls, color =:black)
     #plot!(obstacles, fillalpha=0.5)
 
 
+    obsArea, obstacles = genClutter(perimeter, param, targetNumObs, clutterPercentage, roomWidth, roomHeight)
 
 #################################### 
 # Run PRM once and display config space plot  
@@ -103,13 +109,14 @@ function testGenWalls()
 
     ## Plot path found
     timestamp = Base.Dates.now()
-    title = "PRM with # samples=$numSamples, maxDist=$connectRadius, \npathcost = $pathcost, 
+    title = "PRM with numPts =$numPts, maxDist=$connectRadius, \npathcost = $pathcost, 
             timestamp=$timestamp)\n\n"
     roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
 
 
     #prmPlot= plotfxn.plotPRM(roomPlot, roadmap, solPath, title::String, afont)
     prmPlot= plotfxn.plotPRM(roomPlot, roadmap, solPath, title::String)
+    plot!(prmPlot, size=(600,600))
 
     print("\n --- Time --- \n")
     @show timestamp
