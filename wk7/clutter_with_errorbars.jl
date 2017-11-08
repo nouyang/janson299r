@@ -1,6 +1,6 @@
 include("PRM.jl")
 #using Distributions
-pfont = Plots.Font("sans-serif", 8, :hcenter, :vcenter, 0.0, RGB{U8}(0.0, 0.0, 0.0))
+pfont = Plots.Font("sans-serif", 8, :left, :left, 0.0, RGB{U8}(0.0, 0.0, 0.0))
 glvisualize(titlefont = pfont, guidefont = pfont)
 #Plots.resetfontsizes()
 #Plots.scalefontsizes(0.9)
@@ -50,7 +50,7 @@ function testGenClutter()
     param = algT.AlgParameters(numSamples, connectRadius)
 
     targetNumObs = 3
-    clutterPercentage = 0.25
+    clutterPercentage = 0.1
     roomWidth,roomHeight  = 20,20
 
     startstate = Point(1.,1)
@@ -147,7 +147,7 @@ function clutterExp()
     ####################################
     ## PARAMETERS - plot clutter 
     ####################################
-    N = 5
+    N = 50
 
     clutterPercentages = [0 0.01 0.05 0.1 0.12 0.15 0.2 0.25 0.3 0.4 0.5]
     clutterPercentages = [0 0.1 0.2 0.3 0.5]
@@ -232,7 +232,7 @@ function clutterExp()
     ####################################
     # clutter (area) on X
     # pathcost on Y
-    sizeplot = (800,600)
+    sizeplot = (1000,1000)
 
     @show clutterPercentages
     @show avgCosts 
@@ -241,11 +241,10 @@ function clutterExp()
 
     #supTitle= ""
     # why does glvisualize() have terrible title() issues? oh well comment out for now
-    supTitle="\nprm with maxdist=$connectRadius, "*
-            "\n# samples = $N, numPts = $numPts."*
-            "(time to run:$timeExperiment, "*
-            "\ntimestamp=$timestamp)\n\n"
-    costTitle= "clutter % vs pathcost\n"
+    supTitle="prm with maxdist=$connectRadius, "* "numPts = $numPts,"* "Avgd across #samples = $N" *
+            "\n(time to run:$timeExperiment, "*
+            "\ntimestamp=$timestamp)"
+    costTitle= "\nclutter % vs pathcost\n"
 
 
     yerrCost = 10
@@ -257,10 +256,10 @@ function clutterExp()
     pPRMcost = scatter(clutterPercentages, avgCosts',
         markercolor = :black,
         title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "clutter %",
-        yaxis=((0,60), 0:5:40), yerr = stddevs)
+        yaxis=((0,50), 0:5:40), yerr = stddevs) #this automatically centers the 1 stddev, I think. So each side is +- 0.5 stddev?
          # yerr = yerrCost)
 
-    successTitle = "\n\n\nclutter % vs pSuccess\n"
+    successTitle = "clutter % vs pSuccess"
     pPRMsuccess = scatter(clutterPercentages, listpSucc',
         color = :orange, markersize= 6, 
         title = successTitle, title_location=:center, ylabel = ("P(success)=numSucc/$N trials"), xlabel = "clutter %",
@@ -272,5 +271,5 @@ function clutterExp()
 end
 #testGenClutter()
 
-#testGenClutter()
-clutterExp()
+testGenClutter()
+#clutterExp()

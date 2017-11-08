@@ -228,3 +228,10 @@ solution: take glvisualize() out of top of file
 
 # well glvisualize()
 The subplot title is chilling in the middle of the plot...
+
+
+# Todo
+plot one of each pClutter, together on a subplot
+directly within the clutterExp() code
+
+doublecheck yerr takes in 1 stddev or 1/2 stddev to center around the mean
