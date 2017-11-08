@@ -1,5 +1,6 @@
 include("PRM.jl")
 #using Distributions
+glvisualize()
 
 
 
@@ -177,13 +178,13 @@ function clutterExp()
     stddevs = Vector{Float64}()
     avgCosts = Vector{Float32}() #one per %clutter
 
+    print("\n ------ \n")
     for pClutter in clutterPercentages
         idx, nSuccess, pathcost = 0,0,0.
         pathcosts = Vector{Float32}() #one per %clutter
-        stddev = 0.
+        stddev_n = 0.
 
         param = algT.AlgParameters(numPts, connectRadius)
-        print("\n ------ \n")
 
         while idx < N 
             idx += 1
@@ -207,14 +208,17 @@ function clutterExp()
         @show nSuccess
         pSucc = nSuccess / N 
 
+        @show pathcosts
         sumSqdError = sum([cost - avgCost for cost in pathcosts].^2)
         @show sumSqdError
-        stddev = sqrt( sumSqdError / (nSuccess -1))
+        stddev_n = sqrt( sumSqdError / (nSuccess -1))
+        @show stddev_n
 
         #@printf("For the iter of %d the avg cost was %d across %d trials", maxIter, avgCost, nTrials)
         push!(avgCosts, avgCost) #todo combine pt1
-        push!(stddevs, stddev) #todo combine pt2
+        push!(stddevs, stddev_n) #todo combine pt2
         push!(listpSucc, pSucc)
+        print("\n ------ \n")
     end
 
     timeExperiment = toc();
@@ -230,7 +234,7 @@ function clutterExp()
 
     @show clutterPercentages
     @show avgCosts 
-    @show stddevs
+    @show stddevs'
     @show listpSucc
 
     supTitle= ""
