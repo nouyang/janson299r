@@ -1,6 +1,5 @@
 include("PRM.jl")
 #using Distributions
-glvisualize()
 
 
 
@@ -35,9 +34,6 @@ function genClutter(roomperimeter, param, targetNumObs, clutterPercentage, roomW
     return actualSumObsArea, obstacles
 end
 ####
-
-
-
 
 
 
@@ -134,11 +130,11 @@ function clutterExp()
     # due to varying absolute area
     ####################################
     #################################### 
-    ## PARAMETERS
+    ## PARAMETERS - RRT  
     #################################### 
     connectRadius = 8.
-    numSamples = 100.
-    param = algT.AlgParameters(numSamples, connectRadius)
+    numPts = 100.
+    param = algT.AlgParameters(numPts, connectRadius)
     targetNumObs = 5 
     #clutterPercentage = 0.15
     roomWidth,roomHeight  = 20,20
@@ -147,18 +143,17 @@ function clutterExp()
     goalstate = Point(19.,19)
 
     ####################################
-    ## PARAMETERS PART TWO 
+    ## PARAMETERS - plot clutter 
     ####################################
-    nTrials = 10
+    N = 10
 
-    #clutterPercentageList = [0 0.01 0.05 0.1 0.12 0.15 0.2 0.25 0.3 0.4 0.5]
-    clutterPercentageList = [0 0.1 0.2 0.5]
-    #clutterPercentageList = 0 : 0.05 :0.3
+    clutterPercentages = [0 0.01 0.05 0.1 0.12 0.15 0.2 0.25 0.3 0.4 0.5]
+    clutterPercentages = [0 0.1 0.2 0.3 0.5]
+    #clutterPercentages = 0 : 0.05 :0.3
 
     ####################################
     ## Init
     ####################################
-    cost = 0
     listCosts = Vector{Float32}()
     listpSucc= Vector{Float32}()
 
@@ -176,44 +171,49 @@ function clutterExp()
     # Run Trials
     ####################################
 
-#@show listpSucc
     plot()
     tic()
-    for pClutter in clutterPercentageList
-        totalcost = 0.
-        idx = 0
-        nSuccess = 0
-        pathcost = 0.
-        sumSqdError = 0.
-        param = algT.AlgParameters(numSamples, connectRadius)
+
+    stddevs = Vector{Float64}()
+    avgCosts = Vector{Float32}() #one per %clutter
+
+    for pClutter in clutterPercentages
+        idx, nSuccess, pathcost = 0,0,0.
+        pathcosts = Vector{Float32}() #one per %clutter
+        stddev = 0.
+
+        param = algT.AlgParameters(numPts, connectRadius)
         print("\n ------ \n")
-        #@show pClutter
-        x_nTrial = Vector{Float32}() #this is unused
-        while idx < nTrials
-        #    @show idx
-            obsAreaList = Vector{Float32}() #this is unused
+
+        while idx < N 
             idx += 1
+
             obstacles = Vector{HyperRectangle}()
             obsArea, obstacles = genClutter(perimeter, param, targetNumObs, pClutter, roomWidth, roomHeight)
             r = algT.Room(roomWidth,roomHeight,walls,obstacles)
             nodeslist, edgeslist = preprocessPRM(r, param)
             pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
-            push!(obsAreaList, obsArea) #i am not using this
+
             if isPathFound
                 nSuccess += 1
-        #        @show nSuccess
-                push!(x_nTrial, pathcost)
             end
             if !(pathcost == Void)
-                totalcost += pathcost
+                push!(pathcosts, pathcost)
             end
         end
 
-        avgCost = totalcost /  nSuccess
-        pSucc = nSuccess / nTrials
+        totalcost = sum(pathcosts)
+        avgCost = totalcost /  nSuccess # average cost across the nTrials 
+        @show nSuccess
+        pSucc = nSuccess / N 
+
+        sumSqdError = sum([cost - avgCost for cost in pathcosts].^2)
+        @show sumSqdError
+        stddev = sqrt( sumSqdError / (nSuccess -1))
+
         #@printf("For the iter of %d the avg cost was %d across %d trials", maxIter, avgCost, nTrials)
-        push!(listCosts, avgCost)
-        @show pSucc
+        push!(avgCosts, avgCost) #todo combine pt1
+        push!(stddevs, stddev) #todo combine pt2
         push!(listpSucc, pSucc)
     end
 
@@ -228,7 +228,9 @@ function clutterExp()
     # pathcost on Y
     sizeplot = (800,600)
 
-    @show clutterPercentageList
+    @show clutterPercentages
+    @show avgCosts 
+    @show stddevs
     @show listpSucc
 
     supTitle= ""
@@ -238,19 +240,26 @@ function clutterExp()
             # (time to run:$timeExperiment, timestamp=$timestamp)\n\n"
     costTitle= "clutter % vs pathcost\n"
 
-    pPRMcost = scatter(clutterPercentageList, listCosts',
-        color=:black,
+    yerrCost = 10
+    print("type of stddevs, $(typeof(stddevs))")
+    stddevs = stddevs'
+    yerrCost = [0 1.0 2.1 5.1 10.0]
+    print("type of yerrCost , $(typeof(yerrCost))")
+
+    pPRMcost = scatter(clutterPercentages, avgCosts',
+        markercolor = :black,
         title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "clutter %",
-        yaxis=((0,40), 0:20:40))
+        yaxis=((20,40), 0:5:40), yerr = stddevs)
+         # yerr = yerrCost)
 
     successTitle = "\nclutter % vs pSuccess\n"
-    pPRMsuccess = scatter(clutterPercentageList, listpSucc',
+    pPRMsuccess = scatter(clutterPercentages, listpSucc',
         color = :orange, markersize= 6, 
-        title = successTitle, ylabel = ("P(success)=numSucc/$nTrials trials"), xlabel = "clutter %",
+        title = successTitle, ylabel = ("P(success)=numSucc/$N trials"), xlabel = "clutter %",
         yaxis=((0, 1.2), 0:0.1:1))
 
     plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
-        xaxis=((0, 0.5), 0:0.05:0.5),
+        xaxis=((-0.05, 0.6), 0:0.05:0.6),
         size = sizeplot)
 end
 #testGenClutter()

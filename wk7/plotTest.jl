@@ -1,29 +1,19 @@
 using Plots
 pyplot()
 
-sizeplot = (800, 800)
+x = 1:10
+y = rand(10)
+plot(x,y)
 
-rand = randn()
 
-supTitle="\nPRM with connection radius = $connectRadius\n\n"
+n = 10
+x = [rand()+1 * randn(n) + 2i for i in 1:5]
+y = [rand()+1 * randn(n) + i for i in 1:5]
 
-costTitle= "numsamples vs pathcost\n"
-pPRMcost = scatter(nSamples_list, listCosts, 
-    color=:black,
-    title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "numsamples",
-    xaxis=((0, 300), 0:50:300),
-    yaxis=((0,100), 0:20:100))
+f(v) = 1.96std(v) / sqrt(n)
+xerr = map(f,x)
+yerr = map(f,y)
+x = map(mean, x)
+y = map(mean, y)
 
-successTitle = "\nnumsamples vs pSuccess\n"
-pPRMsuccess = scatter(nSamples_list, listpSucc,
-    #legend=false, yaxis=((0,1.1), 0:0.1:1), xaxis=((0,maxX+20), 0:50:maxX), color = :orange, markersize= 6)
-    color = :orange, markersize= 6, 
-    ylabel = ("P(success) = numSucc/$nTrials trials"), xlabel = "numsamples",
-    xaxis=((0, 300), 0:50:300),
-    yaxis=((0,1), 0:0.1:1), 
-    title = successTitle)
-
-plot(pPRMcost, pPRMsuccess, layout=(2,1), window_title="$rand PRM with connection radius = $connectRadius", size = sizeplot, 
-     #legend=false, xaxis=((0, maxX+50), 0:50:maxX))
-    )
-
+plot(x,y, xerr = xerr, yerr = yerr, marker=stroke(2, :orange))

@@ -168,3 +168,38 @@ SIGH
 glvisualzie() has a tendency to hate 1000 n (as in it will freeze my computer aftwards)
 
 @ HOW TO heck do I clear all old plots()? destory them
+
+
+# 
+
+Adding in shape : 
+Error showing value of type Plots.Plot{Plots.GLVisualizeBackend}:
+ERROR: buffer position has not the same length as the other buffers.
+              Has: 1. Should have: 5
+
+
+    pPRMcost = scatter(clutterPercentages, avgCosts',
+        markercolor = :black,
+        title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "clutter %",
+        yaxis=((20,40), 0:20:40) , yerr = stddevs, marker = stroke(2, :orange), shape="hline")
+        # yerr = yerrCost)
+
+# GUH error bars
+one error bars do not change (constant)
+
+    #yerrCost = [0 1.0 2.1 5.1 10.0]
+    yerrCost = [0.864606, 0.860516, 1.59285, 5.19058, 2.60185]
+    print("type of yerrCost, $(typeof(yerrCost))")
+    yerrCost = [0.8 0.8 1.6 5.2 2.6]
+    print("type yerrCost, $(typeof(yerrCost))")
+
+type of yerrCost, Array{Float64,1}
+type yerrCost, Array{Float64,2}
+
+
+sooooooooooo we want our list of stddevs to be array of 2 instead of array of 1
+
+
+WELL taking the transpose fixed it. ????
+
+

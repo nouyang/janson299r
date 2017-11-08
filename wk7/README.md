@@ -34,3 +34,11 @@ Read `RRT*`-> more proof magic?  Read `FMT*`
 * 11/30: outline / very rough draft due
 * 12/7: rough draft or report due
 * 12/14: Final report due and we'll talk about it
+
+
+# Todo
+
+* Error bars
+* Calculate area *within* the room, as opposed to removing rectangles that fall
+outside the room at all. I do the latter currently which results in a lot of
+paths going through the narrow extra spaces near the walls.
