@@ -1,39 +1,8 @@
 # wk8
-END DATE: 11/21
+END DATE: 11/28/2017
 Well. Tasks to do: 
 
-Implement RRT
-
-More PRM / RRT -> what I want to do: write up mini report, investigate
-* clutter
-* maze
-* more dimensions woo
-* error bars
-bidirectional RRT? and other fun things Implement `RRT*` and `FMT*`
-
-Read `RRT*`-> more proof magic?  Read `FMT*`
-
-
-
-# Todo
-* Error bars
-* Calculate area *within* the room, as opposed to removing rectangles that fall
-outside the room at all. I do the latter currently which results in a lot of
-paths going through the narrow extra spaces near the walls.
-
-# Todo
-plot one of each pClutter, together on a subplot,  directly within the clutterExp() code
-
-doublecheck yerr takes in 1 stddev or 1/2 stddev to center around the mean
-
-!!!! Plot start and end goals, even if fail to find path...
-This should DEFINITELY be done.
-
-
-Check if obstacle covers start or end goals...(can a path be found at all?)
-
-Allow obstacles to be generated outside of room (just calculate contained area)
-
+Implement `RRT*, PRM*, and FMT*`
 
 # To run
 use 
@@ -58,10 +27,18 @@ To use the Jupyter interactive browser-based "notebook"
 > using IJulia
 > notebook(dir=".")
 
+using IJulia; notebook(detached=true)
+
 
 To run a file,
 > include("RRT.jl")
 
 > cd()
 > pwd()
+
+
+# 
+
+Pkg.update(); ENV["GRDIR"] = ""; Pkg.build("GR")
+. BTW: MWE is an abbreviation for "minimal working example" (to reproduce the problem).
 

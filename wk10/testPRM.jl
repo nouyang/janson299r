@@ -10,11 +10,14 @@
 include("PRM.jl")
 
 function main()
+    startstate = Point(1.,1)
+    goalstate = Point(18.,18)
+
     numSamples = 50
     connectRadius = 8
     param = algT.AlgParameters(numSamples, connectRadius)
 
-    print("\n ---- Running PRM ------ \n")
+    print("\n ---- Running PRM ------\n")
     ## Define obstacles
     obs1 = HyperRectangle(Vec(8,3.), Vec(2,2.)) #Todo
     obs2 = HyperRectangle(Vec(4,4.), Vec(2,10.)) #Todo
@@ -39,8 +42,6 @@ function main()
     nodeslist, edgeslist = preprocessPRM(r, param)
 
     ## Query created RM
-    startstate = Point(1.,1)
-    goalstate = Point(18.,18)
 
     #!
     pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
@@ -49,11 +50,9 @@ function main()
     title = "PRM with # samples =$numSamples, \nPathfound = $isPathFound, \npathcost = $pathcost"
     #!
     roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
-
     # this is the gold
     #!
-    prmPlot = plotfxn.plotPRM(roomPlot, roadmap, solPath, title::String)
-    gui(prmPlot)
+    prmPlot = plotfxn.plotPRM(roomPlot, roadmap, solPath, title::String);
 
 ####
 #startGoal = algT.GraphNode(0, Point(0,0))
