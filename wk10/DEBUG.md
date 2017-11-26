@@ -14,3 +14,20 @@ The implementation of this behavior is a "world age counter". This monotonically
 cannot seem to surpress
 
 just use ijulia instead? lose vim keybindings :(
+
+## error report
+**Inside file `tmp.jl`:**
+> using Plots
+> aPlot = scatter(show=false);
+> scatter!(aPlot, [1],[2]);
+
+Then run
+> julia> include("tmp.jl")
+
+This will always open a new tab, which is not the behavior I expect (I expect no output to show up)
+
+If I run the same lines in the commandline, no tab opens, as I expect.
+
+> julia> aPlot = scatter(show=false);
+> julia> scatter!(aPlot, [1],[2]);
+
