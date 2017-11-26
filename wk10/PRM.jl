@@ -307,6 +307,18 @@ function preprocessPRM(room, parameters)
     roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
     numPts, connectRadius = parameters.numSamples, parameters.connectRadius
 
+
+    #make sPRM into sPRM*
+    
+    d = 2 # 2 dimensions
+    invD = 1/d # curse of dimensionality
+        unitSphere = pi # πr²
+    gammaPRM = 2 * (1 + invD)^invD * ( roomWidth*roomHeight / pi)^invD
+    gammaPRM = ceil(gammaPRM)
+    optimalRad = gammaPRM * (log(numPts) / numPts)^invD
+    connectRadius = optimalRad
+    # end sPRM* optimal changes
+
     nodeslist = Vector{algT.GraphNode}()
     edgeslist = Vector{algT.Edge}()
 
