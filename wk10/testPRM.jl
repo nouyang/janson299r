@@ -8,7 +8,7 @@
 # MAIN
 ####################################################
 include("PRM.jl")
-
+plotly()
 function main()
     startstate = Point(1.,1)
     goalstate = Point(18.,18)
@@ -183,7 +183,6 @@ end
 # Call main() function
 ########################################   
 
-main()
 #collTest()
 #rectUnionAreaTest()
 

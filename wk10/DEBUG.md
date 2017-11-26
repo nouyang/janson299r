@@ -12,3 +12,5 @@ The implementation of this behavior is a "world age counter". This monotonically
 
 # plotly() is very insistent on opening a new tab
 cannot seem to surpress
+
+just use ijulia instead? lose vim keybindings :(

@@ -239,7 +239,7 @@ module plotfxn
     ####
 
     function plotRoom(room)
-        aPlot = plot(show=false) #Todo! this assumes plotroom is first thing called()
+        aPlot = plot() #Todo! this assumes plotroom is first thing called()
         roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
        # #print("\nPlotting Room\n")
         plot!(aPlot, walls, color =:black)
@@ -248,33 +248,32 @@ module plotfxn
     end
 
     function plotPRM(roomPlot, roadmap, solPath, title)
-        #  startstate, goalstate, nodeslist, edgeslist = roadmap.startstate, roadmap.goalstate, roadmap.nodeslist, roadmap.edgeslist
-#  
-        #  x = [n.state[1] for n in nodeslist]
-        #  y = [n.state[2] for n in nodeslist]
-        #  scatter!(roomPlot, x,y, color=:black) 
-#  
-        #  edgeXs, edgeYs = [], []
-        #  for e in edgeslist
-            #  startN = algfxn.findNode(e.startID, nodeslist)
-            #  endN = algfxn.findNode(e.endID, nodeslist)
-            #  x1,y1 = startN.state[1], startN.state[2]
-            #  x2,y2 = endN.state[1], endN.state[2]
-            #  push!(edgeXs, x1, x2, NaN) #the NaNs, keep spaces between edges correctly unplotted
-            #  push!(edgeYs, y1, y2, NaN)
-        #  end
-#  
-        #  plot!(roomPlot, edgeXs, edgeYs, color=:tan, linewidth=0.3)
-#  
-        #  # plot solution
-        #  prmPlot = plotSolPath(roomPlot, solPath)
-        #  
-        #  #title!(prmPlot, title, titlefont = afont)
-        #  title!(prmPlot, title)
-        #  plot!(prmPlot, legend=false, size=(600,600), xaxis=((-5,25), 0:1:20 ), 
-              #  yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
-        prmPlot = roomPlot;
-        return prmPlot;
+        startstate, goalstate, nodeslist, edgeslist = roadmap.startstate, roadmap.goalstate, roadmap.nodeslist, roadmap.edgeslist
+
+        x = [n.state[1] for n in nodeslist]
+        y = [n.state[2] for n in nodeslist]
+        scatter!(roomPlot, x,y, color=:black) 
+
+        edgeXs, edgeYs = [], []
+        for e in edgeslist
+            startN = algfxn.findNode(e.startID, nodeslist)
+            endN = algfxn.findNode(e.endID, nodeslist)
+            x1,y1 = startN.state[1], startN.state[2]
+            x2,y2 = endN.state[1], endN.state[2]
+            push!(edgeXs, x1, x2, NaN) #the NaNs, keep spaces between edges correctly unplotted
+            push!(edgeYs, y1, y2, NaN)
+        end
+
+        plot!(roomPlot, edgeXs, edgeYs, color=:tan, linewidth=0.3)
+
+        # plot solution
+        prmPlot = plotSolPath(roomPlot, solPath)
+        
+        #title!(prmPlot, title, titlefont = afont)
+        title!(prmPlot, title)
+        plot!(prmPlot, legend=false, size=(600,600), xaxis=((-5,25), 0:1:20 ), 
+              yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
+        return prmPlot
     end
 
     function plotSolPath(aPlot, solPath)
