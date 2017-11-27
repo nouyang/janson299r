@@ -186,7 +186,7 @@ module plotfxn
         xs = [pt[1] for pt in rectpoints];
         ys = [pt[2] for pt in rectpoints];
         seriestype := :shape
-        color := :gray
+        color := :grey #:indigo goes well with the orange lines too
         #fillcolor := :orange
         #linecolor := :orange
         #markercolor := :orange
@@ -246,7 +246,7 @@ module plotfxn
         roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
        # #print("\nPlotting Room\n")
         plot!(aPlot, walls, color =:black)
-        plot!(aPlot, obstacles, fillalpha=0.5)
+        plot!(aPlot, obstacles, fillalpha=0.8)
         return aPlot
     end
 

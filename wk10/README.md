@@ -65,3 +65,10 @@ and allows the "new tab" on plotly to render all the text contents visibly.
     timestamp = Base.Dates.now()
     timestamp = Base.Dates.format(timestamp, "dd u yyyy HH:MM:SS")
 
+
+
+# colors
+
+are css colors
+
+https://developer.mozilla.org/en-US/docs/Web/CSS/color_value
