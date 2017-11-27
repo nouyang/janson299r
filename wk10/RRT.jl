@@ -103,17 +103,22 @@ module algfxn
         return pt_rand
     end
 
-    function steer(pt1, pt2, connectRadius)
+    function steer(fromPt, toPt, connectRadius)
+        dist = min_euclidean(Vec(fromPt), Vec(toPt))
         # If pt_rand is too far from its nearest node, "truncate" it to be closer
-        x1,y1 = pt1
-        x2,y2 = pt2 
+        if dist <= connectRadius
+            return toPt
+        else 
+            x1,y1 = fromPt
+            x2,y2 = toPt
 
-        theta = atan2((y2-y1) , (x2-x1))
-        newX = x1 + connectRadius * cos(theta)
-        newY = y1 + connectRadius * sin(theta)
+            theta = atan2((y2-y1) , (x2-x1))
+            newX = x1 + connectRadius * cos(theta)
+            newY = y1 + connectRadius * sin(theta)
 
-        newPt = Point(newX, newY)
-        return newPt
+            newPt = Point(newX, newY)
+            return newPt
+        end
     end
 
 	function ccw(A,B,C)
