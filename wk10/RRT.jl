@@ -64,7 +64,7 @@ module algT
         cost::Int64
     end
 
-    struct roadmap
+    struct Graph
         startstate::Point{2,Float64}
         goalstate::Point{2,Float64}
         nodeslist::Vector{GraphNode}
@@ -309,7 +309,7 @@ module plotfxn
         return aPlot
     end
 
-    function plotRRT(roomPlot, roadmap, solPath, title)
+    function plotRRT(roomPlot, nodeslist, solPath, title)
         startstate, goalstate, nodeslist, edgeslist = roadmap.startstate, roadmap.goalstate, roadmap.nodeslist, roadmap.edgeslist
 
         x = [n.state[1] for n in nodeslist]
@@ -329,13 +329,12 @@ module plotfxn
         plot!(roomPlot, edgeXs, edgeYs, color=:tan, linewidth=0.3)
 
         # plot solution
-        prmPlot = plotSolPath(roomPlot, solPath)
+        rrtPlot = plotSolPath(roomPlot, solPath)
         
-        #title!(prmPlot, title, titlefont = afont)
-        title!(prmPlot, title)
-        plot!(prmPlot, legend=false, size=(600,600), xaxis=((-5,25), 0:1:20 ), 
+        title!(rrtPlot, title)
+        plot!(rrtPlot, legend=false, size=(600,600), xaxis=((-5,25), 0:1:20 ), 
               yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
-        return prmPlot
+        return rrtPlot
     end
 
     function plotSolPath(aPlot, solPath)
