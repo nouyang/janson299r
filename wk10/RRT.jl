@@ -397,7 +397,7 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
 
         # Steer 
         pt_new = algfxn.steer(n_nearest.state, pt_rand, connectRadius) #no node ID yet
-        @show pt_new
+        #@show pt_new
 
         # edge going FROM nearest in tree TO new node
         candidateEdge = LineSegment(n_nearest.state, pt_new)
@@ -409,7 +409,7 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
             # Currently we will have to loop through all edges to trace the solution path
         if (    !algfxn.isCollidingObstacles(candidateEdge, obstacles) 
               & !algfxn.isCollidingWalls(candidateEdge, walls) )
-            @show candidateEdge
+            #@show candidateEdge
             n_new = algT.GraphNode(currID, pt_new)
             currID += 1
             newEdge = algT.Edge(n_nearest.id , n_new.id)
@@ -422,10 +422,11 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
             break
         end
     end
+
     @show isPathFound
 
     pathNodes = Vector{algT.GraphNode}()
-    @show edgeslist
+    #@show edgeslist
 
     if isPathFound
         ## CREATE LIST OF NODES IN THE FEASIBLE PATH
@@ -439,21 +440,22 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
 
         # Loop until we reach the start node
         while currPathID != 0
+            @show currPathID
 
             # Find the parent node ID, add associated node to list
             foundParent = false
 
-
             # Todo! do NOT fail silently if no edge is found, or if more than one edge is found (in RRT)
+            node = Void
             for edge in edgeslist
+                #@show edge
                 if edge.endID == currPathID
                     node = algfxn.findNode(edge.startID, nodeslist)
                     push!(pathNodes, node)
                     break
-                else
-                    print("AHHH bORKEN")
                 end
             end
+            @show node
             currPathID = node.id
         end
 
