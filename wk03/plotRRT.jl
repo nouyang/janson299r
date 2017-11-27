@@ -1,9 +1,7 @@
 using Plots
-gr()
 include("RRT.jl")
 closeall()
-
-
+plotly()
 
 cost, isPathFound, nlist = rrtPathPlanner(30)
 @show isPathFound

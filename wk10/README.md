@@ -24,10 +24,9 @@ Add useful packages, either https://pkg.julialang.org or from a github repo.
 
 To use the Jupyter interactive browser-based "notebook"
 > Pkg.add("IJulia")
-> using IJulia
-> notebook(dir=".")
 
-using IJulia; notebook(detached=true)
+julia> using IJulia; notebook(detached=true, dir=".")
+
 
 
 To run a file,

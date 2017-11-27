@@ -8,22 +8,24 @@
 # MAIN
 ####################################################
 include("PRM.jl")
-plotly()
-function main()
-    startstate = Point(1.,1)
-    goalstate = Point(18.,18)
+#plotly()
 
-    numSamples = 50
-    connectRadius = 8
+function main()
+    startstate = Point(0.,0)
+    goalstate = Point(20.,20)
+
+    numSamples = 150
+    connectRadius = 5
+	flagOptimal = false
     param = algT.AlgParameters(numSamples, connectRadius)
 
     print("\n ---- Running PRM ------\n")
     ## Define obstacles
     obs1 = HyperRectangle(Vec(8,3.), Vec(2,2.)) #Todo
     obs2 = HyperRectangle(Vec(4,4.), Vec(2,10.)) #Todo
-
+    obs3 = HyperRectangle(Vec(14,14.), Vec(3,4.)) #Todo
     obstacles = Vector{HyperRectangle}()
-    push!(obstacles, obs1, obs2)
+    push!(obstacles, obs1, obs2, obs3)
 
     # Define walls
     walls = Vector{LineSegment}()
@@ -39,7 +41,7 @@ function main()
     roomPlot = plotfxn.plotRoom(r)
 
     ## Run preprocessing
-    nodeslist, edgeslist = preprocessPRM(r, param)
+    nodeslist, edgeslist = preprocessPRM(r, param, flagOptimal)
 
     ## Query created RM
 
@@ -47,7 +49,10 @@ function main()
     pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
 
     ## Plot path found
-    title = "PRM with # samples =$numSamples, \nPathfound = $isPathFound, \npathcost = $pathcost"
+    #title = "PRM with # samples =$numSamples, \nPathfound = $isPathFound, \npathcost = $pathcost"
+
+    timestamp = Base.Dates.now()
+    title = "PRM with # samples=$numSamples, maxDist=$connectRadius, \npathcost = $(ceil(pathcost)), timestamp=$timestamp)\n\n"
     #!
     roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
     # this is the gold

@@ -1,7 +1,6 @@
 print("Hello World! ☺ ♫ ☕ \n\n")
 
 using Plots
-gr()
 
 plot([1,2],[2,3])
 

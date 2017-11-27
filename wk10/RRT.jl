@@ -270,8 +270,7 @@ module plotfxn
         prmPlot = plotSolPath(roomPlot, solPath)
         
         #title!(prmPlot, title, titlefont = afont)
-        #title!(prmPlot, title, fontsize=10.0)
-        annotate!([(0,-2,text("$title",12,:blue,:center))])
+        title!(prmPlot, title)
         plot!(prmPlot, legend=false, size=(600,600), xaxis=((-5,25), 0:1:20 ), 
               yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
         return prmPlot
@@ -304,23 +303,21 @@ module plotfxn
 
 end
 
-function preprocessPRM(room, parameters, flagOptimal) 
+function preprocessPRM(room, parameters) 
     roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
     numPts, connectRadius = parameters.numSamples, parameters.connectRadius
 
+
     #make sPRM into sPRM*
     
-    if flagOptimal
-        d = 2 # 2 dimensions
-        invD = 1/d # curse of dimensionality
+    d = 2 # 2 dimensions
+    invD = 1/d # curse of dimensionality
         unitSphere = pi # πr²
-        gammaPRM = 2 * (1 + invD)^invD * ( roomWidth*roomHeight / pi)^invD
-        gammaPRM = ceil(gammaPRM)
-        optimalRad = gammaPRM * (log(numPts) / numPts)^invD
-        connectRadius = optimalRad
-        print("\n --- RUnning Optimal $gammaPRM $connectRadius----- \n")
-        # end sPRM* optimal changes
-    end
+    gammaPRM = 2 * (1 + invD)^invD * ( roomWidth*roomHeight / pi)^invD
+    gammaPRM = ceil(gammaPRM)
+    optimalRad = gammaPRM * (log(numPts) / numPts)^invD
+    connectRadius = optimalRad
+    # end sPRM* optimal changes
 
     nodeslist = Vector{algT.GraphNode}()
     edgeslist = Vector{algT.Edge}()
