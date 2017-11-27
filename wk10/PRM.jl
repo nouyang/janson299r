@@ -186,7 +186,10 @@ module plotfxn
         xs = [pt[1] for pt in rectpoints];
         ys = [pt[2] for pt in rectpoints];
         seriestype := :shape
-        color = :orange
+        color := :gray
+        #fillcolor := :orange
+        #linecolor := :orange
+        #markercolor := :orange
         #m = (:black, stroke(0))
         s = Shape(xs[:], ys[:])
     end
