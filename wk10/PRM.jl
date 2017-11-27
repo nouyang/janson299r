@@ -1,5 +1,7 @@
 ####################################################
 
+#  PRM.jl
+
 #  Implementing PRM and functions for plotting PRM
 #  Parameters incude num samples, connection distance, a list of obstacles, and start and goal states
 #  Graph search implemented is Astar. Edge cost is assumed to be equal to euclidean distance.
@@ -187,8 +189,8 @@ module plotfxn
         ys = [pt[2] for pt in rectpoints];
         seriestype := :shape
         color := :grey #:indigo goes well with the orange lines too
-        #fillcolor := :orange
         #linecolor := :orange
+        #fillcolor := :orange
         #markercolor := :orange
         #m = (:black, stroke(0))
         s = Shape(xs[:], ys[:])

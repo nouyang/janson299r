@@ -1,7 +1,8 @@
 ####################################################
 
-#  This file is used for development and testing of PRM.jl. 
-#  It runs the PRM once and plots the results.
+#  testPRM.jl
+
+#  This file is used for development and testing of PRM.jl 
 #  nouyang 2017
 
 ####################################################
@@ -11,6 +12,7 @@ include("PRM.jl")
 #plotly()
 
 function main()
+#  runs the PRM once and plots the results.
     startstate = Point(0.,0)
     goalstate = Point(20.,20)
 
@@ -54,6 +56,7 @@ function main()
     timestamp = Base.Dates.now()
     timestamp = Base.Dates.format(timestamp, "dd u yyyy HH:MM:SS")
     title = " Week 10 PRM [ $timestamp ] \n\n$numSamples samples, connectRadius = $connectRadius, pathcost = $(ceil(pathcost,2))"
+    
     #!
     roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
     # this is the gold

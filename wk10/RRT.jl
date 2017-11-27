@@ -1,4 +1,6 @@
 ####################################################
+ 
+#  RRT.jl
 
 #  Implementing PRM and functions for plotting PRM
 #  Parameters incude num samples, connection distance, a list of obstacles, and start and goal states
@@ -83,6 +85,37 @@ module algfxn
     using GeometryTypes
     using algT
 
+
+    function sampleFree(roomW, roomH, obstacles)
+        pt_rand = Void
+
+        sampledFree = false
+        while !sampledFree
+            xrand = rand(Uniform(0, roomW))
+            yrand = rand(Uniform(0, roomH))
+            pt = Point(xrand, yrand)
+            if !algfxn.isCollidingNode(pt, obstacles) # this does NOT check if point is on a line (e.g. a wall)
+                pt_rand = Point(xrand, yrand) 
+                sampledFree = true
+            end
+        end
+
+        return pt_rand
+    end
+
+    function steer(pt1, pt2, connectRadius)
+        # If pt_rand is too far from its nearest node, "truncate" it to be closer
+        x1,y1 = pt1
+        x2,y2 = pt2 
+
+        theta = atan2((y2-y1) , (x2-x1))
+        newX = x1 + connectRadius * cos(theta)
+        newY = y1 + connectRadius * sin(theta)
+
+        newPt = Point(newX, newY)
+        return newPt
+    end
+
 	function ccw(A,B,C)
         # determines direction of lines formed by three points
         return (C[2]-A[2]) * (B[1]-A[1]) > (B[2]-A[2]) * (C[1]-A[1])
@@ -141,6 +174,7 @@ module algfxn
 
     function findNearestNodes(nodestate, nodeslist, maxDist)
         # given maxDist, return all nodes within that distance of node
+        # list is NOT sorted by distance
         nearestNodes = Vector{Tuple{algT.GraphNode, Float64}}()
         for n in nodeslist
             dist = min_euclidean(Vec(nodestate), Vec(n.state))
@@ -148,10 +182,38 @@ module algfxn
                 push!(nearestNodes, (n, dist))
             end
         end
-        # return list sorted by distance?
-        # or just return list with distances included for now...
         return nearestNodes 
     end
+
+    function nearestN(pt::Point{2,Float64}, nodeslist)
+        # 
+        # This loops through all nodes 
+        nearestDist = 99999999;
+        nearestNode = Void;
+
+        for n in nodeslist
+            dist = min_euclidean(Vec(pt), Vec(n.state))
+            if dist < nearestDist
+                nearestDist = dist
+                nearestNode = n
+            end
+        end
+        return nearestNode
+    end
+
+    function inGoalRegion(pt, pt_goal)
+        if pt == pt_goal
+            return true
+        else 
+            dist = min_euclidean(Vec(pt), Vec(pt_goal))
+            if dist <= 2
+                return true
+            end
+        end
+        
+        return false
+    end
+
     
     function costPath(solPath)
         pathcost = 0
@@ -164,7 +226,7 @@ module algfxn
     end
 
     function findNode(nodeID, nodeslist)
-        #since we haven't removed any nodes, nodeslist should be sorted by index. but just in case, let's search through it
+        # Assumes we have not removed any nodes, hence we can sort by ID
         index = findfirst([node.id for node in nodeslist], nodeID)
         return nodeslist[index]
     end
@@ -247,7 +309,7 @@ module plotfxn
         return aPlot
     end
 
-    function plotPRM(roomPlot, roadmap, solPath, title)
+    function plotRRT(roomPlot, roadmap, solPath, title)
         startstate, goalstate, nodeslist, edgeslist = roadmap.startstate, roadmap.goalstate, roadmap.nodeslist, roadmap.edgeslist
 
         x = [n.state[1] for n in nodeslist]
@@ -297,198 +359,89 @@ module plotfxn
         else
            # #print("\n --- No solution path found ----- \n")
         end
+
         return aPlot
     end
 
 
 end
 
-function preprocessPRM(room, parameters) 
+
+function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
     roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
     numPts, connectRadius = parameters.numSamples, parameters.connectRadius
-
-
-    #make sPRM into sPRM*
-    
-    d = 2 # 2 dimensions
-    invD = 1/d # curse of dimensionality
-        unitSphere = pi # πr²
-    gammaPRM = 2 * (1 + invD)^invD * ( roomWidth*roomHeight / pi)^invD
-    gammaPRM = ceil(gammaPRM)
-    optimalRad = gammaPRM * (log(numPts) / numPts)^invD
-    connectRadius = optimalRad
-    # end sPRM* optimal changes
 
     nodeslist = Vector{algT.GraphNode}()
     edgeslist = Vector{algT.Edge}()
 
-    currID = 1
+    currID = 1 #current node ID
 
-    # Sample points, create list of nodes 
+    # for numPts iterations...
     for i in 1:numPts
-        xrand, yrand = rand(Uniform(0, roomWidth), 2)
-		#xrand,yrand = rand(1.0:roomWidth-1,2)
-        n = Point(xrand, yrand) #new point in room
-        if !algfxn.isCollidingNode(n, obstacles) #should write fxn to check for sampling *on* a wall at some point TODO
-            newNode = algT.GraphNode(currID, n)
+
+        # Sample node from free space
+        pt_rand = algfxn.sampleFree(roomWidth, roomHeight, obstacles)
+
+        # Find nearest existing node
+        n_nearest = algfxn.nearestN(pt_rand, nodeslist)
+
+
+        pt_new = algfxn.steer(pt_rand, n_nearest.state) #no node ID yet
+
+        # draw edging going FROM nearest in tree TO new node
+        candidateEdge = LineSegment(n_nearest.state, pt_new)
+
+        if (    !algfxn.isCollidingObstacles(candidateEdge, obstacles) 
+              & !algfxn.isCollidingWalls(candidateEdge, walls) )
+
+            n_new = algT.GraphNode(currID, pt_new)
             currID += 1
-            push!(nodeslist, newNode)
 
-        else
-            #print("\n NODE REMOVED: $n \n")
+            # Note: Alternate implementation: for RRT we do not *need* edges list
+            # if we include a parent ID for each node.
+            # Here we just make an edge
+            # Currently we will have to loop through all edges to trace the solution path
+            newEdge = algT.Edge(n_new.id, n_nearest.id) 
+            push!(nodeslist, n_new)
+            push!(edgeslist, newEdge)
         end
-    end
 
-    # Connect each node to its neighboring nodes within a ball or radius r, creating edges
-    for startnode in nodeslist 
-        neighbors = [item[1] for item in algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point
-        n = [algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point
-        for endnode in neighbors
-            candidateEdge = LineSegment(startnode.state, endnode.state)
-            if !algfxn.isCollidingObstacles(candidateEdge, obstacles) & !algfxn.isCollidingWalls(candidateEdge, walls)
-                #line = LineSegment(startnode.state, endnode.state)
-                newEdge = algT.Edge(startnode.id, endnode.id) #by ID, or just store node? #wait no, i'd have multiple copies of same node for no real reason, mulitple edges per node
-                push!(edgeslist, newEdge)
-            else 
-                #print("\n EDGE REMOVED: $startnode WITH $endnode  \n")
-            end
-        end
-    end
-
-    #@show edgeslist 
-    #@printf("\nPath found? %s Length of nodeslist: %d\n", isPathFound, length(nodeslist))
-    return nodeslist, edgeslist
-end
-
-function getSuccessors(curNode, edgeslist, nodeslist) #assuming bidirectional for now
-    #Find all edges that start or end at current node, and then make a list of the corresponding start or end nodes
-    nodeID = curNode.id
-    successorNodeIDs = Vector{Int}()
-    successors = Vector{algT.GraphNode}()
-
-    for e in edgeslist
-        if e.startID == nodeID
-            push!(successorNodeIDs, e.endID)
-        end
-        if e.endID == nodeID #should I include endID? it is bidirectional after all. 
-            push!(successorNodeIDs,  e.startID) #yes, because local planner connects in bidirectional way
-        end
-    end
-
-    for id in successorNodeIDs
-        node = algfxn.findNode(id, nodeslist)
-        push!(successors, node)
-    end
-
-    return successors
-end
-
-function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
-    # to find nearest node, set connect radius to be infinity for now #todo
-    connectRadius = 99;
-    n_nearStart= algfxn.findNearestNodes(startstate, nodeslist, connectRadius) #Get distance from start, for all points in graph.
-    n_nearGoal= algfxn.findNearestNodes(goalstate, nodeslist, connectRadius) 
-
-    ## SECTION remove nodes that we cannot reach in a straight line without going through an obstacle
-    #todo: this is expensive, we should only check distances in order
-
-    # n_nearStart is tuple of node and distance
-    sort!(n_nearStart, by=n_nearStart->n_nearStart[2]) #Sort by distance and pick node with smallest distance from start
-    sort!(n_nearGoal, by=n_nearGoal->n_nearGoal[2])
-    #print("\n ----------------- \n")
-    #@show n_nearStart
-    #print("\n ----------------- \n")
-    #@show n_nearGoal
-
-    nodestart = algT.GraphNode(9999,Point(9999,9999))
-    nodegoal = algT.GraphNode(9999,Point(9999,9999))
-
-    for (n, dist) in n_nearStart 
-        # bar = typeof(startstate)
-        # bar2 = typeof(n)
-        ## #print("\n$bar, $bar2\n")
-        candidateline = LineSegment(Point(startstate), Point(n.state))
-        if !algfxn.isCollidingObstacles(candidateline, obstaclesList)
-            nodestart = n
-            break
-        end
-    end
-
-    for (n, dist) in n_nearGoal
-        candidateline = LineSegment(Point(goalstate), n.state)
-        if !algfxn.isCollidingObstacles(candidateline, obstaclesList)
-            nodegoal = n
-            break
-        end
-    end
-
-
-    if nodestart == algT.GraphNode(9999,Point(9999,9999))
-        nodestart = algT.GraphNode(0, Point(0,0))
-        #print("ahhhhhh didn't find a start node")
-    end
-    if nodegoal == algT.GraphNode(9999,Point(9999,9999))
-        nodegoal = algT.GraphNode(0, Point(0,0))
-       # #print("ahhhhhh didn't find a goal node")
-    end
-
-    ## SECTION END
-
-   # #print("This is the beginState $(startstate) and the endState $(goalstate)\n")
-   # #print("This is the beginVertex--> $(nodestart) >>> and the endVertex--> $(nodegoal)\n")
-
-
-    pathNodes = Vector{algT.GraphNode}()
-    visited = Vector{algT.GraphNode}() #nodes we've searched through
-
-    frontier = PriorityQueue()
-    queue1 = algT.queueTmp(nodestart, pathNodes, 1) 
-    enqueue!(frontier, queue1, 1) #root node has cost 0  
-    pathcost = 99999
-
-    #################### A star search
-    while length(frontier) != 0
-        front = DataStructures.dequeue!(frontier)
-        pathVertices = []
-
-        curNode, pathNodes, totalEdgeCost = front.node, front.statesList, front.cost
-
-        if curNode == nodegoal
-           # #print("Hurrah! endState reached! \n")
-            unshift!(pathNodes, nodestart) #prepend our first path node back to pathVertices
-            unshift!(pathNodes, algT.GraphNode(0, startstate)) #prepend the start 
-            push!(pathNodes, algT.GraphNode(0, goalstate)) #append the goal 
-            finalPathCost = algfxn.costPath(pathNodes) #Assuming edge cost is Euclidean cost
+        if algfxn.inGoalRegion(pt_new, goalstate)
             isPathFound = true
-            return (finalPathCost, isPathFound, pathNodes) #list of nodes in solution path
-
-        else
-            if !(curNode in visited) 
-                push!(visited, curNode) # Add all successors to the stack
-
-                for candidateNode in getSuccessors(curNode, edgeslist, nodeslist)
-                    newEdgeCost = min_euclidean(Vec(curNode.state),
-                                                Vec(candidateNode.state))
-                    #edgecost is euclidean dist(state,state). better to pass
-                   # Node than to perform node lookup everytime (vs passing id)
-                    f_x = totalEdgeCost + newEdgeCost + min_euclidean(Vec(candidateNode.state), Vec(nodegoal.state)) #heuristic = euclidean distance to end goal
-                    p = deepcopy(pathNodes)
-                    push!(p, candidateNode)
-                    if !(candidateNode in keys(frontier))
-                        newQ = algT.queueTmp(candidateNode, p, ceil(totalEdgeCost+ newEdgeCost))
-                        enqueue!(frontier, newQ, ceil(f_x)) 
-                    end
-                end
-
-            end
+            break
         end
-    end    
+    end
 
-    # Return None if no solution found
-    #@printf("No solution found! This is length of frontier, %d\n", length(frontier))
-    finalPathCost = Void
-    isPathFound = false
-    pathNodes = Void
+    if isPathFound
+        algfxn.makeSolPath
+
+#     return nodeslist, edgeslist 
+    else
+        finalPathCost = Void
+        pathNodes = Void
+    end
+
     return (finalPathCost, isPathFound, pathNodes)
-end
 
+function makeSolPath
+
+    # ----------------------------------------------------------------------
+    pathNodes = Vector{algT.GraphNode}()
+
+    pt_last = pt_new #the last node added, 
+        unshift!(pathNodes, nodestart) #prepend our first path node back to pathVertices
+        unshift!(pathNodes, algT.GraphNode(0, startstate)) #prepend the start 
+        push!(pathNodes, algT.GraphNode(0, goalstate)) #append the goal 
+        finalPathCost = algfxn.costPath(pathNodes) #Assuming edge cost is Euclidean cost
+        isPathFound = true
+        return (finalPathCost, isPathFound, pathNodes) #list of nodes in solution path
+
+                p = deepcopy(pathNodes)
+                push!(p, candidateNode)
+    curNode, pathNodes, totalEdgeCost = front.node, front.statesList, front.cost
+    # ----------------------------------------------------------------------
+
+
+
+    end
+end

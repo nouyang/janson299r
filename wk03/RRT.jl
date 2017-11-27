@@ -174,7 +174,7 @@ function rrtPathPlanner(niterations)
         #if !isCollidingNode(r, obs1)#check node XY first #Tofix: this function
         if !isCollidingNode(r, obs1) && !isCollidingEdge(r, nn.state, obs1) # check edge #rewrite so we can check multiple obstacles...
                 nearestDist = distPt(r, nn.state)
-                    if nearestDist > maxDist
+                    if nearestDist > maxDist  #steer if new point is too far
                         x1,y1 = nn.state.x, nn.state.y
                         x2,y2 = r.x, r.y 
                         tantheta = atan2((y2-y1) , (x2-x1))
