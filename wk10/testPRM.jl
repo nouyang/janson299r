@@ -16,9 +16,9 @@ function main()
     startstate = Point(0.,0)
     goalstate = Point(20.,20)
 
-    numSamples = 150
+    numSamples = 10
     connectRadius = 5
-	flagOptimal = false
+	flagOptimal = true 
     param = algT.AlgParameters(numSamples, connectRadius)
 
     print("\n ---- Running PRM ------\n")

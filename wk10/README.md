@@ -157,3 +157,40 @@ end
 
 But would have to rewrite pathcost calculation. so ignore for now
 
+
+
+# friends julia Anonymous functions
+
+```
+findfirst(y -> y > 7, x)v 
+
+myfilter(y) = y > 2
+milter = y-> Y > 2
+
+(y -> y > 2).(x)
+
+
+first argument by convention
+
+findfirst(x) do y
+ z = y+2
+ z > 2
+end
+
+returns 0 if not work
+
+==
+
+revise (the library)
+
+
+===
+
+findfirst( node -> node.start_id == 1, nodes)
+
+```
+
+# Reference; Matlab Robotics Toolbox
+
+Probably I should re-organize my code to resemble this.
+<https://github.com/petercorke/robotics-toolbox-matlab/blob/master/PRM.m>

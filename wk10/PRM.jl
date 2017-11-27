@@ -313,19 +313,14 @@ function preprocessPRM(room, parameters, flagOptimal)
     roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
     numPts, connectRadius = parameters.numSamples, parameters.connectRadius
 
-    #make sPRM into sPRM*
-    
-    if flagOptimal
+    #--- make sPRM into sPRM* ---
         d = 2 # 2 dimensions
         invD = 1/d # curse of dimensionality
         unitSphere = pi # πr²
         gammaPRM = 2 * (1 + invD)^invD * ( roomWidth*roomHeight / pi)^invD
         gammaPRM = ceil(gammaPRM)
-        optimalRad = gammaPRM * (log(numPts) / numPts)^invD
-        connectRadius = optimalRad
-        print("\n --- RUnning Optimal $gammaPRM $connectRadius----- \n")
-        # end sPRM* optimal changes
-    end
+    #--------------------
+    
 
     nodeslist = Vector{algT.GraphNode}()
     edgeslist = Vector{algT.Edge}()
@@ -347,8 +342,17 @@ function preprocessPRM(room, parameters, flagOptimal)
         end
     end
 
+
+    graphSize = 0 # Number of nodes in Graph
+
     # Connect each node to its neighboring nodes within a ball or radius r, creating edges
     for startnode in nodeslist 
+
+        if flagOptimal
+            graphSize += 1
+            connectRadius = gammaPRM * (log(graphSize) / graphSize)^invD
+        end
+
         neighbors = [item[1] for item in algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point
         n = [algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point
         for endnode in neighbors
