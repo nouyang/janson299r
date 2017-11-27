@@ -273,7 +273,7 @@ module plotfxn
         title!(prmPlot, title)
         #annotate!([(0,-2,text("$title",12,:blue,:center))])
         plot!(prmPlot, legend=false, size=(600,600), xaxis=((-2,22), 0:1:20 ), 
-              yaxis=((-2,22), 0:1:20), foreground_color_grid= :black, titlefont=font("Arial"))
+              yaxis=((-2,22), 0:1:20), foreground_color_grid= :black, titlefont=font("Arial", 10))
         return prmPlot
     end
 
