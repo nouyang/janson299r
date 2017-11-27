@@ -44,7 +44,6 @@ function main()
 
     ## Run preprocessing
     nodeslist, edgeslist = preprocessPRM(r, param, flagOptimal)
-
     ## Query created RM
 
     #!

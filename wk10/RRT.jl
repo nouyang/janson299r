@@ -83,8 +83,8 @@ end
 
 module algfxn 
     using GeometryTypes
+    using Distributions
     using algT
-
 
     function sampleFree(roomW, roomH, obstacles)
         pt_rand = Void
@@ -309,8 +309,8 @@ module plotfxn
         return aPlot
     end
 
-    function plotRRT(roomPlot, nodeslist, solPath, title)
-        startstate, goalstate, nodeslist, edgeslist = roadmap.startstate, roadmap.goalstate, roadmap.nodeslist, roadmap.edgeslist
+    function plotRRT(roomPlot, graph, solPath, title)
+        startstate, goalstate, nodeslist, edgeslist = graph.startstate, graph.goalstate, graph.nodeslist, graph.edgeslist
 
         x = [n.state[1] for n in nodeslist]
         y = [n.state[2] for n in nodeslist]
@@ -345,13 +345,14 @@ module plotfxn
             xPath = [n.state[1] for n in solPath] 
             yPath = [n.state[2] for n in solPath]
             xstart, ystart = solPath[1].state
+
             xend, yend = solPath[end].state
             # plot start pt
             scatter!(aPlot, [xstart], [ystart], 
                      markercolor= :red, markershape = :circle,  markersize = 6, markerstrokealpha = 0.5, markerstrokewidth=1)
             # plot goal pt
             scatter!(aPlot, [xend], [yend], 
-                     markerstrokecolor = :green, markershape = :star,  markersize = 5, markerstrokealpha = 1, markerstrokewidth=5)
+                     markerstrokecolor = :green, markershape = :dtriangle,  markersize = 5, markerstrokealpha = 1, markerstrokewidth=5)
 
             # plot path
             plot!(aPlot, xPath, yPath, color = :orchid, linewidth=3, fillalpha = 0.3)
@@ -379,8 +380,10 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
     currID = 1 #current node ID
 
     # for numPts iterations...
-    for i in 1:numPts
+    isPathFound = false
 
+    n_new = algT.GraphNode(999999, goalstate)
+    for i in 1:numPts
         # Sample node from free space
         pt_rand = algfxn.sampleFree(roomWidth, roomHeight, obstacles)
 
@@ -388,7 +391,8 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
         n_nearest = algfxn.nearestN(pt_rand, nodeslist)
 
         # Steer 
-        pt_new = algfxn.steer(pt_rand, n_nearest.state) #no node ID yet
+        pt_new = algfxn.steer(n_nearest.state, pt_rand, connectRadius) #no node ID yet
+        @show pt_new
 
         # edge going FROM nearest in tree TO new node
         candidateEdge = LineSegment(n_nearest.state, pt_new)
@@ -400,9 +404,10 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
             # Currently we will have to loop through all edges to trace the solution path
         if (    !algfxn.isCollidingObstacles(candidateEdge, obstacles) 
               & !algfxn.isCollidingWalls(candidateEdge, walls) )
+            @show candidateEdge
             n_new = algT.GraphNode(currID, pt_new)
             currID += 1
-            newEdge = algT.Edge(n_new.id, n_nearest.id) 
+            newEdge = algT.Edge(n_nearest.id , n_new.id)
             push!(nodeslist, n_new)
             push!(edgeslist, newEdge)
         end
@@ -412,8 +417,10 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
             break
         end
     end
+    @show isPathFound
 
     pathNodes = Vector{algT.GraphNode}()
+    @show edgeslist
 
     if isPathFound
         ## CREATE LIST OF NODES IN THE FEASIBLE PATH
@@ -429,12 +436,17 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
         while currPathID != 0
 
             # Find the parent node ID, add associated node to list
+            foundParent = false
+
+
+            # Todo! do NOT fail silently if no edge is found, or if more than one edge is found (in RRT)
             for edge in edgeslist
                 if edge.endID == currPathID
                     node = algfxn.findNode(edge.startID, nodeslist)
                     push!(pathNodes, node)
-                # Todo! do NOT fail silently if no edge is found, or if more than one edge is found (in RRT)
-                # can i use `break` here?
+                    break
+                else
+                    print("AHHH bORKEN")
                 end
             end
             currPathID = node.id
@@ -448,7 +460,7 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
     end
 
     finalPathCost = algfxn.costPath(pathNodes) #Assuming edge cost is Euclidean cost
-    return (finalPathCost, isPathFound, pathNodes)
+    return (nodeslist, edgeslist, isPathFound, pathNodes, finalPathCost)
 
 end
 
