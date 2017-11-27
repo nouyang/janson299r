@@ -52,7 +52,8 @@ function main()
     #title = "PRM with # samples =$numSamples, \nPathfound = $isPathFound, \npathcost = $pathcost"
 
     timestamp = Base.Dates.now()
-    title = "PRM with # samples=$numSamples, maxDist=$connectRadius, \npathcost = $(ceil(pathcost)), timestamp=$timestamp)\n\n"
+    timestamp = Base.Dates.format(timestamp, "dd u yyyy HH:MM:SS")
+    title = " Week 10 PRM [ $timestamp ] \n\n$numSamples samples, connectRadius = $connectRadius, pathcost = $(ceil(pathcost,2))"
     #!
     roadmap = algT.roadmap(startstate, goalstate, nodeslist, edgeslist)
     # this is the gold

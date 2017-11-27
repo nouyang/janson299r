@@ -41,3 +41,11 @@ To run a file,
 Pkg.update(); ENV["GRDIR"] = ""; Pkg.build("GR")
 . BTW: MWE is an abbreviation for "minimal working example" (to reproduce the problem).
 
+
+```
+https://en.wikibooks.org/wiki/Introducing_Julia/Working_with_dates_and_times#Date_formatting
+
+```
+
+Font attribute does not seem to impact jupyter rendering of plotly graphs, although you can at least change the actual font.
+But I can't get "bold" to show up. ("Courier Bold" does not work).

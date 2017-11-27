@@ -270,10 +270,10 @@ module plotfxn
         prmPlot = plotSolPath(roomPlot, solPath)
         
         #title!(prmPlot, title, titlefont = afont)
-        #title!(prmPlot, title, fontsize=10.0)
-        annotate!([(0,-2,text("$title",12,:blue,:center))])
-        plot!(prmPlot, legend=false, size=(600,600), xaxis=((-5,25), 0:1:20 ), 
-              yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
+        title!(prmPlot, title)
+        #annotate!([(0,-2,text("$title",12,:blue,:center))])
+        plot!(prmPlot, legend=false, size=(600,600), xaxis=((-2,22), 0:1:20 ), 
+              yaxis=((-2,22), 0:1:20), foreground_color_grid= :black, titlefont=font("Arial"))
         return prmPlot
     end
 
