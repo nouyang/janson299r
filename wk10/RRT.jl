@@ -211,7 +211,7 @@ module algfxn
             return true
         else 
             dist = min_euclidean(Vec(pt), Vec(pt_goal))
-            if dist <= 2
+            if dist <= 3 #HARDCODED REGION #TODO
                 return true
             end
         end
@@ -408,39 +408,44 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
             # Here we just make an edge
             # Currently we will have to loop through all edges to trace the solution path
         if (    !algfxn.isCollidingObstacles(candidateEdge, obstacles) 
-              & !algfxn.isCollidingWalls(candidateEdge, walls) )
+              && !algfxn.isCollidingWalls(candidateEdge, walls) )
             #@show candidateEdge
+            #@show pt_new
             n_new = algT.GraphNode(currID, pt_new)
+            #@show n_new
             currID += 1
             newEdge = algT.Edge(n_nearest.id , n_new.id)
             push!(nodeslist, n_new)
             push!(edgeslist, newEdge)
-        end
 
-        if algfxn.inGoalRegion(pt_new, goalstate)
-            isPathFound = true
-            break
+            if algfxn.inGoalRegion(pt_new, goalstate)
+                print("\n\n - n_new $n_new , pt_new $pt_new -\n\n")
+                isPathFound = true
+                break
+            end
         end
     end
 
-    @show isPathFound
+    print("\n\n - pathfound $isPathFound - \n\n")
 
     pathNodes = Vector{algT.GraphNode}()
     #@show edgeslist
 
+    #
+    goalNode = algT.GraphNode(999999, goalstate)
+    push!(pathNodes, goalNode)
+
     if isPathFound
         ## CREATE LIST OF NODES IN THE FEASIBLE PATH
 
-        pt_goal = goalstate
-        n_last = n_new #the last node added is the one in the goal region
+        n_last = n_new #last node in path (not necessarily goal node) is n_new
         push!(pathNodes, n_last)
 
-        # node =  What to initalize to ??
         currPathID = n_last.id
 
         # Loop until we reach the start node
         while currPathID != 0
-            @show currPathID
+            #@show currPathID
 
             # Find the parent node ID, add associated node to list
             foundParent = false
@@ -455,16 +460,15 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
                     break
                 end
             end
-            @show node
+            #@show node
             currPathID = node.id
         end
 
     else
         # if no feasible path was found, just return the start and end nodes so we can plot them
-        push!(pathNodes, startNode)
-        goalNode = algT.GraphNode(999999, goalstate)
-        push!(pathNodes,goalNode)
     end
+
+    push!(pathNodes, startNode)
 
     finalPathCost = algfxn.costPath(pathNodes) #Assuming edge cost is Euclidean cost
     return (nodeslist, edgeslist, isPathFound, pathNodes, finalPathCost)
