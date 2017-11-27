@@ -494,9 +494,13 @@ function queryPRM(startstate, goalstate, nodeslist, edgeslist, obstaclesList)
 
     # Return None if no solution found
     #@printf("No solution found! This is length of frontier, %d\n", length(frontier))
-    finalPathCost = Void
+    pathNodes = Vector{algT.GraphNode}()
+    push!(pathNodes, nodestart)
+    push!(pathNodes, nodegoal)
+    finalPathCost = algfxn.costPath(pathNodes) #Assuming edge cost is Euclidean cost
     isPathFound = false
-    pathNodes = Void
+    # Todo! fix that nodegoal and nodestart might have been wiped out by "snap to nearest node" for start and goal states
+
     return (finalPathCost, isPathFound, pathNodes)
 end
 

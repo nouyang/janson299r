@@ -118,3 +118,42 @@ It is most similar to PRM. It needs the "total path cost" same as `RRT*`.
 Section 3.4 has the implementation details. For saving computational costs we
 will want a binary min heap for Vopen, ordered by cost-to-arrive. But ignore
 this for now.`
+
+# Plotting
+
+In PRM we can only plot the start and end goals when we are queried.
+So, plot the room.
+Plot the obstacles.
+When queried, plot the query start and end.
+If we found a feasible path for that query, plot that path.
+
+With RRT, we construct the graph 
+
+# Plot feasible path
+
+Could choose to implement with edges.
+```
+    pathEdges = Vector{algT.Edge}()
+
+    pt_goal = goalstate
+    n_last = n_new #the last node added is the one in the goal region
+    push!(pathNodes, n_last.id)
+
+    currPathID = n_last.id
+
+    # Loop until we reach the start node
+    while currPathID != 0
+        # Find the parent node ID, add associated edge to list
+        for edge in edgeslist
+            if edge.endID == currPathID
+                push!(pathEdges, edge)
+            break
+            # Todo! do NOT fail silently if no edge is found, or if more than one edge is found (in RRT)
+        end
+        currPathID = edge.startID
+    end
+end
+```
+
+But would have to rewrite pathcost calculation. so ignore for now
+

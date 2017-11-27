@@ -374,6 +374,9 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
     nodeslist = Vector{algT.GraphNode}()
     edgeslist = Vector{algT.Edge}()
 
+    startNode = algT.GraphNode(0, startstate)
+    push!(nodeslist, startNode)
+
     currID = 1 #current node ID
 
     # for numPts iterations...
@@ -385,22 +388,21 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
         # Find nearest existing node
         n_nearest = algfxn.nearestN(pt_rand, nodeslist)
 
-
+        # Steer 
         pt_new = algfxn.steer(pt_rand, n_nearest.state) #no node ID yet
 
-        # draw edging going FROM nearest in tree TO new node
+        # edge going FROM nearest in tree TO new node
         candidateEdge = LineSegment(n_nearest.state, pt_new)
 
-        if (    !algfxn.isCollidingObstacles(candidateEdge, obstacles) 
-              & !algfxn.isCollidingWalls(candidateEdge, walls) )
-
-            n_new = algT.GraphNode(currID, pt_new)
-            currID += 1
 
             # Note: Alternate implementation: for RRT we do not *need* edges list
             # if we include a parent ID for each node.
             # Here we just make an edge
             # Currently we will have to loop through all edges to trace the solution path
+        if (    !algfxn.isCollidingObstacles(candidateEdge, obstacles) 
+              & !algfxn.isCollidingWalls(candidateEdge, walls) )
+            n_new = algT.GraphNode(currID, pt_new)
+            currID += 1
             newEdge = algT.Edge(n_new.id, n_nearest.id) 
             push!(nodeslist, n_new)
             push!(edgeslist, newEdge)
@@ -412,36 +414,42 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
         end
     end
 
-    if isPathFound
-        algfxn.makeSolPath
-
-#     return nodeslist, edgeslist 
-    else
-        finalPathCost = Void
-        pathNodes = Void
-    end
-
-    return (finalPathCost, isPathFound, pathNodes)
-
-function makeSolPath
-
-    # ----------------------------------------------------------------------
     pathNodes = Vector{algT.GraphNode}()
 
-    pt_last = pt_new #the last node added, 
-        unshift!(pathNodes, nodestart) #prepend our first path node back to pathVertices
-        unshift!(pathNodes, algT.GraphNode(0, startstate)) #prepend the start 
-        push!(pathNodes, algT.GraphNode(0, goalstate)) #append the goal 
-        finalPathCost = algfxn.costPath(pathNodes) #Assuming edge cost is Euclidean cost
-        isPathFound = true
-        return (finalPathCost, isPathFound, pathNodes) #list of nodes in solution path
+    if isPathFound
+        ## CREATE LIST OF NODES IN THE FEASIBLE PATH
 
-                p = deepcopy(pathNodes)
-                push!(p, candidateNode)
-    curNode, pathNodes, totalEdgeCost = front.node, front.statesList, front.cost
-    # ----------------------------------------------------------------------
+        pt_goal = goalstate
+        n_last = n_new #the last node added is the one in the goal region
+        push!(pathNodes, n_last)
 
+        # node =  What to initalize to ??
+        currPathID = n_last.id
 
+        # Loop until we reach the start node
+        while currPathID != 0
 
+            # Find the parent node ID, add associated node to list
+            for edge in edgeslist
+                if edge.endID == currPathID
+                    node = algfxn.findNode(edge.startID, nodeslist)
+                    push!(pathNodes, node)
+                # Todo! do NOT fail silently if no edge is found, or if more than one edge is found (in RRT)
+                # can i use `break` here?
+                end
+            end
+            currPathID = node.id
+        end
+
+    else
+        # if no feasible path was found, just return the start and end nodes so we can plot them
+        push!(pathNodes, startNode)
+        goalNode = algT.GraphNode(999999, goalstate)
+        push!(pathNodes,goalNode)
     end
+
+    finalPathCost = algfxn.costPath(pathNodes) #Assuming edge cost is Euclidean cost
+    return (finalPathCost, isPathFound, pathNodes)
+
 end
+
