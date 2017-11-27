@@ -253,7 +253,8 @@ module plotfxn
         xs = [pt[1] for pt in rectpoints];
         ys = [pt[2] for pt in rectpoints];
         seriestype := :shape
-        color = :orange
+        color := :orange
+        linecolor := :black
         #m = (:black, stroke(0))
         s = Shape(xs[:], ys[:])
     end
@@ -262,7 +263,7 @@ module plotfxn
         xs = [pt[1]]
         ys = [pt[2]]
         seriestype --> :scatter
-        color = :orange
+        color := :orange
         markersize := 3
         xs, ys
     end
@@ -271,7 +272,7 @@ module plotfxn
         xs = [ l[1][1], l[2][1] ]
         ys = [ l[1][2], l[2][2] ]
         # seriestype = :line
-        color = :red
+        color := :darkblue
         lw := 3
         xs, ys
     end
@@ -331,14 +332,16 @@ module plotfxn
             push!(edgeYs, y1, y2, NaN)
         end
 
-        plot!(roomPlot, edgeXs, edgeYs, color=:tan, linewidth=0.3)
+        plot!(roomPlot, edgeXs, edgeYs, color=:tan, linewidth=1)
 
         # plot solution
         rrtPlot = plotSolPath(roomPlot, solPath)
         
         title!(rrtPlot, title)
-        plot!(rrtPlot, legend=false, size=(600,600), xaxis=((-5,25), 0:1:20 ), 
-              yaxis=((-5,25), 0:1:20), foreground_color_grid= :black)
+        plot!(rrtPlot, legend=false, size=(600,600), xaxis=((-2,22), 0:1:20 ), 
+              yaxis=((-2,22), 0:1:20), foreground_color_grid= :black, titlefont=font("Arial", 10))
+
+
         return rrtPlot
     end
 

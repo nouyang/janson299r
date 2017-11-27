@@ -9,7 +9,7 @@
 # MAIN
 ####################################################
 include("RRT.jl")
-plotly()
+#plotly()
 
 
 function main()
@@ -17,8 +17,8 @@ function main()
     startstate = Point(0.,0)
     goalstate = Point(20.,20)
 
-    numSamples = 200
-    connectRadius = 10
+    numSamples = 500
+    connectRadius = 3
 	flagOptimal = false
     param = algT.AlgParameters(numSamples, connectRadius)
 
@@ -52,7 +52,7 @@ function main()
 
     timestamp = Base.Dates.now()
     timestamp = Base.Dates.format(timestamp, "dd u yyyy HH:MM:SS")
-    title = " Week 10 PRM [ $timestamp ] \n\n$numSamples samples, connectRadius = $connectRadius, pathcost = $(ceil(pathcost,2))"
+    title = " Week 10 RRT [ $timestamp ] \n\n$numSamples samples, connectRadius = $connectRadius, pathcost = $(ceil(pathcost,2))"
     
     graph = algT.Graph(startstate, goalstate, nodeslist, edgeslist)
     # this is the gold
