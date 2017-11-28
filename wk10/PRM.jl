@@ -319,6 +319,11 @@ function preprocessPRM(room, parameters, flagOptimal)
         unitSphere = pi # πr²
         gammaPRM = 2 * (1 + invD)^invD * ( roomWidth*roomHeight / pi)^invD
         gammaPRM = ceil(gammaPRM)
+    if flagOptimal
+        @show connectRadius
+        connectRadius = gammaPRM * (log(numPts) / numPts)^invD
+        @show connectRadius
+    end
     #--------------------
     
 
@@ -343,15 +348,9 @@ function preprocessPRM(room, parameters, flagOptimal)
     end
 
 
-    graphSize = 0 # Number of nodes in Graph
-
     # Connect each node to its neighboring nodes within a ball or radius r, creating edges
     for startnode in nodeslist 
 
-        if flagOptimal
-            graphSize += 1
-            connectRadius = gammaPRM * (log(graphSize) / graphSize)^invD
-        end
 
         neighbors = [item[1] for item in algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point
         n = [algfxn.findNearestNodes(startnode.state, nodeslist, connectRadius)] # parent point

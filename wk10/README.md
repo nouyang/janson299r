@@ -194,3 +194,15 @@ findfirst( node -> node.start_id == 1, nodes)
 
 Probably I should re-organize my code to resemble this.
 <https://github.com/petercorke/robotics-toolbox-matlab/blob/master/PRM.m>
+
+# Reference: Youtube! olzhai adi
+
+https://www.youtube.com/watch?v=JM7kmWE8Gtc&t=152s
+
+# Reference: The paper
+
+Defines Parent and Rewire functions
+
+http://personalrobotics.ri.cmu.edu/files/courses/papers/Karaman11-anytimerrtstar.pdf
+
+I definitely do need to store parent and cost as part of the node. sigh
