@@ -15,6 +15,8 @@ To run a file,
 > include("testRRTstar.jl")
 > main()
 
+julia> include("RRT.jl"); include("algfxn.jl"); include("testRRT.jl"); main()
+
 ## Edit
 
 > vi RRTstar.jl

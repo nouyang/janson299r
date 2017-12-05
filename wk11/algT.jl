@@ -19,8 +19,8 @@ module algT
         end
 
     struct Edge
-        startNode::Node
-        endNode::Node
+        startNode::algT.Node
+        endNode::algT.Node
         #  startID::Int64
         #  endID::Int64
         #  startpt::Pt2D

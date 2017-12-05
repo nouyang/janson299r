@@ -20,10 +20,9 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
     numPts, connectRadius = parameters.numSamples, parameters.connectRadius
 
     nodeslist = Vector{algT.Node}()
-    #edgeslist = Vector{algT.Edge}()
-    edgeslist = Vector{algT.Line2D}()
+    edgeslist = Vector{algT.Edge}()
 
-    startNode = algT.Node(0, algT.Pt2D(startstate))
+    startNode = algT.Node(0,algT.Pt2D(startstate),0) #id, state, parentid
     push!(nodeslist, startNode)
 
     currID = 1 #current node ID
@@ -36,11 +35,13 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
         randPt = algfxn.sampleFree(roomWidth, roomHeight, obstacles)
 
         nn = algT.Node(algfxn.nearestN(randPt, nodeslist))
+        @show nn
         newPt = algfxn.steer(nn.state, randPt, connectRadius) #no node ID yet
         newMove = LineSegment(Point(nn.state), Point(newPt))
+            print("\n --- move: $newMove --- \n")
 
         if algfxn.isFreeMotion(newMove, obstacles, walls)
-            newNode = algT.Node(currID, nn.id, newPt) # include parent node id
+            newNode = algT.Node(currID, newPt, nn.id ) # include parent node id
             newEdge = algT.Edge(nn, newNode)
             currID += 1
             push!(nodeslist, newNode)
@@ -68,6 +69,8 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
         end
     end
 
+    @show edgeslist
+    @show nodeslist
     finalPathCost = algfxn.costPath(solPath) 
     return (nodeslist, edgeslist, isPathFound, solPath, finalPathCost)
 end

@@ -80,8 +80,8 @@ module plotfxn
 
         edgeXs, edgeYs = [], []
         for e in edgeslist
-            startN = algfxn.findNode(e.startID, nodeslist)
-            endN = algfxn.findNode(e.endID, nodeslist)
+            startN = e.startNode
+            endN = e.endNode
             x1,y1 = startN.state[1], startN.state[2]
             x2,y2 = endN.state[1], endN.state[2]
             push!(edgeXs, x1, x2, NaN) #the NaNs, keep spaces between edges correctly unplotted

@@ -65,7 +65,7 @@ module algfxn
     end
 
     function isFreeMotion(line::LineSegment, obstacles::Vector{HyperRectangle}, walls::Vector{LineSegment})
-        return (!algfxn.isCollidingObstacles(line, obstacles) && !algfxn.isCollidingWalls(line, walls))
+        return (!algfxn.isCollidingWalls(line, walls) && !algfxn.isCollidingObstacles(line, obstacles))
     end
 
     #helper1
@@ -74,6 +74,9 @@ module algfxn
             rectLines = decompRect(obs)
             for rectline in rectLines
                 if intersects(line, rectline)[1]
+                @show line
+                @show obs 
+                print("interseeciton bos")
                     return true
                 end
             end
@@ -83,26 +86,30 @@ module algfxn
 
     #helper2
     function isCollidingWalls(line::LineSegment, walls::Vector{LineSegment})
+            print("\nline: $line\n")
         for wall in walls
             if intersects(line, wall)[1]
+                @show line
+                @show wall
+                print("\ninterseecito\n")
                 return true
             end
         end
         return false
     end
 
-    function findNearestNodes(nodestate, nodeslist, maxDist)
-        # given maxDist, return all nodes within that distance of node
-        # list is NOT sorted by distance
-        nearestNodes = Vector{Tuple{algT.TreeNode, Float64}}()
-        for n in nodeslist
-            dist = algfxn.dist(nodestate, n.state)
-            if dist < maxDist 
-                push!(nearestNodes, (n, dist))
-            end
-        end
-        return nearestNodes 
-    end
+#=     function findNearestNodes(nodestate, nodeslist, maxDist) =#
+        #  # given maxDist, return all nodes within that distance of node
+        #  # list is NOT sorted by distance
+        #  nearestNodes = Vector{Tuple{algT.TreeNode, Float64}}()
+        #  for n in nodeslist
+            #  dist = algfxn.dist(nodestate, n.state)
+            #  if dist < maxDist 
+                #  push!(nearestNodes, (n, dist))
+            #  end
+        #  end
+        # return nearest 
+    #  end
 
     function nearestN(pt::Point{2,Float64}, nodeslist)
         # 
