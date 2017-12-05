@@ -1,6 +1,6 @@
 ####################################################
 
-#  testRRT.jl
+#  testRRTstar.jl
 
 #  This file is used for development and testing of RRT.jl
 #  nouyang 2017
@@ -14,10 +14,10 @@ include("RRTstar.jl")
 
 function main()
 #  runs the PRM once and plots the results.
-    startstate = Point(0.,0)
+    startstate = Point(1.,1)
     goalstate = Point(20.,20)
 
-    numSamples = 200
+    numSamples = 20
     connectRadius = 3.0
 	flagOptimal = false
     param = algT.AlgParameters(numSamples, connectRadius)
@@ -29,7 +29,7 @@ function main()
     obs3 = HyperRectangle(Vec(14,14.), Vec(3,4.)) #Todo
 
     obstacles = Vector{HyperRectangle}()
-    push!(obstacles, obs1, obs2, obs3)
+    #push!(obstacles, obs1, obs2, obs3)
 
     # Define walls
     walls = Vector{LineSegment}()
@@ -45,7 +45,7 @@ function main()
     roomPlot = plotfxn.plotRoom(r)
 
     #!
-    nodeslist, edgeslist, isPathFound, pathNodes, pathcost = rrtPlan(r, param, startstate, goalstate, obstacles)
+    nodeslist, edgeslist, isPathFound, pathNodes, pathcost = rrtStarPlan(r, param, startstate, goalstate, obstacles)
 
     ## Plot path found
     #title = "PRM with # samples =$numSamples, \nPathfound = $isPathFound, \npathcost = $pathcost"

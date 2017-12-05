@@ -6,7 +6,6 @@
 #  nouyang 2017
 
 ####################################################
-
 using Plots
 using DataStructures
 using GeometryTypes 
@@ -16,14 +15,15 @@ using plotfxn
 using algT
 using algfxn
 
-function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
+# pts are pure Points, nodes have ID information
+function rrtStarPlan(room, parameters, startstate, goalstate, obstaclesList)
     roomWidth, roomHeight, walls, obstacles = room.width, room.height, room.walls, room.obstacles
     numPts, connectRadius = parameters.numSamples, parameters.connectRadius
 
     nodeslist = Vector{algT.Node}()
     edgeslist = Vector{algT.Edge}()
 
-    startNode = algT.Node(0, algT.Pt2D(startstate))
+    startNode = algT.Node(0, algT.Pt2D(startstate), 0) #id, state, parentid
     push!(nodeslist, startNode)
 
     currID = 1 #current node ID
@@ -35,7 +35,7 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
     endNode = nothing 
 
     for i in 1:numPts
-            print("\n --- ---------------------- \n")
+            print("\n ------------------------ \n")
         randPt = algfxn.sampleFree(roomWidth, roomHeight, obstacles)
 
         nn = algT.Node(algfxn.nearestN(randPt, nodeslist))
@@ -43,25 +43,17 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
         newMove = LineSegment(Point(nn.state), Point(newPt))
 
         if algfxn.isFreeMotion(newMove, obstacles, walls)
-            newNode = algT.Node(currID, newPt, nn.id) # include parent node id
+            newNode = algT.Node(currID, newPt, nn.id ) # include parent node id
             newEdge = algT.Edge(nn, newNode)
-
-            newNode, nn = algfxn.chooseParent(n_nearest, n_new, nodeslist, connectRadius)
-            newEdge = algT.Edge(nn.id , newNode.id)
-
-            nodeslist, edgeslist = algfxn.rewire(nodeslist, edgeslist, newNode, connectRadius, obstacles, walls)
-
-            currID += 1 #we always add nodes, never delete
+            currID += 1
             push!(nodeslist, newNode)
             push!(edgeslist, newEdge)
-
             if algfxn.inGoalRegion(newPt, goalstate)
                 print("\n --goal found! $newPt, goal is $goalstate-- \n")
                 endNode = newNode
                 isPathFound = true
                 break
             end
-
         end
     end
 
@@ -71,6 +63,7 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
 
     solPath = Vector{algT.Node}()
 
+    # TODO handle this more gracefully
     if endNode != nothing
         goalNode = algT.Node(currID+1, goalstate, endNode.id)
     else
@@ -95,8 +88,13 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
     #@show nodeslist
     @show solPath
 
-    finalPathCost = algfxn.costPath(pathNodes) 
-    return (nodeslist, edgeslist, isPathFound, pathNodes, finalPathCost)
-
+    finalPathCost = algfxn.costPath(solPath) 
+    return (nodeslist, edgeslist, isPathFound, solPath, finalPathCost)
 end
+
+            #newNode, nn = algfxn.chooseParent(n_nearest, n_new, nodeslist, connectRadius)
+            #newEdge = algT.Edge(nn.id , newNode.id)
+
+            #nodeslist, edgeslist = algfxn.rewire(nodeslist, edgeslist, newNode, connectRadius, obstacles, walls)
+
 

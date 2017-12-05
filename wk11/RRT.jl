@@ -29,7 +29,7 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
 
     isPathFound = false
 
-    nn = algT.Node(99999, goalstate, -99999)
+    nn = algT.Node(99999, algT.Pt2D(goalstate))
     newNode = nothing 
     endNode = nothing 
 
@@ -40,6 +40,7 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
         nn = algT.Node(algfxn.nearestN(randPt, nodeslist))
         newPt = algfxn.steer(nn.state, randPt, connectRadius) #no node ID yet
         newMove = LineSegment(Point(nn.state), Point(newPt))
+
         if algfxn.isFreeMotion(newMove, obstacles, walls)
             newNode = algT.Node(currID, newPt, nn.id ) # include parent node id
             newEdge = algT.Edge(nn, newNode)

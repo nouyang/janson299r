@@ -173,5 +173,32 @@ ERROR: TypeError: non-boolean (Tuple{Bool,GeometryTypes.Point{2,Float64}}) used 
 
 #
  I just realized.
+
 A lot of the issues may have come from differences in how my intersect() code and the library code handles corners,
 e.g. coincident things.
+## 
+
+# TODO !!!!!!!!!!!!!!!!!!!
+
+Cannot set start state as 0,0 anymore
+
+#
+
+ERROR: MethodError: Cannot `convert` an object of type algT.Node to an object of type algT.Node
+This may have arisen from a call to the constructor algT.Node(...),
+since type constructors fall back to convert methods.
+
+
+##
+in the module, was calling Node instea of algT.node
+
+h
+        startstate::Pt2D
+        goalstate::Pt2D
+        nodeslist::Vector{algT.Node}
+        edgeslist::Vector{algT.Edge}
+
+# No ndes were showing up
+
+## TOFIX (or at least not fail silently)
+Cannot set start state as 0,0 anymore

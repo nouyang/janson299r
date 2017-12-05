@@ -29,7 +29,6 @@ module algfxn
     end
 
     function steer(fromPt, toPt, connectRadius)
-        @show fromPt
         dist = algfxn.dist(fromPt, toPt)
         # If pt_rand is too far from its nearest node, "truncate" it to be closer
         if dist <= connectRadius
