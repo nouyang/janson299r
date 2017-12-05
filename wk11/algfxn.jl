@@ -163,7 +163,7 @@ module algfxn
     ######## RRT* Specific Functions ##########
 
     function chooseParent(nearestN, newNode,  nodeslist, connectRadius, obstacles, walls)
-                        print("\n --- looking for parent ---\n")
+                        #print("\n --- looking for parent ---\n")
         for n in nodeslist
             pt = n.state
             if ( isFreeMotion( LineSegment(pt, nearestN.state) ,  obstacles, walls) &&
@@ -194,12 +194,12 @@ module algfxn
 				#  end
 				
 
-                print("\n --- REWIRING ---\n")
+                # print("\n --- REWIRING ---\n")
                 for i in length(edgeslist)
                     e = edgeslist[i]
                     if (e.startNode.id == p.parentID && e.endNode.id == p.id)
                         deleteat!(edgeslist, i)
-                        print("\n deletd an edge! $(e) \n")
+                        # print("\n deletd an edge! $(e) \n")
                         break
                     end
 

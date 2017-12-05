@@ -57,10 +57,8 @@ function rrtStarPlan(room, parameters, startstate, goalstate, obstaclesList)
             nodeslist, edgeslist = algfxn.rewire(nodeslist, edgeslist, newNode, connectRadius, obstacles, walls)
 
             if algfxn.inGoalRegion(newPt, goalstate)
-                print("\n --goal found! $newPt, goal is $goalstate-- \n")
                 endNode = newNode
                 isPathFound = true
-                break
             end
         end
     end
@@ -74,8 +72,6 @@ function rrtStarPlan(room, parameters, startstate, goalstate, obstaclesList)
     # TODO handle this more gracefully
     if endNode != nothing
         goalNode = algT.Node(currID+1, goalstate, endNode.id)
-        @show endNode
-    @show nodeslist
     else
         goalNode = algT.Node(currID+1, goalstate)
     end
@@ -85,10 +81,8 @@ function rrtStarPlan(room, parameters, startstate, goalstate, obstaclesList)
         pID = goalNode.parentID
         node = []
         print("The pat was found. the nodeslist is $(length(nodeslist))")
-    @show edgeslist
 
         while true 
-            @show pID
             node = algfxn.findNode(pID, nodeslist)
             pID = node.parentID
             push!(solPath, node)
