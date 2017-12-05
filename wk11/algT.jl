@@ -60,5 +60,12 @@ module algT
 
     Base.isless(q1::queueTmp, q2::queueTmp) = q1.cost < q2.cost
 
+    import Base.show
+    function Base.show(io::IO, n::Node)
+        print(io, "($(n.id), $(n.parentID), $(n.state))\n")
+    end
+    function Base.show(io::IO, e::Edge)
+        print(io, "<$(e.startNode.id), $(e.startNode.state); $(e.endNode.id), $(e.endNode.state)>\n")
+    end
 end
 

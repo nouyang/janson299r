@@ -30,28 +30,23 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
     isPathFound = false
 
     nn = algT.Node(99999, goalstate, -99999)
+    newNode = nothing 
 
     for i in 1:numPts
             print("\n --- ---------------------- \n")
         randPt = algfxn.sampleFree(roomWidth, roomHeight, obstacles)
-        @show randPt
 
         nn = algT.Node(algfxn.nearestN(randPt, nodeslist))
-        @show nn.state
         newPt = algfxn.steer(nn.state, randPt, connectRadius) #no node ID yet
-        @show newPt
         newMove = LineSegment(Point(nn.state), Point(newPt))
             print("\n --- move: $newMove --- \n")
 
-            newNode = algT.Node(currID, newPt, nn.id ) # include parent node id
         if algfxn.isFreeMotion(newMove, obstacles, walls)
             newNode = algT.Node(currID, newPt, nn.id ) # include parent node id
             newEdge = algT.Edge(nn, newNode)
             currID += 1
             push!(nodeslist, newNode)
             push!(edgeslist, newEdge)
-    @show edgeslist
-    @show nodeslist
             if algfxn.inGoalRegion(newPt, goalstate)
                 isPathFound = true
             end
@@ -62,18 +57,21 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
 
     solPath = Vector{algT.Node}()
 
-    goalNode = algT.Node(999999, goalstate)
+    goalNode = algT.Node(currID+1, goalstate, nodeslist[end].id)
     push!(solPath, goalNode)
 
     if isPathFound
+        nowID = goalNode.id
+        pID = goalNode.parentID
         while nowID != 1
-            nowID = goalNode.id
-            pID = goalNode.parentID
-            parentNode = findNode(pID, nodeslist)
-            push!(solPath, parentNode)
+            node = algfxn.findNode(pID, nodeslist)
+            pID = node.parentID
+            push!(solPath, node)
             nowID = pID
         end
     end
+    @show edgeslist
+    @show nodeslist
 
     finalPathCost = algfxn.costPath(solPath) 
     return (nodeslist, edgeslist, isPathFound, solPath, finalPathCost)

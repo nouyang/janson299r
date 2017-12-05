@@ -4,7 +4,11 @@ module algfxn
     using algT
 
     function dist(pt1, pt2)
-        return min_euclidean(Vec(pt1), Vec(pt2))
+        x2,y2 = pt2[1], pt2[2]
+        x1,y1 = pt1[1], pt1[2]
+        dist = sqrt( (x1-x2)^2 + (y1-y2)^2 )
+        return dist
+#        return min_euclidean(Vec(pt1), Vec(pt2))
     end
 
     function sampleFree(roomW, roomH, obstacles)
@@ -75,9 +79,6 @@ module algfxn
             rectLines = decompRect(obs)
             for rectline in rectLines
                 if intersects(line, rectline)[1]
-                @show line
-                @show obs 
-                print("interseeciton bos")
                     return true
                 end
             end
@@ -87,12 +88,8 @@ module algfxn
 
     #helper2
     function isCollidingWalls(line::LineSegment, walls::Vector{LineSegment})
-            print("\nline: $line\n")
         for wall in walls
             if intersects(line, wall)[1]
-                @show line
-                @show wall
-                print("\ninterseecito\n")
                 return true
             end
         end
@@ -116,7 +113,7 @@ module algfxn
         # 
         # This loops through all nodes  TODO
         nearestDist = 99999999;
-        nearestNode = Void;
+        nearestNode = [];
 
         for n in nodeslist
             dist = algfxn.dist(pt, n.state)
@@ -125,6 +122,7 @@ module algfxn
                 nearestNode = n
             end
         end
+        print("$(nearestNode.state), which is type $typeof(nearestNode), and from $pt")
         return nearestNode
     end
 
@@ -152,9 +150,14 @@ module algfxn
     end
 
     function findNode(nodeID, nodeslist)
-        idlist = [node.id for node in nodeslist]
-        index = findfirst(idlist, nodeID)
-        return nodeslist[index]
+        for n in nodeslist
+            if n.id == nodeID 
+                return n
+            end
+        end
+        #idlist = [node.id for node in nodeslist]
+        #index = findfirst(idlist, nodeID)
+        #return nodeslist[index]
     end
 
 end
