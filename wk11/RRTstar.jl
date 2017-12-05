@@ -45,6 +45,14 @@ function rrtStarPlan(room, parameters, startstate, goalstate, obstaclesList)
         if algfxn.isFreeMotion(newMove, obstacles, walls)
             newNode = algT.Node(currID, newPt, nn.id ) # include parent node id
             newEdge = algT.Edge(nn, newNode)
+
+            # RRTstar redo parent (check if shorter total path cost via another parent in the neighborhood)
+            newNode, nn = algfxn.chooseParent(nn, newNode, nodeslist, connectRadius)
+            newEdge = algT.Edge(nn , newNode)
+
+            # RRTstar redo neighbors (check if shorter total path by going through the newNode)
+            nodeslist, edgeslist = algfxn.rewire(nodeslist, edgeslist, newNode, connectRadius, obstacles, walls)
+
             currID += 1
             push!(nodeslist, newNode)
             push!(edgeslist, newEdge)
@@ -91,10 +99,4 @@ function rrtStarPlan(room, parameters, startstate, goalstate, obstaclesList)
     finalPathCost = algfxn.costPath(solPath) 
     return (nodeslist, edgeslist, isPathFound, solPath, finalPathCost)
 end
-
-            #newNode, nn = algfxn.chooseParent(n_nearest, n_new, nodeslist, connectRadius)
-            #newEdge = algT.Edge(nn.id , newNode.id)
-
-            #nodeslist, edgeslist = algfxn.rewire(nodeslist, edgeslist, newNode, connectRadius, obstacles, walls)
-
 

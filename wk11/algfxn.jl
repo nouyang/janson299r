@@ -164,12 +164,6 @@ module algfxn
     function chooseParent(nearestN, newNode,  nodeslist, connectRadius)
         for n in nodeslist
             pt = n.state
-            #@show pt
-            #@show newNode
-            #@show connectRadius #Todo! cast int to float
-            #asdf = min_euclidean(pt), newNode.state))
-            #@show asdf
-            #print("type: $(typeof(asdf))")
             if dist(pt, newNode.state) < connectRadius  && 
                 n.cost + dist(pt, newNode.state) < nearestN.cost + dist(nearestN.state, pt)
                 nearestN = n
@@ -182,23 +176,28 @@ module algfxn
 
     function rewire(nodeslist, edgeslist, newNode, connectRadius, obstacles, walls)
         for p in nodeslist
-            newEdge = LineSegment( Point(p.state, Point(newNode.state)))
+            newMove = LineSegment( Point(p.state), Point(newNode.state))
 
             if ( algfxn.isFreeMotion(newMove, obstacles, walls) &&
 				p.id != newNode.parentID && dist(p.state, newNode.state) < connectRadius &&
                 newNode.cost + dist(p.state, newNode.state) < p.cost )
-                ###terriblecode
+                ###terriblecode just loops for now
                 # remove edge
 
-				i = findfirst(edgeslist) do y
-					y.startID == p.parentID && y.endID == p.id
-				end
+				#  i = findfirst(edgeslist) do y
+                    #  y.startNode.id == p.parentID && y.endNode.id == p.id
+				#  end
 				
-				#@show i
-                #@show length(edgeslist)
-                if i != 0
-                    deleteat!(edgeslist, i)
+                for i in length(edgeslist)
+                    e = edgeslist[i]
+                    if (e.startNode.id == p.parentID && e.endNode.id == p.id)
+                        deleteat!(e, i)
+                        print("rewiring, deletd an edge! $(e)")
+                        break
+                    end
+
                 end
+
 
                 p.parentID = newNode.id
                 p.cost = newNode.cost + min_euclidean(p.state, newNode.state)
