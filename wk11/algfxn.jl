@@ -151,6 +151,7 @@ module algfxn
         for n in nodeslist #TODO I reverted back to looping through alll the nodes; fix this
             if n.id == nodeID 
                 return n
+                break
             end
         end
         #idlist = [node.id for node in nodeslist]
@@ -161,11 +162,14 @@ module algfxn
 
     ######## RRT* Specific Functions ##########
 
-    function chooseParent(nearestN, newNode,  nodeslist, connectRadius)
+    function chooseParent(nearestN, newNode,  nodeslist, connectRadius, obstacles, walls)
+                        print("\n --- looking for parent ---\n")
         for n in nodeslist
             pt = n.state
-            if dist(pt, newNode.state) < connectRadius  && 
-                n.cost + dist(pt, newNode.state) < nearestN.cost + dist(nearestN.state, pt)
+            if ( isFreeMotion( LineSegment(pt, nearestN.state) ,  obstacles, walls) &&
+                dist(pt, newNode.state) < connectRadius  && 
+                n.cost + dist(pt, newNode.state) < nearestN.cost + dist(nearestN.state, pt)  )
+
                 nearestN = n
             end
         end
@@ -175,7 +179,8 @@ module algfxn
     end
 
     function rewire(nodeslist, edgeslist, newNode, connectRadius, obstacles, walls)
-        for p in nodeslist
+        for j in length(nodeslist)
+            p = nodeslist[j]
             newMove = LineSegment( Point(p.state), Point(newNode.state))
 
             if ( algfxn.isFreeMotion(newMove, obstacles, walls) &&
@@ -188,11 +193,13 @@ module algfxn
                     #  y.startNode.id == p.parentID && y.endNode.id == p.id
 				#  end
 				
+
+                print("\n --- REWIRING ---\n")
                 for i in length(edgeslist)
                     e = edgeslist[i]
                     if (e.startNode.id == p.parentID && e.endNode.id == p.id)
-                        deleteat!(e, i)
-                        print("rewiring, deletd an edge! $(e)")
+                        deleteat!(edgeslist, i)
+                        print("\n deletd an edge! $(e) \n")
                         break
                     end
 
@@ -200,11 +207,10 @@ module algfxn
 
 
                 p.parentID = newNode.id
-                p.cost = newNode.cost + min_euclidean(p.state, newNode.state)
-
-                foo = algT.Edge(p.id, newNode.id) 
-
-                # add edge
+                p.cost = newNode.cost + dist(p.state, newNode.state)
+                nodeslist[i] = p #update node
+                foo = algT.Edge(p, newNode) 
+                # add back new edge
 				push!(edgeslist,foo)
             end
         end

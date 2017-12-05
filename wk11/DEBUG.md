@@ -202,3 +202,6 @@ h
 
 ## TOFIX (or at least not fail silently)
 Cannot set start state as 0,0 anymore
+
+# hmm. parent id is the same is id
+

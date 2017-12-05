@@ -35,7 +35,6 @@ function rrtStarPlan(room, parameters, startstate, goalstate, obstaclesList)
     endNode = nothing 
 
     for i in 1:numPts
-            print("\n ------------------------ \n")
         randPt = algfxn.sampleFree(roomWidth, roomHeight, obstacles)
 
         nn = algT.Node(algfxn.nearestN(randPt, nodeslist))
@@ -43,19 +42,20 @@ function rrtStarPlan(room, parameters, startstate, goalstate, obstaclesList)
         newMove = LineSegment(Point(nn.state), Point(newPt))
 
         if algfxn.isFreeMotion(newMove, obstacles, walls)
+
             newNode = algT.Node(currID, newPt, nn.id ) # include parent node id
             newEdge = algT.Edge(nn, newNode)
+            currID += 1
 
             # RRTstar redo parent (check if shorter total path cost via another parent in the neighborhood)
-            newNode, nn = algfxn.chooseParent(nn, newNode, nodeslist, connectRadius)
+            newNode, nn = algfxn.chooseParent(nn, newNode, nodeslist, connectRadius, obstacles, walls)
             newEdge = algT.Edge(nn , newNode)
+            push!(nodeslist, newNode)
+            push!(edgeslist, newEdge)
 
             # RRTstar redo neighbors (check if shorter total path by going through the newNode)
             nodeslist, edgeslist = algfxn.rewire(nodeslist, edgeslist, newNode, connectRadius, obstacles, walls)
 
-            currID += 1
-            push!(nodeslist, newNode)
-            push!(edgeslist, newEdge)
             if algfxn.inGoalRegion(newPt, goalstate)
                 print("\n --goal found! $newPt, goal is $goalstate-- \n")
                 endNode = newNode
@@ -74,6 +74,8 @@ function rrtStarPlan(room, parameters, startstate, goalstate, obstaclesList)
     # TODO handle this more gracefully
     if endNode != nothing
         goalNode = algT.Node(currID+1, goalstate, endNode.id)
+        @show endNode
+    @show nodeslist
     else
         goalNode = algT.Node(currID+1, goalstate)
     end
@@ -82,18 +84,21 @@ function rrtStarPlan(room, parameters, startstate, goalstate, obstaclesList)
     if isPathFound
         pID = goalNode.parentID
         node = []
+        print("The pat was found. the nodeslist is $(length(nodeslist))")
+    @show edgeslist
+
         while true 
+            @show pID
             node = algfxn.findNode(pID, nodeslist)
             pID = node.parentID
             push!(solPath, node)
             if node.id == 0
+                print("reached start node")
                 break
             end
         end
     end
 
-    #@show edgeslist
-    #@show nodeslist
     @show solPath
 
     finalPathCost = algfxn.costPath(solPath) 
