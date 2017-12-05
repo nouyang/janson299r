@@ -11,7 +11,9 @@ Implement `RRT*, FMT*`. Collect data.
 julia> using IJulia; notebook(detached=true, dir=".")
 
 To run a file,
+> plotly()
 > include("testRRTstar.jl")
+> main()
 
 ## Edit
 
@@ -20,10 +22,13 @@ To run a file,
 
 
 # To run data collection
+
 use 
 `clutter_with_errorbars.jl`
 and 
 `walls_experiment.jl`
+
+
 
 
 # Write RRT*
@@ -49,3 +54,7 @@ Probably I should re-organize my code to resemble this.
 Defines Parent and Rewire functions
 <http://personalrobotics.ri.cmu.edu/files/courses/papers/Karaman11-anytimerrtstar.pdf>
 
+
+# Bugs
+
+plotting is broken for RRT

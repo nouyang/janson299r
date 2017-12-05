@@ -78,6 +78,11 @@ module algfxn
     using Distributions
     using algT
 
+    function dist(pt1, pt2)
+        return min_euclidean(Vec(pt1), Vec(pt2)) 
+    end
+                  
+
     function chooseParent(nearestN, newNode,  nodeslist, connectRadius)
         for n in nodeslist
             pt = n.state

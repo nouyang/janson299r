@@ -13,6 +13,7 @@ include("RRT.jl")
 
 
 function main()
+    using algT
 #  runs the PRM once and plots the results.
     startstate = Point(0.,0)
     goalstate = Point(20.,20)
