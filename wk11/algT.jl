@@ -3,18 +3,18 @@ module algT
 
     export Node, Edge, Obstacle, Room, AlgParameters, queueTmp, Graph
 
-    Pt2D{T}  = Point{2, Float64}
+    Pt2D  = Point{2, Float64}
     UNDEF = -999999 #undefined
-    Line2D{T} = LineSegment{Pt2D}
+    Line2D = LineSegment{ Pt2D}
 
     struct Node
         id::Int64
         parentID::Int64
-        state::Pt2D{T}
+        state::Pt2D
         cost::Float64
-        Node(id::Int64, state::Pt2D{T}) = new(id, UNDEF, state, UNDEF) #todo do this with outer constructors?
-        Node(id::Int64, parentID::Int64, state::Pt2D{T}) = new(id, parentID, state, UNDEF)
-        Node(id::Int64, parentID::Int64, state::Pt2D{T}, cost::Float64) = new()
+        Node(id::Int64, state::Pt2D) = new(id, UNDEF, state, UNDEF) #todo do this with outer constructors?
+        Node(id::Int64, parentID::Int64, state::Pt2D) = new(id, parentID, state, UNDEF)
+        Node(id::Int64, parentID::Int64, state::Pt2D, cost::Float64) = new()
 	end
 
     struct Edge

@@ -11,9 +11,8 @@
 include("RRT.jl")
 #plotly()
 
-
+    import algT
 function main()
-    using algT
 #  runs the PRM once and plots the results.
     startstate = Point(0.,0)
     goalstate = Point(20.,20)
@@ -65,4 +64,3 @@ function main()
 #endNode = algT.GraphNode(0, Point(0,0))
 
 end
-

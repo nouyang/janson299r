@@ -93,3 +93,10 @@ include("testRRT.jl")
 plotly()
 main()
 LoadError: LoadError: UndefVarError: AlgParameters not defined
+
+# GUHhhhhhhh
+
+import algT
+algT.Nod
+
+UndefVarError: Node not definede

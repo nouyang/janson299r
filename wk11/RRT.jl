@@ -10,14 +10,9 @@ using DataStructures
 using GeometryTypes 
 using Distributions
 
-using plotfxn
-using algT
-using algfxn
-
-    numSamples = 200
-    connectRadius = 3
-	flagOptimal = false
-    param = algT.AlgParameters(numSamples, connectRadius)
+import plotfxn
+import algT
+import algfxn
 
 # pts are pure Points, nodes have ID information
 function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
