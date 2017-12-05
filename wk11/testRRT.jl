@@ -23,7 +23,7 @@ function main()
     startstate = Point(1.,1)
     goalstate = Point(20.,20)
 
-    numSamples = 5
+    numSamples =100 
     connectRadius = 5
 	flagOptimal = false
     param = algT.AlgParameters(numSamples, connectRadius)
@@ -31,11 +31,11 @@ function main()
     print("\n ---- Running RRT ------\n")
     ## Define obstacles
     obs1 = HyperRectangle(Vec(8,3.), Vec(2,2.)) #Todo
-    #obs2 = HyperRectangle(Vec(4,4.), Vec(2,10.)) #Todo
+    obs2 = HyperRectangle(Vec(4,4.), Vec(2,10.)) #Todo
     obs3 = HyperRectangle(Vec(14,14.), Vec(3,4.)) #Todo
 
     obstacles = Vector{HyperRectangle}()
-    push!(obstacles, obs1, obs3)
+    #push!(obstacles, obs1, obs3)
 
     # Define walls
     walls = Vector{LineSegment}()

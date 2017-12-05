@@ -122,7 +122,7 @@ module algfxn
                 nearestNode = n
             end
         end
-        print("$(nearestNode.state), which is type $typeof(nearestNode), and from $pt")
+        #print("$(nearestNode.state), which is type $(typeof(nearestNode)), and from $pt   ")
         return nearestNode
     end
 

@@ -1,11 +1,8 @@
 ####################################################
  
-#  RRT.jl
+#  RRTstar.jl
 
-#  Implementing PRM and functions for plotting PRM
-#  Parameters incude num samples, connection distance, a list of obstacles, and start and goal states
-#  Graph search implemented is Astar. Edge cost is assumed to be equal to euclidean distance.
-#  To use, call ` include("PRM.jl") ` from any Julia file in the same folder.
+#  Implementing RRTstar 
 #  nouyang 2017
 
 ####################################################
