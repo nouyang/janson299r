@@ -34,7 +34,7 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
     endNode = nothing 
 
     for i in 1:numPts
-            print("\n --- ---------------------- \n")
+            print("\n ------------------------ \n")
         randPt = algfxn.sampleFree(roomWidth, roomHeight, obstacles)
 
         nn = algT.Node(algfxn.nearestN(randPt, nodeslist))
@@ -55,11 +55,18 @@ function rrtPlan(room, parameters, startstate, goalstate, obstaclesList)
         end
     end
 
+
+    ## Collect Paths
     print("\n\n - pathfound $isPathFound - \n\n")
 
     solPath = Vector{algT.Node}()
 
-    goalNode = algT.Node(currID+1, goalstate, endNode.id)
+    # TODO handle this more gracefully
+    if endNode != nothing
+        goalNode = algT.Node(currID+1, goalstate, endNode.id)
+    else
+        goalNode = algT.Node(currID+1, goalstate)
+    end
     push!(solPath, goalNode)
 
     if isPathFound

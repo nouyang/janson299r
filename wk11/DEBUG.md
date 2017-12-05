@@ -169,3 +169,9 @@ Stacktrace:
 # 
 
 ERROR: TypeError: non-boolean (Tuple{Bool,GeometryTypes.Point{2,Float64}}) used in boolean context
+
+
+#
+ I just realized.
+A lot of the issues may have come from differences in how my intersect() code and the library code handles corners,
+e.g. coincident things.

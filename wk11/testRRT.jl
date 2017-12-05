@@ -23,7 +23,7 @@ function main()
     startstate = Point(1.,1)
     goalstate = Point(20.,20)
 
-    numSamples =100 
+    numSamples = 10
     connectRadius = 5
 	flagOptimal = false
     param = algT.AlgParameters(numSamples, connectRadius)
@@ -35,7 +35,7 @@ function main()
     obs3 = HyperRectangle(Vec(14,14.), Vec(3,4.)) #Todo
 
     obstacles = Vector{HyperRectangle}()
-    #push!(obstacles, obs1, obs3)
+    push!(obstacles, obs1, obs3, obs2)
 
     # Define walls
     walls = Vector{LineSegment}()

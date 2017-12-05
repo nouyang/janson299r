@@ -8,13 +8,13 @@ module algT
     Line2D = LineSegment{ Point{2, Float64}}
 
 
-    struct Node
+    mutable struct Node
         id::Int64
         state::Pt2D
         parentID::Int64
         cost::Float64
 
-        Node(id::Int64, state::Pt2D, parentID::Int64 = -999, cost::Float64 = -999.) =
+        Node(id::Int64, state::Pt2D, parentID::Int64 = -999, cost::Float64 = 9999999.) =
             new(id, state, parentID,  cost)
         end
 

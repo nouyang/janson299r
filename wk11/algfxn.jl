@@ -8,7 +8,7 @@ module algfxn
         x1,y1 = pt1[1], pt1[2]
         dist = sqrt( (x1-x2)^2 + (y1-y2)^2 )
         return dist
-#        return min_euclidean(Vec(pt1), Vec(pt2))
+#        return min_euclidean(pt1), pt2)) #TODO fix this
     end
 
     function sampleFree(roomW, roomH, obstacles)
@@ -58,7 +58,6 @@ module algfxn
         push!(lines, lineTop, lineRight, lineBottom, lineLeft)
         return lines
     end
-
 
     function isFreeState(node::Point{2, Float64}, obsList::Vector{HyperRectangle})
         for obs in obsList
@@ -111,7 +110,7 @@ module algfxn
 
     function nearestN(pt::Point{2,Float64}, nodeslist)
         # 
-        # This loops through all nodes  TODO
+        # This loops through all nodes  TODO 
         nearestDist = 99999999;
         nearestNode = [];
 
@@ -150,7 +149,7 @@ module algfxn
     end
 
     function findNode(nodeID, nodeslist)
-        for n in nodeslist
+        for n in nodeslist #TODO I reverted back to looping through alll the nodes; fix this
             if n.id == nodeID 
                 return n
             end
@@ -159,6 +158,73 @@ module algfxn
         #index = findfirst(idlist, nodeID)
         #return nodeslist[index]
     end
+
+
+    ######## RRT* Specific Functions ##########
+
+    function chooseParent(nearestN, newNode,  nodeslist, connectRadius)
+        for n in nodeslist
+            pt = n.state
+            #@show pt
+            #@show newNode
+            #@show connectRadius #Todo! cast int to float
+            #asdf = min_euclidean(pt), newNode.state))
+            #@show asdf
+            #print("type: $(typeof(asdf))")
+            if dist(pt, newNode.state) < connectRadius  && 
+                n.cost + dist(pt, newNode.state) < nearestN.cost + dist(nearestN.state, pt)
+                nearestN = n
+            end
+        end
+        newNode.cost = nearestN.cost + dist(nearestN.state, newNode.state)
+        newNode.parentID = nearestN.id
+        return newNode, nearestN
+    end
+
+    function rewire(nodeslist, edgeslist, newNode, connectRadius, obstacles, walls)
+        for p in nodeslist
+            newEdge = LineSegment( Point(p.state, Point(newNode.state)))
+
+            if ( algfxn.isFreeMotion(newMove, obstacles, walls) &&
+				p.id != newNode.parentID && dist(p.state, newNode.state) < connectRadius &&
+                newNode.cost + dist(p.state, newNode.state) < p.cost )
+                ###terriblecode
+                # remove edge
+
+				i = findfirst(edgeslist) do y
+					y.startID == p.parentID && y.endID == p.id
+				end
+				
+				#@show i
+                #@show length(edgeslist)
+                if i != 0
+                    deleteat!(edgeslist, i)
+                end
+
+                p.parentID = newNode.id
+                p.cost = newNode.cost + min_euclidean(p.state, newNode.state)
+
+                foo = algT.Edge(p.id, newNode.id) 
+
+                # add edge
+				push!(edgeslist,foo)
+            end
+        end
+        return nodeslist, edgeslist
+    end
+    
+    #  function findEdge(startID, endID, edgeslist)
+                #  #removeID = findEdge(p.startID, p.endID)
+        #  for edge in edgeslist 
+            #  if edge.startID == startID && edge.endID == endID
+                #  return edge
+            #  end
+        #  end
+        #  return 0
+    #  end
+   
+
+    ##################
 
 end
 

@@ -22,7 +22,7 @@ function main()
 	flagOptimal = false
     param = algT.AlgParameters(numSamples, connectRadius)
 
-    print("\n ---- Running PRM ------\n")
+    print("\n ---- Running RRT* ------\n")
     ## Define obstacles
     obs1 = HyperRectangle(Vec(8,3.), Vec(2,2.)) #Todo
     obs2 = HyperRectangle(Vec(4,4.), Vec(2,10.)) #Todo
@@ -52,7 +52,7 @@ function main()
 
     timestamp = Base.Dates.now()
     timestamp = Base.Dates.format(timestamp, "dd u yyyy HH:MM:SS")
-    title = " Week 10 RRT [ $timestamp ] \n\n$numSamples samples, connectRadius = $connectRadius, pathcost = $(ceil(pathcost,2))"
+    title = " Week 11 RRT [ $timestamp ] \n\n$numSamples samples, connectRadius = $connectRadius, pathcost = $(ceil(pathcost,2))"
     
     graph = algT.Graph(startstate, goalstate, nodeslist, edgeslist)
     # this is the gold
