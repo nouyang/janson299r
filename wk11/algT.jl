@@ -1,33 +1,31 @@
 module algT
     using GeometryTypes 
 
-    export Node, Edge, Obstacle, Room, AlgParameters, queueTmp, Graph
+    export Node, Edge, Obstacle, Room, AlgParameters, queueTmp, Graph, Pt2D, Line2D, Point
 
     Pt2D  = Point{2, Float64}
     UNDEF = -999999 #undefined
-    Line2D = LineSegment{ Pt2D}
+    Line2D = LineSegment{ Point{2, Float64}}
+
 
     struct Node
         id::Int64
-        parentID::Int64
         state::Pt2D
+        parentID::Int64
         cost::Float64
-        Node(id::Int64, state::Pt2D) = new(id, UNDEF, state, UNDEF) #todo do this with outer constructors?
-        Node(id::Int64, parentID::Int64, state::Pt2D) = new(id, parentID, state, UNDEF)
-        Node(id::Int64, parentID::Int64, state::Pt2D, cost::Float64) = new()
-	end
+
+        Node(id::Int64, state::Pt2D, parentID::Int64 = -999, cost::Float64 = 0.0) =
+            new(id, state, parentID,  cost)
+        end
 
     struct Edge
-        startID::Int64
-        endID::Int64
-        startpt::Pt2D{T}
-        endpt::Pt2D{T}
-        line::Line2D{T}
-        Edge( startID::Int64, endID::Int64) = new(startID, endID, UNDEF, UNDEF, UNDEF)
-        Edge( startID::Int64, endID::Int64) = new(startID, endID, UNDEF, UNDEF, UNDEF)
-        Edge( startpt::Pt2D{T}, endpt::Pt2D{T}) = new( UNDEF, UNDEF, startpt, endpt, UNDEF)
-        Edge( startID::Int64, endID::Int64, startpt::Pt2D{T}, endpt::Pt2D{T}) = Edge( startID, endID, startpt, endpt, UNDEF)
-        Edge( line::Line2D{T} ) = Edge( UNDEF,UNDEF,UNDEF,UNDEF, line)
+        startNode::Node
+        endNode::Node
+        #  startID::Int64
+        #  endID::Int64
+        #  startpt::Pt2D
+        #  endpt::Pt2D
+        #  line::Line2D
     end
 
     struct Obstacle
@@ -54,8 +52,8 @@ module algT
     end
 
     struct Graph
-        startstate::Pt2D{T}
-        goalstate::Pt2d{T}
+        startstate::Pt2D
+        goalstate::Pt2D
         nodeslist::Vector{Node}
         edgeslist::Vector{Edge}
     end

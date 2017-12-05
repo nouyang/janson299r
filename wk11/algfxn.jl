@@ -10,6 +10,7 @@ module algfxn
     function sampleFree(roomW, roomH, obstacles)
         pt_rand = Void
         sampledFree = false
+        
         while !sampledFree
             xrand = rand(Uniform(0, roomW))
             yrand = rand(Uniform(0, roomH))
@@ -24,7 +25,7 @@ module algfxn
     end
 
     function steer(fromPt, toPt, connectRadius)
-        dist = dist(fromPt, toPt)
+        dist = algfxn.dist(fromPt, toPt)
         # If pt_rand is too far from its nearest node, "truncate" it to be closer
         if dist <= connectRadius
             return toPt
@@ -63,37 +64,39 @@ module algfxn
         return false
     end
 
-    function isFreeMotion(line::LineSegment, obsList::Vector{HyperRectangle}, walls::Vector{LineSegment})
-        return (!algfxn.isCollidingObstacles(candidateEdge, obstacles) && !algfxn.isCollidingWalls(candidateEdge, walls))
+    function isFreeMotion(line::LineSegment, obstacles::Vector{HyperRectangle}, walls::Vector{LineSegment})
+        return (!algfxn.isCollidingObstacles(line, obstacles) && !algfxn.isCollidingWalls(line, walls))
     end
 
-        function isCollidingObstacles(line::LineSegment, obsList::Vector{HyperRectangle})
-            for obs in obsList
-                rectLines = decompRect(obs)
-                for rectline in rectLines
-                    if intersects(line, rectline)[1]
-                        return true
-                    end
-                end
-            end
-            return false
-        end
-
-        function isCollidingWalls(line::LineSegment, walls::Vector{LineSegment})
-            for wall in walls
-                if intersects(line, wall)
+    #helper1
+    function isCollidingObstacles(line::LineSegment, obstacles::Vector{HyperRectangle})
+        for obs in obstacles 
+            rectLines = decompRect(obs)
+            for rectline in rectLines
+                if intersects(line, rectline)[1]
                     return true
                 end
             end
-            return false
         end
+        return false
+    end
+
+    #helper2
+    function isCollidingWalls(line::LineSegment, walls::Vector{LineSegment})
+        for wall in walls
+            if intersects(line, wall)[1]
+                return true
+            end
+        end
+        return false
+    end
 
     function findNearestNodes(nodestate, nodeslist, maxDist)
         # given maxDist, return all nodes within that distance of node
         # list is NOT sorted by distance
         nearestNodes = Vector{Tuple{algT.TreeNode, Float64}}()
         for n in nodeslist
-            dist = dist(nodestate, n.state)
+            dist = algfxn.dist(nodestate, n.state)
             if dist < maxDist 
                 push!(nearestNodes, (n, dist))
             end
@@ -108,7 +111,7 @@ module algfxn
         nearestNode = Void;
 
         for n in nodeslist
-            dist = dist(pt, n.state)
+            dist = algfxn.dist(pt, n.state)
             if dist < nearestDist
                 nearestDist = dist
                 nearestNode = n
@@ -121,7 +124,7 @@ module algfxn
         if pt == pt_goal
             return true
         else 
-            dist = dist(pt, pt_goal)
+            dist = algfxn.dist(pt, pt_goal)
             if dist <= 3 #HARDCODED REGION #TODO
                 return true
             end
@@ -135,7 +138,7 @@ module algfxn
         for i in 2:length(solPath)
             curN  = solPath[i].state
             prevN = solPath[i-1].state
-            pathcost += dist(curN, prevN)
+            pathcost += algfxn.dist(curN, prevN)
         end
         return pathcost
     end

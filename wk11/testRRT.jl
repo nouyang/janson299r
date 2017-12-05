@@ -11,7 +11,13 @@
 include("RRT.jl")
 #plotly()
 
-    import algT
+using GeometryTypes 
+using Distributions
+
+using plotfxn
+using algT
+using algfxn
+
 function main()
 #  runs the PRM once and plots the results.
     startstate = Point(0.,0)
