@@ -14,7 +14,7 @@ module algT
         parentID::Int64
         cost::Float64
 
-        Node(id::Int64, state::Pt2D, parentID::Int64 = -999, cost::Float64 = 0.0) =
+        Node(id::Int64, state::Pt2D, parentID::Int64 = -999, cost::Float64 = -999.) =
             new(id, state, parentID,  cost)
         end
 

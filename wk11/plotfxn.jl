@@ -75,6 +75,7 @@ module plotfxn
         startstate, goalstate, nodeslist, edgeslist = graph.startstate, graph.goalstate, graph.nodeslist, graph.edgeslist
 
         x = [n.state[1] for n in nodeslist]
+        @show x
         y = [n.state[2] for n in nodeslist]
         scatter!(roomPlot, x,y, color=:black) 
 

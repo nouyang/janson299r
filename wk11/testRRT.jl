@@ -23,8 +23,8 @@ function main()
     startstate = Point(1.,1)
     goalstate = Point(20.,20)
 
-    numSamples =3 
-    connectRadius = 10
+    numSamples = 5
+    connectRadius = 8
 	flagOptimal = false
     param = algT.AlgParameters(numSamples, connectRadius)
 

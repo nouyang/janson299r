@@ -25,6 +25,7 @@ module algfxn
     end
 
     function steer(fromPt, toPt, connectRadius)
+        @show fromPt
         dist = algfxn.dist(fromPt, toPt)
         # If pt_rand is too far from its nearest node, "truncate" it to be closer
         if dist <= connectRadius
@@ -58,10 +59,10 @@ module algfxn
     function isFreeState(node::Point{2, Float64}, obsList::Vector{HyperRectangle})
         for obs in obsList
             if contains(obs, node)
-                return true
+                return false
             end
         end
-        return false
+        return true
     end
 
     function isFreeMotion(line::LineSegment, obstacles::Vector{HyperRectangle}, walls::Vector{LineSegment})
