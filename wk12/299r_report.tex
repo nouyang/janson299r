@@ -21,24 +21,40 @@
 \setlength{\parskip}{\baselineskip}%
 \setlength{\parindent}{0pt}%
 
-\title{CS283 Fall 2017 Final Project}
+\title{299r Fall 2017: Sampling Based Motion Planning Algorithms}
 \author{Nao Ouyang}
 
 \begin{document}
 \maketitle
 
-\begin{abstract} plicate their results.
+\begin{abstract} 
 
 \end{abstract}
 
 \section{Introduction}
-According to this paper, motion segmentation is the problem of determining which
+
+This paper covers the work I did for my research rotation with
+Professor Lucas Janson in Fall of 2017. The rotation focused around
+sampling-based motion planning algorithms which are frequently used in
+robotics (my area of interest). 
+
+The rotation can be roughly divided into three main components:
+1. Understanding the algorithms
+2. Understanding the proofs of the algorithmic properties
+3. Computer simulations of the algorithms 
 
 
-\section{Motivation}
+The specific algorithms covered include:
+1. RRT and it's optimal variant, RRT*
+2. PRM and it's simplified variant, sPRM
+3. FMT*
 
-In the decade before this paper, people did a lot of work with static scenes
-where the camera moved. However, there was not as much work done eon dynamic
+Finally, I'll write a section reflecting on my experiences this semester.
+
+\section{Algorithms}
+
+
+
 \section{Methods}
 
 
@@ -97,7 +113,7 @@ is written in terms of rotations and translations as A $\in \mathbb{R}^{2 \times
 
  \begin{figure}
      \centering
-     \includegraphics[width=0.3\textwidth]{./pca.png}
+     % \includegraphics[width=0.3\textwidth]{./pca.png}
      \caption{If we imagine the blobs as clouds of points in 3D
      (so imagine them going at some angle through space), the  problem with picking a single subspace
      is that the data lies more naturalies in two subspaces, e.g. the two lines
@@ -118,7 +134,7 @@ is written in terms of rotations and translations as A $\in \mathbb{R}^{2 \times
 
  \begin{figure}
      \centering
-     \includegraphics[width=0.3\textwidth]{./polysubspace.png}
+     % \includegraphics[width=0.3\textwidth]{./polysubspace.png}
      \caption{Here the intersection, or combined zero-set, of two 3D planes are
      used to define a line (2D subspace) in $\mathbb{R}^3$.}
  \end{figure}
