@@ -1,0 +1,184 @@
+\documentclass[a4paper]{article}
+
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{url}
+\usepackage{listings}
+\PassOptionsToPackage{hyphens}{url} 
+
+\setlength{\parskip}{\baselineskip}%
+\setlength{\parindent}{0pt}%
+
+\title{CS283 Fall 2017 Final Project}
+\author{Nao Ouyang}
+
+\begin{document}
+\maketitle
+
+\begin{abstract} plicate their results.
+
+\end{abstract}
+
+\section{Introduction}
+According to this paper, motion segmentation is the problem of determining which
+
+
+\section{Motivation}
+
+In the decade before this paper, people did a lot of work with static scenes
+where the camera moved. However, there was not as much work done eon dynamic
+\section{Methods}
+
+
+\subsection{Problem Formulation}
+
+\newcommand{\matx}[1]{\mbox{\tt #1}}
+\newcommand{\vect}[1]{{\bf #1}}
+
+\begin{itemize}
+\item n = number of objects aka independent motions aka subspaces
+\item P = number of $(x, y)$ point correspondences
+\item F = number of frames
+\end{itemize}
+
+Let us stack all the frames vertically so that we get a matrix W
+
+$$W = MS^T$$
+
+where M is motion matrix
+$\in \mathbb{R}^{2F \time 4}$
+and where $S$ is shape matrix (point correspondences).
+
+Additionally, we have the world coordinates (x,y,z) as
+
+\begin{equation}
+X =
+\begin{bmatrix}
+    x \\
+    y \\
+    z \\
+    1 \\
+\end{bmatrix}
+\end{equation}
+
+
+\begin{equation}
+x =
+\begin{bmatrix}
+    x \\
+    y \\
+\end{bmatrix}
+\end{equation}
+
+
+
+The affine camera matrix translating between a given world and image coordinate
+is written in terms of rotations and translations as A $\in \mathbb{R}^{2 \times 4}$
+
+\begin{equation}
+\vect A = 
+\begin{bmatrix}
+    R1 && R2 && R3 && T1 \\
+    R3 && R4 && R5 && T2 \\ 
+\end{bmatrix}
+\end{equation}
+
+ \begin{figure}
+     \centering
+     \includegraphics[width=0.3\textwidth]{./pca.png}
+     \caption{If we imagine the blobs as clouds of points in 3D
+     (so imagine them going at some angle through space), the  problem with picking a single subspace
+     is that the data lies more naturalies in two subspaces, e.g. the two lines
+     going through the gray and dark gray clusters.}
+ \end{figure}
+
+\subsubsection{Representing motion subspaces with polynomials}
+
+ The gist of this section is that, if all n subspaces (each representing one
+ object) have dimension 4 in $\mathbb{R}^5$, then a single linear polynomial of
+ degree 5 is enough to represent them. To see this, consider that a plane may be
+ represented by a linear polynomial of three variables, $ax+by+cz = 0$. Then, we
+ can fit a polynomial defined as the product of the n planes, which will have at
+ most degree n and have three variables. We can also describe lower dimension
+ subsubspaces as a the "common zero set" of multiple hyperplanes. For instance,
+ a line can be described as the intersection of two hyperplanes. 
+
+
+ \begin{figure}
+     \centering
+     \includegraphics[width=0.3\textwidth]{./polysubspace.png}
+     \caption{Here the intersection, or combined zero-set, of two 3D planes are
+     used to define a line (2D subspace) in $\mathbb{R}^3$.}
+ \end{figure}
+
+ \textit{Aside: an algebraic variety is roughly like a "shape" that fits the
+ points. Here we are saying that if this polynomial "shape" fits all the
+ datapoints in n subspaces,
+ then we should be able to factor the algebraic variety nto n polynomials.  Co-dimension means the number of dimensions not occupied by a subspace, e.g. a subspace of dimension 4 in 5 dimensional space has a co-dimension of 1. }
+ % TODO: zero set
+\section{Results}
+
+I used the dataset Hopkins 155 provided by JHU. It is available at http://www.vision.jhu.edu/data/.
+
+I created a MATLAB file which plots the datapoints in the .mat files against the
+video. This file may be found as . In order to run
+
+My code appeared to have an error rate of 35\% for the 'arm' dataset in Pt 6 of
+Hokins 155. This was unfortunately much larger than the reported 5\% error for
+most of the datasets.
+
+I did not get around to plotting the points by color onto the video to debug
+what was going on.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Conclusion}
+
+Powerfactorization was not implemented, and the code appears to still have
+issues. To Debug, I should assign colors to my labels and check what might be
+causes of the issue.
+Future work includes playing around with RANSAC with outliers.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{References}
+
+ 
+R. Vidal and R. Hartley, "Motion segmentation with missing data using
+PowerFactorization and GPCA," Proceedings of the 2004 IEEE Computer Society
+Conference on Computer Vision and Pattern Recognition, 2004. CVPR 2004., doi:
+10.1109/CVPR.2004.1315180.
+\href{http://vision.jhu.edu/assets/VidalCVPR04.pdf}{Paper link}
+
+\bigskip
+
+\noindent 
+Hartley R.I. and Tron, R., \& Vidal, R. (2007). Multiframe Motion Segmentation
+with Missing Data Using PowerFactorization and GPCA. International Journal of
+Computer Vision, 79, 85-105. doi: 10.1007/s11263-007-0099-z.
+\href{https://pdfs.semanticscholar.org/322b/3feffe79585c112c6a0d86c05909634ac7c5.pdf}{Paper
+link}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%http://cs229.stanford.edu/notes/cs229-notes10.pdf (PCA)
+
+
+%PCA (Andrew Ng)
+%https://www.youtube.com/watch?v=T-B8muDvzu0&index=83&list=PLLssT5z_DsK-h9vYZkQkYNWcItqhlRJLN
+
+
+%https://link-springer-com.ezp-prod1.hul.harvard.edu/book/10.1007%2F978-0-387-87811-9#about
+\end{document}
+
