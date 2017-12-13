@@ -483,7 +483,7 @@ end
     end
 
     function findNode(id, nodeslist)
-        for n in nodeslist
+        for n in nodesjlist
             #TODO: switch nodeslist to use an array, where indice is the ID...
             #this was a really dumb implementation, making a "loop" find
             #instead of taking advantage of fast lookup libraries
