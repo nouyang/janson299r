@@ -22,13 +22,16 @@ gr()
 
 
 ## PARAMETERS
-connectRadius = 8
-targetNumObs = 5
-clutterPercentage = 0.2
+numSamples = 500 
+connectRadius = 2 
+param = algT.AlgParameters(numSamples, connectRadius)
+
+targetNumObs = 3
+clutterPercentage = 0.15
 roomWidth,roomHeight  = 20,20
 
-startstate = Point(1.,1)
-goalstate = Point(20.,20)
+startstate = Point(4.,4)
+goalstate = Point(15.,15)
 
 
 
@@ -82,15 +85,10 @@ r = algT.Room(roomWidth,roomHeight,walls,obstacles)
 plotfxn.plotRoom(r)
 
 ## Run preprocessing
-numSamples = 25
-connectRadius =10 
-param = algT.AlgParameters(numSamples, connectRadius)
 nodeslist, edgeslist = preprocessPRM(r, param)
 print("\n ---- pre-processed --- \n")
 
 ## Query created RM
-startstate = Point(1.,1)
-goalstate = Point(18.,18)
 
 pathcost, isPathFound, solPath = queryPRM(startstate, goalstate, nodeslist, edgeslist, obstacles)
 print("\n ---- queried ---- \n")
@@ -117,3 +115,32 @@ print("\n -------- \n")
 
 
 # todo: save one "representative" figure from each run
+
+
+@show listCosts
+@show listpSucc
+sizeplot = (800, 800)
+
+# sanity check
+plot()
+
+
+supTitle="\nPRM with maxDist=$connectRadius, nTrials=$nTrials.
+        (time to run:$timeExperiment, timestamp=$timestamp)\n\n"
+costTitle= "numsamples vs pathcost\n"
+
+pPRMcost = scatter(nSamples_list, listCosts',
+    color=:black,
+    title = supTitle * costTitle, ylabel = "euclidean path cost", xlabel = "numsamples",
+    yaxis=((0,100), 0:20:100))
+
+successTitle = "\nnumsamples vs pSuccess\n"
+pPRMsuccess = scatter(nSamples_list, listpSucc',
+    color = :orange, markersize= 6, 
+    title = successTitle, ylabel = ("P(success)=numSucc/$nTrials trials"), xlabel = "numsamples",
+    yaxis=((0, 1.2), 0:0.1:1))
+
+plot(pPRMcost, pPRMsuccess, layout=(2,1), legend=false,
+    xaxis=((0, 320), 0:50:300),
+    size = sizeplot, sizeplot = (800, 800))
+
