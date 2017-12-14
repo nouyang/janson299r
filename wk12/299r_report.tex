@@ -394,6 +394,14 @@ The idea is to shrink the size of the balls so that the cost approaches
 
 I will probably write this up next, there is a lot of interesting translations
     into english that I learned.
+ 
+ 
+\begin{figure} \centering
+    \includegraphics[width=0.7\textwidth]{FMTball.png}
+     \caption{FMT ball diagram} 
+ \end{figure}
+ 
+
 
 \subsection{AO}
 
@@ -432,8 +440,62 @@ In general, what we care about is determined by real life use cases.
     complexity. Demonstrating can be used on actual robot.
 
     E.g. num samples vs (failure rate and pathcost
-{\%clutter vs (pathcost and feasibility)
 
+\subsection{number samples vs path cost, averaged with error bars, ideally for each of the algs  }
+
+TODO: discuss expectations about the graphs for each , and the graphs for algs
+compared to each other 
+
+\begin{figure} \centering
+    \includegraphics[width=0.5\textwidth]{./RRT_n_pathcost_pSuccess.png}
+     \caption{RRT} 
+ \end{figure}
+
+\begin{figure} \centering
+    \includegraphics[width=0.5\textwidth]{./PRMn_vs_feasibility_errorbars.png}
+     \caption{PRM} 
+ \end{figure}
+
+\subsection{ clutter vs pathcost }
+
+\begin{figure} \centering
+    \includegraphics[width=0.5\textwidth]{./PRMcostclutter.png}
+     \caption{PRM} 
+ \end{figure}
+
+
+\subsection{  bugtrap }
+
+\begin{figure} \centering
+    \includegraphics[width=0.5\textwidth]{./PRM_bugtrap_widedoor.png}
+     \caption{bugtrap widedoor} 
+ \end{figure}
+
+\begin{figure} \centering
+    \includegraphics[width=0.5\textwidth]{./PRM_bugtrap.png}
+     \caption{some caption} 
+ \end{figure}
+
+
+\begin{figure} \centering
+    \includegraphics[width=0.5\textwidth]{./PRM_bugtrap_needObsFeasibilityCheck.png}
+     \caption{PRM\_bugtrap\_needObsFeasibilityCheck.png} 
+ \end{figure}
+
+
+ 
+ 
+ 
+ 
+\begin{figure} \centering
+    \includegraphics[width=0.5\textwidth]{PRM_bugtrap_doorsize_pSuccess.png}
+     \caption{PRM\_bugtrap\PRM\_doorsize\_pSuccess.png} 
+ \end{figure}
+ 
+ 
+ 
+ 
+ 
     \subsection{Implementation Details}
 
     Modularity: Roadmap vs Graph Search vs Plotting individual (and possibly
@@ -459,6 +521,14 @@ In general, what we care about is determined by real life use cases.
     programming gods)} And then discuss pros and cons of Julia and warn people about / away from it.
 
     \subsection{Debugging Protips}
+
+ 
+ 
+\begin{figure} \centering
+    \includegraphics[width=0.5\textwidth]{./PRM_manysamples.png}
+     \caption{prm many samples}
+ \end{figure}
+
 
     Trees should not be graphs (no cyclic components)
 
