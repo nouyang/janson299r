@@ -62,8 +62,6 @@ to have a high probability of finding a feasible path (if it exists), including
 in terms of how fast this probability changes as (for instance) a function of
 the number of samples.
 
-\subsection{Problem Formulation}
-
 Although here we will present 2D (xy) examples of the algorithms where the robot
 is a point, these algorithms can be applied to any dimensions. For instance, we
 can imagine the dimensions for a multirotor might include x,y,z and also roll,
@@ -73,6 +71,8 @@ the proofs, one will encounter a $^{1/n}$ exponent where, for instance, the
 convergence of a solution will slow down drastically the number of dimensions
 increases.
 
+\subsection{How people represent these problems}
+
 In all of these algorithms, we have a perfect map of the environment and can
 check for node and edge collsions. Addititionally, we have a goal region rather
 than a point goal, as the probability of sampling exactly the goal node is
@@ -80,7 +80,7 @@ essentially zero.
 
 \section{Algorithms}
 
-Both PRM and RRT algorithms are very straightforward, requiring less than 10
+Both PRM and RRT algorithms are straightforward, requiring less than 10
 lines of pseudocode each \footnote{Psuedocode as written in that "algorithm"
 format all CS papers seem to use, with the $\gets$ signs.} 
 
@@ -341,50 +341,6 @@ $|W|$)}
 
 \section{Numerical Studies}
 
-\newcommand{\matx}[1]{\mbox{\tt #1}} \newcommand{\vect}[1]{{\bf #1}}
-
-\begin{itemize} \item n = number of objects aka independent motions aka subspaces \item P = number of $(x, y)$ point correspondences \item F = number
-of frames \end{itemize}
-
-Let us stack all the frames vertically so that we get a matrix W
-
-$$W = MS^T$$
-
-where M is motion matrix $\in \mathbb{R}^{2F \time 4}$ and where $S$ is shape matrix (point correspondences).
-
-Additionally, we have the world coordinates (x,y,z) as
-
-\begin{equation} X = \begin{bmatrix} x \\ y \\ z \\ 1 \\ \end{bmatrix} \end{equation}
-
-\begin{equation} x = \begin{bmatrix} x \\ y \\ \end{bmatrix} \end{equation}
-
-The affine camera matrix translating between a given world and image coordinate is written in terms of rotations and translations as A $\in
-\mathbb{R}^{2 \times 4}$
-
-\begin{equation} \vect A = \begin{bmatrix} R1 && R2 && R3 && T1 \\ R3 && R4 && R5 && T2 \\ \end{bmatrix} \end{equation}
-
- \begin{figure} \centering
-     % \includegraphics[width=0.3\textwidth]{./pca.png}
-     \caption{If we imagine the blobs as clouds of points in 3D (so imagine them going at some angle through space), the  problem with picking a
- single subspace is that the data lies more naturalies in two subspaces, e.g. the two lines going through the gray and dark gray clusters.}
- \end{figure}
-
-\subsubsection{Representing motion subspaces with polynomials}
-
- The gist of this section is that, if all n subspaces (each representing one object) have dimension 4 in $\mathbb{R}^5$, then a single linear
- polynomial of degree 5 is enough to represent them. To see this, consider that a plane may be represented by a linear polynomial of three variables,
- $ax+by+cz = 0$. Then, we can fit a polynomial defined as the product of the n planes, which will have at most degree n and have three variables. We
- can also describe lower dimension subsubspaces as a the "common zero set" of multiple hyperplanes. For instance, a line can be described as the
- intersection of two hyperplanes. 
-
- \begin{figure} \centering
-     % \includegraphics[width=0.3\textwidth]{./polysubspace.png}
-     \caption{Here the intersection, or combined zero-set, of two 3D planes are used to define a line (2D subspace) in $\mathbb{R}^3$.} \end{figure}
-
- \textit{Aside: an algebraic variety is roughly like a "shape" that fits the points. Here we are saying that if this polynomial "shape" fits all the
- datapoints in n subspaces, then we should be able to factor the algebraic variety nto n polynomials.  Co-dimension means the number of dimensions not
- occupied by a subspace, e.g. a subspace of dimension 4 in 5 dimensional space has a co-dimension of 1. }
- % TODO: zero set
 \section{Results}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -410,11 +366,11 @@ accomplish.
 
 \section{Reflection}
 
-This rotation was super cool to me, I've never worked through a proof before. I
+This rotation was very enjoyable, I've never worked through a proof before. I
 feel less intimidated by algorithmic notation and proofs now that I have a
 better idea what they are. In that sense, forcing myself to work through this
 rotation helped me out a lot. I also hadn't thought math was fun since middle
-school, so it was really cool to hang out with math majors who were really
+school, so it was really nice to hang out with math majors who were really
 enthusiastic about math. Hopefully this feeling will keep me going when I take
 math courses and have to do graded things.
 
@@ -451,22 +407,21 @@ Math is so cool!
 
 \section{Thanks}
 
-People who have helped me understand things:
+People who have helped me understand math / Julia:
 
-Eric Lu
-Ambarish
-Irina
+\begin{itemize}
+    \item Irina Tolkova
+    \item Eric Lu 
+    \item Ambarish Chattopadhyay
+    \item Robin Deits
+    \item Misc. patient strangers online who dealt with my deep incoherent
+        frustration... I will look their names up later 
+\end{itemize}
 
-I'm of course very thankful to my advisor for patiently explaining lots of
-things to me, in a way that made sense, and also for writing numerous
-recommmendation letters.
-
-Great source of procrastination: Numberphile
--1/12
-
-
-
-
+Thanks to my advisor Lucas Janson for sparing an hour a week to patiently trying
+to explain things to me in a way that made sense to me, for writing
+numerous recommmendation letters, dealing with my continual work tardiness, and
+helping me figure out what I want to do in terms of research.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -474,21 +429,27 @@ Great source of procrastination: Numberphile
 
 \begin{thebibliography}{1}
 
-\bibitem{PRM} Analysis of Probabilistic Roadmaps for Path Planning {\em Readings compiled for History
-21.479.}  1991.
+\bibitem{PRM} 
+        LaValle, S. M. (1998). Rapidly-exploring random trees: A new tool for
+        path planning.
+        \href{http://bloom.personalrobotics.ri.cmu.edu/files/courses/papers/Kavraki98-prm.pdf}{Paper link} 
 
+\bibitem{RRT*} 
+        Karaman, S., & Frazzoli, E. (2011). Sampling-based algorithms for
+        optimal motion planning. The international journal of robotics research,
+        30(7), 846-894.
+        \href{https://arxiv.org/pdf/1105.1186}{PDF link}
 
-\bibitem{RRT*} {\em Readings compiled for History
-21.479.} 2011.
 
 \bibitem{FMT*} Fast Marching Tree {\em Imperial Japan 1800-1945} 2015.
+    Janson, L., Schmerling, E., Clark, A., & Pavone, M. (2015). Fast marching
+        tree: A fast marching sampling-based method for optimal motion planning
+        in many dimensions. The International journal of robotics research,
+        34(7), 883-921.
+        \href{http://journals.sagepub.com/doi/10.1177/0278364915577958}{Article
+        DOI link} 
+        \href{ https://arxiv.org/pdf/1306.3532.pdf}{PDF link}
 
-\bibitem{norman} E. H. Norman {\em Japan's emergence as a modern
-state} 1940: International Secretariat, Institute of Pacific
-Relations.
-
-\bibitem{fo} Bob Tadashi Wakabayashi {\em Anti-Foreignism and Western
-Learning in Early-Modern Japan} 1986: Harvard University Press.
 
 \end{thebibliography}
 
