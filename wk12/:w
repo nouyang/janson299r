@@ -1,0 +1,366 @@
+\documentclass[a4paper]{article}
+
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{url}
+\usepackage{listings}
+\PassOptionsToPackage{hyphens}{url} 
+
+%\setlength{\parindent}{0pt}%
+
+\title{Sampling Based Motion Planning Algorithms}
+\author{299r Fall 2017 by Nao Ouyang}
+
+\begin{document}
+\maketitle
+
+\begin{abstract} 
+This paper covers the work I did for my research rotation with Professor Lucas
+Janson in Fall of 2017. The rotation focused around sampling-based motion
+planning algorithms which are frequently used in robotics (my area of
+interest).  The rotation can be roughly divided into three main components: 1.
+Understanding the algorithms 2. Understanding the proofs of the algorithmic
+properties 3. Computer simulations of the algorithms. The specific algorithms
+covered include: 1. RRT and it's optimal variant, RRT* 2. PRM and it's
+simplified variant, sPRM 3. FMT* Finally, I'll write a section reflecting on my
+experiences this semester.
+
+\end{abstract}
+
+\section{Introduction}
+
+The goal of sampling-based algorithms is to reduce high-dimensionality
+problems, which in practicality cannot be solved exactly, to something
+manageable by sampling randomly within the space to find paths.
+
+The two foundational algorithms are Rapidly Exploring Random Trees, aka RRT;
+and Probabilistic Roadmaps, aka PRM. The first is used for on-line path
+planning, as it rapidly converges to a feasible path with increasing number of
+samples. On the other hand, probabilistic roadmaps make a graph covering the
+space. This graph can be reused for multiple start and goal locations, whereas
+the RRT algorithm generates a path for a specific pair of start and end points.
+
+Generally proofs cover the feasibility, optimality, and computational complexity
+of the different algorithms. Researchers seek to charaterize properities that
+help determine how many samples might be required to cover a space well enough
+to have a high probability of finding a feasible path (if it exists), including
+in terms of how fast this probability changes as (for instance) a function of
+the number of samples.
+
+\subsection{Problem Formulation}
+
+Although here we will present 2D (xy) examples of the algorithms where the robot
+is a point, these algorithms can be applied to any dimensions. For instance, we
+can imagine the dimensions for a multirotor might include x,y,z and also roll,
+pitch, and yaw of the copter. However, as the number of dimensions we must sample in
+increases, we encounter what is called the "curse of dimensionality". In many of
+the proofs, one will encounter a $^{1/n}$ exponent where, for instance, the
+convergence of a solution will slow down drastically the number of dimensions
+increases.
+
+In all of these algorithms, we have a perfect map of the environment and can
+check for node and edge collsions. Addititionally, we have a goal region rather
+than a point goal, as the probability of sampling exactly the goal node is
+essentially zero.
+
+\section{Algorithms}
+
+Both PRM and RRT algorithms are very straightforward, requiring less than 10
+lines of pseudocode each \footnote{Psuedocode as written in that "algorithm"
+format all CS papers seem to use, with the $\gets$ signs.} 
+
+The pseudocode for the algorithms may be found in \cite{RRT*}. Here I will
+attempt a more casual description. 
+
+%%% TODO: go over all the symbols used %%%
+
+\subsection{PRM}
+
+We have two variables we control: the number of samples we use, which is
+pre-determined, and also the connection radius. In later cases we will write
+this connection radius as a function of the number of samples used in a
+given run. 
+
+The general idea of PRM is to sample uniformly over the free space (generally,
+we actually *close* to uniformly by sampling over the entire space, collision
+checking, and throwing out colliding nodes). We then have a "local planner"
+which connects each point to its neighbors. Two commonly used methods are
+"k-nearest", in which points are connected to its k nearest neighbors; and
+otherwise by a distance threshold. (for the purposes of this report, we will
+work in metric space, where the triangle inequality holds, and use Euclidean
+distance as the distance metric). If we sample enough points, according to percolation
+theory, we will end up with a well-connected graph (as opposed to isolated
+clusters).
+
+Finally, when given a specific set of start and end points, we can use any
+standard graph search algorithm, such as A*, to find a path in the graph between
+the start and end points.
+
+Simplified PRM, or sPRM, differs only in that connections between vertices in
+already connected components are allowed. This makes the implementation easier.
+In the original PRM, these connections were avoided as they do not contribute as
+much to the connectivity of the graph.
+
+\subsection{RRT}
+
+In RRT, we build a tree instead of a graph. This tree grows from the start node
+and terminates when it connects to the goal node. Whereas in PRM where we sample
+all the points at once and then run a local planner and finally a graph search,
+in RRT we teratively randomly sample a point in space. In this way RRT is more
+suitable for online applications, where we care more about finding a solution
+fast than have a good coverage of the entire space.
+
+We first include the starting point in the tree. Then, we randomly sample a
+point in free space, and then connect it to the nearest node in the tree. If the
+neighbor is outside the connection radius, then we "steer" (or take a step of
+distance $r$ from the neighbor to the sample), and add that closer node to the tree
+(instead of the original sampled point). Of course, the edge we add must be
+collision free. 
+
+Of note, randomly sampling in the entire space is preferable to, for instance,
+sampling random control inputs from the existing tree. In the latter case, new
+points will tend to cluster around existing points. With sampling across all of
+free space, points will tend to land in unexplored space (since the unexplored
+space will be of greater area than the explored space, thus the probability of
+sampling in unexplored space is bigger). Voronoi diagrams can help visaulize
+this effect of random sampling. 
+
+%% todo add picture of voronoi diagrams
+
+\subsection{PRM*}
+
+In order to guarantee that PRM will be asymptotically optimal, we simply define
+a lower limit on the connection radius as a function of the number of samples.
+
+\subsection{RRT*}
+
+An unfortunate downside of RRT is that, because it stops growing the tree as
+soon as it reaches the goal node, it is likely to return a suboptimal route. In
+fact, it can be proven that as $\lim_{n\to \infty}$, RRT is \textbf{guaranteed} to return a suboptimal path. 
+
+In order to guarantee that RRT will return an optimal path as $\lim_{n\to
+\infty}$, we must introduce a "rewire" function. For each point we put down, we
+will rewire it and its neighbors to make sure that the each point in the tree is
+reached with least cost (all paths are "shortest paths"). Rewiring involves
+removing an edge and replacing it with another edge. Additionally, as the number
+of nodes we have sampled increases, we decrease the connection radius (as a
+function of n).
+
+This rewiring step is done for two conditions.
+
+Specifically, when we add a node, we check that the edge to its nearest neighbor
+in the tree is collision-free (that is, we check that the node can be added to
+the tree at all). After that, we consider the edges to all points within a
+radius of the new point. If one of edges results in a lower path cost (where
+path cost is defined starting from the origin) than the edge we just created, we
+erase the first edge and add in the latter. 
+
+After that, we try all the edges to neighbors in distance r from the new point,
+and if that new path to the neighboring edge results in a smaller cost than the
+current path to the neighboring edge (from the origin), then we deleted the
+parent and add in the edge connecting $x_new$ to the neighbor.
+
+%% Todo: image of example of rewiring step's two cases
+
+\subsection{FMT* (Fast Marching Tree)}
+
+This algorithm works some black magic which I assume is inspired by or building
+on some other method, because otherwise it's a pretty weird combo of things to come up with
+and then have great faith to put effort into proving its optimality. \footnote{Actually,
+how does that work? That sounds incredibly risky (sinking time into a proof of a
+property that may or may not exist) and/or a very in-the-dark way
+of finding new algorithms (come up with some idea and run simulations to see if
+its likely to have asymptoptic optimality?}
+
+The algorithm proceeds roughly (ignoring set considerations) as follows:
+Similar to PRM, we sample all n points at once. Then, we begin the tree at the start
+point. From there, we find the lowest cost node, say z. Then find \textbf{z's}
+neigbors, which we might denote y = neighbors(z, r). We look from G
+
+\section{Methods}
+
+\subsection{Problem Formulation}
+
+\newcommand{\matx}[1]{\mbox{\tt #1}} \newcommand{\vect}[1]{{\bf #1}}
+
+\begin{itemize} \item n = number of objects aka independent motions aka subspaces \item P = number of $(x, y)$ point correspondences \item F = number
+of frames \end{itemize}
+
+Let us stack all the frames vertically so that we get a matrix W
+
+$$W = MS^T$$
+
+where M is motion matrix $\in \mathbb{R}^{2F \time 4}$ and where $S$ is shape matrix (point correspondences).
+
+Additionally, we have the world coordinates (x,y,z) as
+
+\begin{equation} X = \begin{bmatrix} x \\ y \\ z \\ 1 \\ \end{bmatrix} \end{equation}
+
+
+\begin{equation} x = \begin{bmatrix} x \\ y \\ \end{bmatrix} \end{equation}
+
+
+
+The affine camera matrix translating between a given world and image coordinate is written in terms of rotations and translations as A $\in
+\mathbb{R}^{2 \times 4}$
+
+\begin{equation} \vect A = \begin{bmatrix} R1 && R2 && R3 && T1 \\ R3 && R4 && R5 && T2 \\ \end{bmatrix} \end{equation}
+
+ \begin{figure} \centering
+     % \includegraphics[width=0.3\textwidth]{./pca.png}
+     \caption{If we imagine the blobs as clouds of points in 3D (so imagine them going at some angle through space), the  problem with picking a
+ single subspace is that the data lies more naturalies in two subspaces, e.g. the two lines going through the gray and dark gray clusters.}
+ \end{figure}
+
+\subsubsection{Representing motion subspaces with polynomials}
+
+ The gist of this section is that, if all n subspaces (each representing one object) have dimension 4 in $\mathbb{R}^5$, then a single linear
+ polynomial of degree 5 is enough to represent them. To see this, consider that a plane may be represented by a linear polynomial of three variables,
+ $ax+by+cz = 0$. Then, we can fit a polynomial defined as the product of the n planes, which will have at most degree n and have three variables. We
+ can also describe lower dimension subsubspaces as a the "common zero set" of multiple hyperplanes. For instance, a line can be described as the
+ intersection of two hyperplanes. 
+
+ \begin{figure} \centering
+     % \includegraphics[width=0.3\textwidth]{./polysubspace.png}
+     \caption{Here the intersection, or combined zero-set, of two 3D planes are used to define a line (2D subspace) in $\mathbb{R}^3$.} \end{figure}
+
+ \textit{Aside: an algebraic variety is roughly like a "shape" that fits the points. Here we are saying that if this polynomial "shape" fits all the
+ datapoints in n subspaces, then we should be able to factor the algebraic variety nto n polynomials.  Co-dimension means the number of dimensions not
+ occupied by a subspace, e.g. a subspace of dimension 4 in 5 dimensional space has a co-dimension of 1. }
+ % TODO: zero set
+\section{Results}
+
+I used the dataset Hopkins 155 provided by JHU. It is available at http://www.vision.jhu.edu/data/.
+
+I created a MATLAB file which plots the datapoints in the .mat files against the video. This file may be found as . In order to run
+
+My code appeared to have an error rate of 35\% for the 'arm' dataset in Pt 6 of Hokins 155. This was unfortunately much larger than the reported 5\%
+error for most of the datasets.
+
+I did not get around to plotting the points by color onto the video to debug what was going on.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Things I learned}
+
+I learned about reading math papers. 99\% of the symbols are defined in the
+paper, you just have to be patient about finding the defintion either earlier or later in
+the paper, or perhaps in the appendix somewhere.
+
+The set minus, the gets, the union and and signs, supremeum and infinimum, 
+
+%% explain those 
+
+I also learned about the differences between sampling-based motion planning and
+nonlinear convex optimazation approaches, and which one is more suited than the
+other.
+
+I also learned a bit about keeping in mind the overall goal vs. getting stuck on
+any particular milestone / to-do item. I don't think I had the chance to do so,
+but I wish I had been able to make more executive decisions about what to
+accomplish. 
+
+\section{Reflection}
+
+This rotation was super cool to me, I've never worked through a proof before. I
+feel less intimidated by algorithmic notation and proofs now that I have a
+better idea what they are. In that sense, forcing myself to work through this
+rotation helped me out a lot. I also hadn't thought math was fun since middle
+school, so it was really cool to hang out with math majors who were really
+enthusiastic about math. Hopefully this feeling will keep me going when I take
+math courses and have to do graded things.
+
+My choice of Julia was a tad unfortunate, although it was kind of neat to see.
+In retrospect, I really didn't want to deal with MATLAB (which was glitchy on
+linux, and I didn't have a windows install at the time. I miss public
+computers), and I thought it might be annoying to understand what was going on
+with numpy. But in the end I used no matrices... so... python was a much better
+way to go. I didn't think to ask graphy python people to show me a workflow,
+though a friend helped with the computer vision homework and I got to know the
+python syntax a lot better.
+
+An example of why Julia documentation and I did not get along:
+% todo insert permutations
+
+I think to some extent I expected it to be a little rough to pick to do a PhD in a new-ish
+field, and then to take both computer vision (linear algebra) and this rotation
+(statistics) when I hadn't taken a math class in a while. thought I don't know if this
+is something I consistently do to excuse my slower than hoped for progress.
+
+Regardless I certainly learned a lot compared to the beginning of the semester!
+I'm really happy, this is part of why I decided to go to grad school. It was
+neat to see it all tying together, AI and this rotation and even some of the
+ideas from computer vision.
+
+In the future, I intend to take more math classes and programming classes. I
+also intend to not use Julia again for at least a year. After I switched from
+MATLAB to python for computer vision final project, it was amazing, I'd
+forgotten that programming could actually be pleasant and fun!
+
+\section{Conclusion}
+
+Math is so cool!
+
+\section{Thanks}
+
+People who have helped me understand things:
+
+Eric Lu
+Ambarish
+Irina
+
+I'm of course very thankful to my advisor for patiently explaining lots of
+things to me, in a way that made sense, and also for writing numerous
+recommmendation letters.
+
+Great source of procrastination: Numberphile
+-1/12
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{References}
+
+\begin{thebibliography}{1}
+
+\bibitem{RRT*} John W. Dower {\em Readings compiled for History
+21.479.}  1991.
+
+\bibitem{FMT*}  The Japan Reader {\em Imperial Japan 1800-1945} 1973:
+Random House, N.Y.
+
+\bibitem{norman} E. H. Norman {\em Japan's emergence as a modern
+state} 1940: International Secretariat, Institute of Pacific
+Relations.
+
+\bibitem{fo} Bob Tadashi Wakabayashi {\em Anti-Foreignism and Western
+Learning in Early-Modern Japan} 1986: Harvard University Press.
+
+\end{thebibliography}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%http://cs229.stanford.edu/notes/cs229-notes10.pdf (PCA)
+
+
+%PCA (Andrew Ng) https://www.youtube.com/watch?v=T-B8muDvzu0&index=83&list=PLLssT5z_DsK-h9vYZkQkYNWcItqhlRJLN
+
+
+%https://link-springer-com.ezp-prod1.hul.harvard.edu/book/10.1007%2F978-0-387-87811-9#about
+\end{document}
+

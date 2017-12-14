@@ -67,7 +67,7 @@ is a point, these algorithms can be applied to any dimensions. For instance, we
 can imagine the dimensions for a multirotor might include x,y,z and also roll,
 pitch, and yaw of the copter. However, as the number of dimensions we must sample in
 increases, we encounter what is called the "curse of dimensionality". In many of
-the proofs, one will encounter a $^{1/n}$ exponent where, for instance, the
+the proofs, one will encounter a $^{1/dim}$ exponent where, for instance, the
 convergence of a solution will slow down drastically the number of dimensions
 increases.
 
@@ -78,6 +78,8 @@ check for node and edge collsions. Addititionally, we have a goal region rather
 than a point goal, as the probability of sampling exactly the goal node is
 essentially zero.
 
+!! TODO: go over standard problem formuation, e.g. $X_{free}$, $B(\mu, r)$, etc. %TODO 
+
 \section{Algorithms}
 
 Both PRM and RRT algorithms are straightforward, requiring less than 10
@@ -87,7 +89,8 @@ format all CS papers seem to use, with the $\gets$ signs.}
 The pseudocode for the algorithms may be found in \cite{RRT*}. Here I will
 attempt a more casual description. 
 
-%%% TODO: go over all the symbols used %%%
+
+!! TODO: go over all the symbols used e.g. set notation %TODO 
 
 \subsection{PRM}
 
@@ -140,7 +143,7 @@ space will be of greater area than the explored space, thus the probability of
 sampling in unexplored space is bigger). Voronoi diagrams can help visaulize
 this effect of random sampling. 
 
-%% todo add picture of voronoi diagrams
+!! Todo: add picture of voronoi diagrams %TODO
 
 \subsection{PRM*}
 
@@ -175,7 +178,7 @@ and if that new path to the neighboring edge results in a smaller cost than the
 current path to the neighboring edge (from the origin), then we deleted the
 parent and add in the edge connecting $x_new$ to the neighbor.
 
-%% Todo: image of example of rewiring step's two cases
+!! Todo: image of example of rewiring step's two cases %TODO
 
 \subsection{FMT* (Fast Marching Tree)}
 
@@ -229,6 +232,15 @@ says, so skipping this section for now. Refer to \cite{FMT*}.
 In this section I've give a brief high-level idea of how the proofs of PRM,
 RRT, PRM*, and FMT* go about being, well, proofs.
 
+In particular, I worked through proofs on 
+\begin{itemize}
+    \item probabilistic completeness, the likelihood as n goes to infinity that
+        a feasible path will be found if it exists. since we are sampling
+        randomly, we define probabilistic completeness instead of completeness
+    \item asymptotics optimality, whether as n goes to infinity the pathcost
+        asymptotically approaches the optimal pathcost
+\end{itemize}
+
 All the proofs use the idea of "distance balls" or "cost balls".
 
 As show in Table 1 of \cite{RRT*}:
@@ -247,9 +259,17 @@ As show in Table 1 of \cite{RRT*}:
     \hline
 \end{tabular}
 
-% what is monotone convergence?
+One of the important things is rate of convergence vs. number of samples or even
+more useful, change in path cost vs. time.
 
-\subsection{PRM}
+Of note, the proofs of sPRM and RRT show how they converge to optimality with
+%todo double check this
+at something like $n^2$ 
+
+% what is monotone convergence?
+\subsection{Probabilistic Completeness}
+
+\subsubsection{PRM}
 
 The formal version of this proof is covered in \cite{PRM}.  \footnote{This is
 the only proof I feel like I have a firm grasp on.}
@@ -336,12 +356,131 @@ We calculate the likelihood of this happening for every single one of the $n$
     P(failure) \leq \left(\frac{2L}{R}\right) \left(1 - \frac{\pi R^2}{4|F|}\right)
 \end {equation}
 
+
 \footnote{(the area of free space, $|F|$, which is a subset of world space
 $|W|$)}
 
+\subsubsection{BREAK: REST IS TODO}
+As usual... I finish the PRM algorithm out of 5 or 6 and run out of time for the
+    rest... Will return to this after 5pm 14 Dec 2017. I feel like I only really
+    learning about PRM \footnot{and reasons grumble about Julia}
+
+\subsubsection{todo: the rest: rrt fmt* rrt* and all of AO}
+
+
+\subsubsection{RRT}
+
+    % TODO: RRT
+
+    RRT proof \cite{RRT*} introduces notion of "clearance", strong and weak
+    clearance. Basically finding an exact path is very hard to work with, but if
+    we have an area, we can start talking about the likelihood of finding a path
+    in that area.
+
+Briefly, the idea is that, as we sample uniformly outside of the space, we will
+uniformly expand the boundary of space that the tree can reach into in one step
+    (bound by the connection radius). Eventually this frontier will grow to
+    encompass the whole space.
+
+\subsubsection{FMT*}
+
+we can think about covering the path with balls as
+usual. 
+
+Tight approximation to most of the path vs. loose approximation:
+The idea is to shrink the size of the balls so that the cost approaches
+    optimal... or something... I can't interpret lemma 4.2 at the moment
+
+
+I will probably write this up next, there is a lot of interesting translations
+    into english that I learned.
+
+\subsection{AO}
+
+TODO <> %TODO
+I am not sure I really got around to \textbf{any} of the AO proofs.
+
+
+\subsection{computational complexity}
+
+\subsubsection{computational complexity}
+
+Generally speaking, one of the biggest bottlenecks is collision checking.
+
+Whatever we can do to minimize the amount of collision checking or speed it up
+    will help the most.
+
+Additionally, caching graphs in for instance PRM, as well as intelligently
+    determining places to sample, if a path is not found, could be important.
+
+I'm not sure what to say other than that... collision checking seems obvious.
+
+Of course, in my code the nearest neighbor lookups also took a lot of time, but
+that is because I implemented it in the simplest way possible.
+
+Perhaps if at some point with large enough dimension, the edge and vertice graph may have
+    to be stored in a databse. In this case read and write speeds may become
+    important (minimizing calls), or perhaps the wireless connection bandwitch.
+    But I don't think this would ever be the bottleneck over collision
+    checking.
+
 \section{Numerical Studies}
 
+% TODO numerical
+In general, what we care about is determined by real life use cases.
+    experimentally confirming the proofs, and charaterizing computational
+    complexity. Demonstrating can be used on actual robot.
+
+    E.g. num samples vs (failure rate and pathcost
+{\%clutter vs (pathcost and feasibility)
+
+    \subsection{Implementation Details}
+
+    Modularity: Roadmap vs Graph Search vs Plotting individual (and possibly
+    saving plots of individual runs), vs Plotting and collecting data.
+
+    Walls: collection of lines
+
+    How to deal with graphs so that the information about the actual run (e.g.
+    pathcost, connection radius, etc.)
+    This probably ate 20-30 hours of Julia frustration... I should have used the
+    matplotlib library probably. OR ... just used python. :(
+    (e.g. including timestamp very useful).
+
+    Node: should be this or that (include cost in definition, but optionally --
+    the optional part ate something like 10 hours in Julia frustration)
+
+    Environment: Apparently spiky obstacles are interesting too. As well as
+    higher dimensions.
+
+    Maybe document some Julia things... workflow, types system and common
+    errors, where to seek help \footnote{(probably also cover how to atone for your sins of trying weird
+    languages not made by large corporations by sacrificing small laptops to the
+    programming gods)} And then discuss pros and cons of Julia and warn people about / away from it.
+
+    \subsection{Debugging Protips}
+
+    Trees should not be graphs (no cyclic components)
+
+    \\
+
+    Lines should not cross obstacles
+
+    \\
+
+    Plot n = 500 points etc. to see how it covers the room
+
+
 \section{Results}
+
+    \subsection{num samples vs (failure rate and pathcost)}
+    \subsubsection{PRM}
+
+    todo RRT, RRT*, PRM* double check this
+
+    \subsection{\%clutter vs (pathcost and feasibility)}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -349,15 +488,28 @@ $|W|$)}
 
 I learned about reading math papers. 99\% of the symbols are defined in the
 paper, you just have to be patient about finding the defintion either earlier or later in
-the paper, or perhaps in the appendix somewhere.
+the paper, or perhaps in the appendix somewhere. 
 
-The set minus, the gets, the union and and signs, supremeum and infinimum, 
+    Reading a page of proofs takes >10 hours a page. Should learn to pick
+    battles (understanding some of the stuff may not be critical to
+    understanding the approach of the proof, and also some time should be spent
+    on what the proof tells us / how the proof is useful)
+
+    Abstractions -- for instance, we don't need to define a robot size or
+    clearance needed, we can
+    simply "increase" the size of the obstacles
+
+<The set minus, the gets, the union and and signs, supremeum and infinimum, >
 
 %% explain those 
 
 I also learned about the differences between sampling-based motion planning and
 nonlinear convex optimazation approaches, and which one is more suited than the
 other.
+
+Latex is pretty reasonable, I had some horrific first experience and avoided it
+    since. But just installed all 3 GB of packages or whatever (via sudo apt
+    install texmaker) and previewed templates on sharelatex and now all set.
 
 I also learned a bit about keeping in mind the overall goal vs. getting stuck on
 any particular milestone / to-do item. I don't think I had the chance to do so,
@@ -379,27 +531,29 @@ In retrospect, I really didn't want to deal with MATLAB (which was glitchy on
 linux, and I didn't have a windows install at the time. I miss public
 computers), and I thought it might be annoying to understand what was going on
 with numpy. But in the end I used no matrices... so... python was a much better
-way to go. I didn't think to ask graphy python people to show me a workflow,
+way to go. I didn't think to ask graph python people (instead of robotics
+people) to show me a workflow,
 though a friend helped with the computer vision homework and I got to know the
 python syntax a lot better.
 
 An example of why Julia documentation and I did not get along:
-% todo insert permutations
+https://github.com/scheinerman/Permutations.jl
 
 I think to some extent I expected it to be a little rough to pick to do a PhD in a new-ish
 field, and then to take both computer vision (linear algebra) and this rotation
-(statistics) when I hadn't taken a math class in a while. thought I don't know if this
-is something I consistently do to excuse my slower than hoped for progress.
+(statistics) when I hadn't taken a math class in a while. But it was even
+rougher than I imagined...
 
 Regardless I certainly learned a lot compared to the beginning of the semester!
-I'm really happy, this is part of why I decided to go to grad school. It was
+I'm happy, this is part of why I decided to go to grad school. It was
 neat to see it all tying together, AI and this rotation and even some of the
 ideas from computer vision.
 
 In the future, I intend to take more math classes and programming classes. I
-also intend to not use Julia again for at least a year. After I switched from
+also intend to not use Julia again for a long while. After I switched from
 MATLAB to python for computer vision final project, it was amazing, I'd
-forgotten that programming could actually be pleasant and fun!
+forgotten that programming could actually be pleasant and fun, and I imagine
+something similar will happen with switching from Julia to Python.
 
 \section{Conclusion}
 

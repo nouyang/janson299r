@@ -1,0 +1,32 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{How people represent these problems}{section.1}% 2
+\BOOKMARK [1][-]{section.2}{Algorithms}{}% 3
+\BOOKMARK [2][-]{subsection.2.1}{PRM}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.2}{RRT}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.3}{PRM*}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.4}{RRT*}{section.2}% 7
+\BOOKMARK [2][-]{subsection.2.5}{FMT* \(Fast Marching Tree\)}{section.2}% 8
+\BOOKMARK [3][-]{subsubsection.2.5.1}{Overview}{subsection.2.5}% 9
+\BOOKMARK [3][-]{subsubsection.2.5.2}{In more detail}{subsection.2.5}% 10
+\BOOKMARK [1][-]{section.3}{Theoretical Studies}{}% 11
+\BOOKMARK [2][-]{subsection.3.1}{Probabilistic Completeness}{section.3}% 12
+\BOOKMARK [3][-]{subsubsection.3.1.1}{PRM}{subsection.3.1}% 13
+\BOOKMARK [3][-]{subsubsection.3.1.2}{BREAK: REST IS TODO}{subsection.3.1}% 14
+\BOOKMARK [3][-]{subsubsection.3.1.3}{todo: the rest: rrt fmt* rrt* and all of AO}{subsection.3.1}% 15
+\BOOKMARK [3][-]{subsubsection.3.1.4}{RRT}{subsection.3.1}% 16
+\BOOKMARK [3][-]{subsubsection.3.1.5}{FMT*}{subsection.3.1}% 17
+\BOOKMARK [2][-]{subsection.3.2}{AO}{section.3}% 18
+\BOOKMARK [2][-]{subsection.3.3}{computational complexity}{section.3}% 19
+\BOOKMARK [3][-]{subsubsection.3.3.1}{computational complexity}{subsection.3.3}% 20
+\BOOKMARK [1][-]{section.4}{Numerical Studies}{}% 21
+\BOOKMARK [2][-]{subsection.4.1}{Implementation Details}{section.4}% 22
+\BOOKMARK [2][-]{subsection.4.2}{Debugging Protips}{section.4}% 23
+\BOOKMARK [1][-]{section.5}{Results}{}% 24
+\BOOKMARK [2][-]{subsection.5.1}{num samples vs \(failure rate and pathcost\)}{section.5}% 25
+\BOOKMARK [3][-]{subsubsection.5.1.1}{PRM}{subsection.5.1}% 26
+\BOOKMARK [2][-]{subsection.5.2}{\045clutter vs \(pathcost and feasibility\)}{section.5}% 27
+\BOOKMARK [1][-]{section.6}{Things I learned}{}% 28
+\BOOKMARK [1][-]{section.7}{Reflection}{}% 29
+\BOOKMARK [1][-]{section.8}{Conclusion}{}% 30
+\BOOKMARK [1][-]{section.9}{Thanks}{}% 31
+\BOOKMARK [1][-]{section.10}{References}{}% 32

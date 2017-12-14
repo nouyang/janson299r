@@ -1,0 +1,46 @@
+
+
+\newcommand{\matx}[1]{\mbox{\tt #1}} \newcommand{\vect}[1]{{\bf #1}}
+
+\begin{itemize} \item n = number of objects aka independent motions aka subspaces \item P = number of $(x, y)$ point correspondences \item F = number
+of frames \end{itemize}
+
+Let us stack all the frames vertically so that we get a matrix W
+
+$$W = MS^T$$
+
+where M is motion matrix $\in \mathbb{R}^{2F \time 4}$ and where $S$ is shape matrix (point correspondences).
+
+Additionally, we have the world coordinates (x,y,z) as
+
+\begin{equation} X = \begin{bmatrix} x \\ y \\ z \\ 1 \\ \end{bmatrix} \end{equation}
+
+\begin{equation} x = \begin{bmatrix} x \\ y \\ \end{bmatrix} \end{equation}
+
+The affine camera matrix translating between a given world and image coordinate is written in terms of rotations and translations as A $\in
+\mathbb{R}^{2 \times 4}$
+
+\begin{equation} \vect A = \begin{bmatrix} R1 && R2 && R3 && T1 \\ R3 && R4 && R5 && T2 \\ \end{bmatrix} \end{equation}
+
+ \begin{figure} \centering
+     % \includegraphics[width=0.3\textwidth]{./pca.png}
+     \caption{If we imagine the blobs as clouds of points in 3D (so imagine them going at some angle through space), the  problem with picking a
+ single subspace is that the data lies more naturalies in two subspaces, e.g. the two lines going through the gray and dark gray clusters.}
+ \end{figure}
+
+\subsubsection{Representing motion subspaces with polynomials}
+
+ The gist of this section is that, if all n subspaces (each representing one object) have dimension 4 in $\mathbb{R}^5$, then a single linear
+ polynomial of degree 5 is enough to represent them. To see this, consider that a plane may be represented by a linear polynomial of three variables,
+ $ax+by+cz = 0$. Then, we can fit a polynomial defined as the product of the n planes, which will have at most degree n and have three variables. We
+ can also describe lower dimension subsubspaces as a the "common zero set" of multiple hyperplanes. For instance, a line can be described as the
+ intersection of two hyperplanes. 
+
+ \begin{figure} \centering
+     % \includegraphics[width=0.3\textwidth]{./polysubspace.png}
+     \caption{Here the intersection, or combined zero-set, of two 3D planes are used to define a line (2D subspace) in $\mathbb{R}^3$.} \end{figure}
+
+ \textit{Aside: an algebraic variety is roughly like a "shape" that fits the points. Here we are saying that if this polynomial "shape" fits all the
+ datapoints in n subspaces, then we should be able to factor the algebraic variety nto n polynomials.  Co-dimension means the number of dimensions not
+ occupied by a subspace, e.g. a subspace of dimension 4 in 5 dimensional space has a co-dimension of 1. }
+ % TODO: zero set
