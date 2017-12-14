@@ -19,6 +19,9 @@
 \PassOptionsToPackage{hyphens}{url} 
 
 %\setlength{\parindent}{0pt}%
+% replaced by
+\usepackage{parskip}
+
 
 \title{Sampling Based Motion Planning Algorithms}
 \author{299r Fall 2017 by Nao Ouyang}
@@ -176,6 +179,7 @@ parent and add in the edge connecting $x_new$ to the neighbor.
 
 \subsection{FMT* (Fast Marching Tree)}
 
+\subsubsection{Overview}
 This algorithm works some black magic which I assume is inspired by or building
 on some other method, because otherwise it's a pretty weird combo of things to come up with
 and then have great faith to put effort into proving its optimality. \footnote{Actually,
@@ -192,20 +196,150 @@ all these m = neighbors(x, r) we find the lowest cost node, call it z. Then find
 neigbors, which we might denote y = neighbors(z, r). We look from to see if any
 of these y nodes connect with x in a collision free manner.
 
-I roughly imagine that this algorithm is doing something like, sweeping a cost
-ball from a vertex in the graph, then sweeping a cost ball from one of the
-unconnected vertices, and if the balls overlap, then we check for possible
-edges. Except we do this in an intelligent way, designing each set of: closed
-vertices, open vertices, and unvisited vertices, such that we very efficiently
-and optimally cover the space. The savings in amount of time-intensive
-collision-checking happen from this "lazy evaluation" in that we only evaluate
-nodes that sort of fall within a space that is the intersection of some space
-around the sampled node and the node in the tree already. \footnote{Definitely 100\% guessing here. Maybe this algorithm would make more sense if I had finished Intro to AI, as my intuition about greedy
-(exploration vs exploitation) vs lazy algorithms is not strong} \footnote{
+From the graph perspective, we are locating the proper node via a sort of
+heapsort technique \footnote{by sort of checking the intersection of balls
+between neighbors of sampled points and neighbors of a node in the tree?} and
+then keeping track of, and growing, the set of verticies in a way that we do not
+re-calculate any nodes we have dealt with already. \footnote{I'm 100\% guessing
+as to if this an hand-wavy intuitive way of understanding this algorithm and its
+advantages} \footnote{More formally, according to the paper \cite{FMT*} we are using ideas
+from the Fast Marching Method, whre we "use a heapsort technique to located the
+proper sample point to update, and incrementally build the solution in an
+'outward' direction, so that the algorithm does not need to backtrack over
+previously evaluation sample points.' This 'one-pass property is what makes both
+the FMM and FMT* (in addition to its lazy strategy) particularly efficient.}
 
-\section{Methods}
+\subsubsection{In more detail}
 
-\subsection{Problem Formulation}
+We maintain three sets of vertices: $V_{open}$, $V_{unvisited}$, and $V_{closed}$.
+
+Note: I don't really have a better way of explaining it than what the paper
+says, so skipping this section for now. Refer to \cite{FMT*}.
+% Neat, macros in vim are not that complicatd. Just press q, then a letter to store
+% the command under. Do whatever, then hit q again to stop. Then wherever you
+% want, just use @{letter} to repeat the action.
+% Used here to go from V_open to V_{open}
+
+%% Todo, I'm getting stuck on explaining this in my own words, since I never
+% implemented it, I don't have a good way of explaining it in my own words and
+% I've just been quoting the paper.
+
+\section{Theoretical Studies}
+
+In this section I've give a brief high-level idea of how the proofs of PRM,
+RRT, PRM*, and FMT* go about being, well, proofs.
+
+All the proofs use the idea of "distance balls" or "cost balls".
+
+As show in Table 1 of \cite{RRT*}:
+
+\begin{tabular}{ | l | p{2.5cm} | p{2cm} |}
+    \hline
+    Algorithm & Probabilistic Completeness  & Asymptotic Optimality  \\
+    \hline
+    PRM     & Yes & No  \\
+    sPRM    & Yes & Yes \\
+    RRT     & Yes & No \\
+    \hline
+    PRM*    & Yes & Yes  \\
+    RRT*    & Yes & Yes \\
+    FMT*    & Yes & Yes \\
+    \hline
+\end{tabular}
+
+% what is monotone convergence?
+
+\subsection{PRM}
+
+The formal version of this proof is covered in \cite{PRM}.  \footnote{This is
+the only proof I feel like I have a firm grasp on.}
+
+This paper gave a theoretical analysis of PRM. Specifically, it studied the
+'dependence of failure probability' of finding a feasible path (if it exists) as
+a function of 
+\begin{itemize}
+    \item Number of nodes N in the roadmap.
+    \item Distance from obstacles (nearest or on average) 
+    \item The length of the path 
+\end{itemize}
+
+A use case is providing an estimate of the number N in order to achieve some
+desired bound on the failure rate.
+
+The analysis is done on sPRM, the simplified version of PRM.
+
+A casual explanation of the proof of the first theorem is as follows:
+
+\begin{equation}
+    P(Failure) \leq \frac{2L}{R}\left( 1 - \frac{\pi R^2}{4|F|}\right)^N
+\end{equation}
+
+Given a path $\gamma$ of length $L$, as well as the shortest distance between
+any point on the path and any obstacle, $R$: 
+We place theoertical points equally spaced at $\frac{R}{2}$ apart (arclength, that is
+distance along the line and not euclidean distance, because it makes more sense
+to do so) on the path (if $n$ is the number of of such points, $n =
+\frac{2L}{R}$). Then draw balls of radius R around each point. The area covered
+by these balls is guaranteed to be collision free, by defintion of R. We then
+want to write the probability of failure as a function of the likelihood of
+at least one point being sampled within each of these balls, so that we may
+connect them to form a feasible path (does not lie within obstacles). However,
+we have to consider that a line connecting two such points in these space
+space balls might cross the "dip" between any two balls. Thus, in order to make
+this proof work, we define further a set of balls, centered at the same points
+as before, but now with half the radius  -- $R/2$. The diameter of these smaller
+balls ($B_{small}$) is thus R. We can guarantee that so long as any two points
+fall within the area covered by the $B_{small}$s, we will be able to connect them in a straight line without leaving the collision free area as defined by the $\cup$ total area covered by the $B_{big}$ balls.  
+
+The maximum distance two points can lie apart from each other is thus
+$\frac{3R}{2}$. 
+
+We can now write an upper bound on the probability of failure. The probability
+of failure will always (strictly) be less than the likelihood of not picking a
+sample in a ball, times n times. 
+
+The above statement uses Boole's thereom, which in essence
+states that the probability of some events happening within the union of some
+set of independent events, will always be $\leq$ the sum of the probabilities of
+each individual event happening.
+
+% todo: insert a diagram of this
+
+\begin{equation}
+    P\left(\bigcup_{i=1}^{n}A_i\right) \leq \sum_{i=1}^{n} P(A_i)
+\end{equation}
+
+Theorem 1 is given as:
+
+\begin{equation}
+\begin{align*}
+    P(failure) &\leq P(some\ ball\ is\ empty) \\
+        &\leq \sum_{j=1}^{n-1} P(The\ j_{th}\ ball\ is\ empty) \\
+        &= \left(\lceil(\frac{2L}{R}\rceil-1\right) \left(1-\frac{B_{R/2}}{|F|}\right)^N
+\end{align*}
+\end{equation}
+
+Since we have uniform sampling, and the each sample is taken independently, in
+2D we can relate sampling probabilities as areas.  For any given ball, the
+probability of not sampling within a given ball equals the the probability of
+picking a sample in free space but not within the ball. Since in 2D the area of the small balls is $\pi R^2 / 4$, the sum of this happening z times is 
+\begin{equation}
+    z \left(1 - \frac{\pi R^2}{4|F|}\right) ^z
+\end {equation}
+
+We calculate the likelihood of this happening for every single one of the $n$
+    balls, minus the area of the half small ball covering a path behind the start
+    point and the half small ball covering the area ahead of the final point. As these are
+    independent events, we get
+
+\begin{equation}
+    P(failure) \leq \left(\frac{2L}{R}\right) \left(1 - \frac{\pi R^2}{4|F|}\right)
+\end {equation}
+
+\footnote{(the area of free space, $|F|$, which is a subset of world space
+$|W|$)}
+
+\section{Numerical Studies}
 
 \newcommand{\matx}[1]{\mbox{\tt #1}} \newcommand{\vect}[1]{{\bf #1}}
 
@@ -340,11 +474,14 @@ Great source of procrastination: Numberphile
 
 \begin{thebibliography}{1}
 
-\bibitem{RRT*} John W. Dower {\em Readings compiled for History
+\bibitem{PRM} Analysis of Probabilistic Roadmaps for Path Planning {\em Readings compiled for History
 21.479.}  1991.
 
-\bibitem{FMT*}  The Japan Reader {\em Imperial Japan 1800-1945} 1973:
-Random House, N.Y.
+
+\bibitem{RRT*} {\em Readings compiled for History
+21.479.} 2011.
+
+\bibitem{FMT*} Fast Marching Tree {\em Imperial Japan 1800-1945} 2015.
 
 \bibitem{norman} E. H. Norman {\em Japan's emergence as a modern
 state} 1940: International Secretariat, Institute of Pacific
